@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -170,7 +170,7 @@ func (s *Spider) processURL(URL string, target *TargetConfig) {
 		now := time.Now()
 
 		// Generate content hash
-		hash := md5.Sum(r.Body)
+		hash := sha256.Sum256(r.Body)
 		hashStr := hex.EncodeToString(hash[:])
 
 		var htmlContent []byte
