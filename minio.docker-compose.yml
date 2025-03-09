@@ -1,0 +1,120 @@
+volumes:
+  cache_volume:
+    driver: local
+  spider_volume:
+    driver: local
+  mongodb_volume:
+    driver: local
+  minio_data:
+    driver: local
+  minio_config:
+    driver: local
+
+services:
+  spider:
+    build:
+      context: spider
+      dockerfile: Dockerfile
+    container_name: debias_spider
+    hostname: debias_spider
+    restart: on-failure
+    depends_on:
+      cache:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:11001:8080"
+    volumes:
+      - ./spider/config.yaml:/app/config.yaml
+      - spider_volume:/app/.cache
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_interval: 5s
+
+  cache:
+    image: valkey/valkey:8.0.2-alpine
+    container_name: debias_cache
+    hostname: debias_cache
+    restart: on-failure
+    ports:
+      - "127.0.0.1:11002:6379"
+    volumes:
+      - cache_volume:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_interval: 5s
+
+    command: >
+      valkey-server
+        --port 6379
+        --bind 0.0.0.0
+
+  mongodb:
+    image: mongo:8.0.5
+    container_name: debias_mongodb
+    hostname: debias_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    restart: on-failure
+    ports:
+      - "127.0.0.1:11003:27017"
+    volumes:
+      - mongodb_volume:/data/db
+
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_interval: 15s
+
+  minio:
+    image: minio/minio:latest
+    container_name: debias_minio
+    hostname: debias_minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    restart: on-failure
+    ports:
+      - "127.0.0.1:11004:9000"
+      - "127.0.0.1:11005:9001"
+    volumes:
+      - minio_data:/data
+      - minio_config:/root/.minio
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_interval: 5s
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: debias_minio_setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set minioacc http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY} &&
+      mc mb --ignore-existing minioacc/${MINIO_BUCKET} &&
+      echo 'Bucket ${MINIO_BUCKET} created successfully'"

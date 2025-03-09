@@ -1,0 +1,52 @@
+debug: true
+
+metrics: true
+
+spider:
+  workers: 10
+  cache_dir: "./cache"
+
+  limit_rules:
+    - domain: "*httpbin.*"
+      limit: 10
+      delay: 10s
+
+    - domain: "*"
+      limit: 10
+      delay: 20s
+
+redis:
+  address: "localhost:6379"
+  password: ""
+  db: 0
+  prefix: "spider"
+
+s3:
+  endpoint: "s3.amazonaws.com"
+  region: "us-east-1"
+  access_key: "EXAMPLEACCESSKEY"
+  secret_key: "EXAMPLESECRETKEY"
+  bucket: "bucket"
+  ssl: true
+
+mongodb:
+  url: "mongodb://username:password@localhost:27017"
+  db: "crawler"
+  collection: "pages"
+
+targets:
+  - name: "example.com"
+    root: "https://example.com"
+    render: true
+    domain_only: true
+    ref_filters:
+      - ".next a[href]"
+      - ".prev a[href]"
+
+  - name: "news-website"
+    root: "https://news-website.com"
+    render: false
+    domain_only: false
+    rate_limit: 10
+    ref_filters:
+      - "a[href]"
