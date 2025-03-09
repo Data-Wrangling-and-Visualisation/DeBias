@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/go-rod/rod"
 )
 
 var (
@@ -33,8 +31,8 @@ func main() {
 
 	for _, target := range config.Targets {
 		if target.Render {
-			log.Printf("detected browser usage. downloading instance before starting spider")
-			rod.New().MustConnect()
+			log.Printf("Detected browser usage required. Downloading browser instance before starting spider...")
+			InitBrowser()
 			break
 		}
 	}
@@ -57,4 +55,9 @@ func main() {
 	log.Println("Stopping spider...")
 	cancel()
 	spider.Stop()
+
+	if browser != nil {
+		log.Println("Closing browser...")
+		browser.MustClose()
+	}
 }

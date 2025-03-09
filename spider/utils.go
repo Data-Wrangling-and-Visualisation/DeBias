@@ -1,10 +1,13 @@
 package main
 
 import (
+	"log"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 )
 
 func getDomainFromURL(urlStr string) string {
@@ -37,10 +40,33 @@ func normalizeURL(urlStr string) string {
 	return u.String()
 }
 
+var (
+	browser *rod.Browser
+	once    sync.Once
+)
+
+// InitBrowser initializes and downloads the browser once
+func InitBrowser() {
+	once.Do(func() {
+		log.Println("Downloading and initializing headless browser...")
+		// Just download the browser and prepare the launcher
+		url := launcher.New().Bin("/usr/bin/chromium-browser").Headless(true).MustLaunch()
+		browser = rod.New().ControlURL(url).MustConnect()
+		log.Println("Browser initialized successfully")
+	})
+}
+
+// GetBrowser returns the initialized browser or initializes it if needed
+func GetBrowser() *rod.Browser {
+	if browser == nil {
+		InitBrowser()
+	}
+	return browser
+}
+
 func renderJavaScript(urlStr string) (string, error) {
-	// Launch a browser
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+	// Get the shared browser instance
+	browser := GetBrowser()
 
 	// Navigate to the URL
 	page := browser.MustPage(urlStr)
