@@ -32,6 +32,8 @@ type SpiderConfig struct {
 	Workers int `koanf:"workers" validate:"required"`
 	// CacheDir is the directory to store the downloaded files
 	CacheDir string `koanf:"cache_dir" validate:"required"`
+	// UserAgent is the user agent to be used by the spider
+	UserAgent string `koanf:"user_agent" validate:"required"`
 	// LimitRules is a list of LimitRule to be used to limit the number of concurrent requests to the websites
 	LimitRules []struct {
 		// DomainGlob is a glob pattern to match the domain, e.g. "*httpbin.*"

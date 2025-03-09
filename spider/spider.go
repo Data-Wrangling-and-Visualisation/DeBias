@@ -143,8 +143,8 @@ func (s *Spider) worker(id int) {
 func (s *Spider) processURL(URL string, target *TargetConfig) {
 	// Initialize collector
 	c := colly.NewCollector(
-		colly.AllowedDomains(getDomainFromURL(URL)),
 		colly.CacheDir(s.config.Spider.CacheDir),
+		colly.UserAgent(s.config.Spider.UserAgent),
 	)
 
 	// Apply rate limiting rules
