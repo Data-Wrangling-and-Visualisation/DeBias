@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/go-rod/rod"
 )
 
 var (
@@ -27,6 +29,14 @@ func main() {
 	config, err := LoadConfig(configPath)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	for _, target := range config.Targets {
+		if target.Render {
+			log.Printf("detected browser usage. downloading instance before starting spider")
+			rod.New().MustConnect()
+			break
+		}
 	}
 
 	// Create and start the spider
