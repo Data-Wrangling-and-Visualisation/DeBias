@@ -1,0 +1,96 @@
+package main
+
+import (
+	"errors"
+	"os"
+	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
+)
+
+type Config struct {
+	// Debug is a flag to indicate whether to enable debug mode
+	Debug bool `koanf:"debug" validate:""`
+	// Metrics is a flag to indicate whether to enable metrics
+	Metrics bool `koanf:"metrics" validate:""`
+	// Spider is the spider configuration
+	Spider SpiderConfig `koanf:"spider" validate:"required"`
+	// Targets is a list of targets to be crawled
+	Targets []TargetConfig `koanf:"targets" validate:"required"`
+	// Redis is the redis configuration
+	Redis RedisConfig `koanf:"redis" validate:"required"`
+}
+
+type SpiderConfig struct {
+	LimitRules []struct {
+		// DomainGlob is a glob pattern to match the domain, e.g. "*httpbin.*"
+		DomainGlob string `koanf:"domain" validate:"required"`
+		// Limit is a total number of goroutines (threads) to be spawned to crawl the website
+		Limit int `koanf:"limit" validate:"required"`
+		// Delay is the delay between each request to the website
+		Delay time.Duration `koanf:"delay"`
+	} `koanf:"limit_rules" validate:"required"`
+}
+
+type TargetConfig struct {
+	// Name of the target, e.g. "example.com" or "news-website"
+	Name string `koanf:"name" validate:"required"`
+	// Root is the root url of the target website, spider will recursively crawl the website
+	Root string `koanf:"root" validate:"required,http_url"`
+	// Render is a flag to indicate whether to utilize javascript rendering
+	Render bool `koanf:"render" validate:""`
+	// DomainOnly is a flag to indicate whether to crawl only the domain of the target.
+	// E.g. if example.com references another.com, spider will crawl example.com but not another.com if DomainOnly is true
+	DomainOnly bool `koanf:"domain_only" validate:""`
+	// RateLimit is the number of requests per second to be made to the target website
+	RateLimit int `koanf:"rate_limit" validate:""`
+	// RefFilters is a list of selectors to be used to find references on the website. E.g. ".next a[href]"
+	RefFilters []string `koanf:"ref_filters" validate:""`
+}
+
+type RedisConfig struct {
+	// Address is the redis address, e.g. "localhost:6379"
+	Address string `koanf:"address" validate:"required"`
+	// Password is the password to authenticate to the redis server, optional
+	Password string `koanf:"password"`
+	// DB is the redis database to use, optional
+	DB int `koanf:"db"`
+	// Prefix is the prefix to be used for all keys in redis, optional
+	Prefix string `koanf:"prefix"`
+}
+
+// LoadConfig loads the config file from the given path
+func LoadConfig(filepath string) (Config, error) {
+	if _, err := os.Stat(filepath); err != nil {
+		return Config{}, ErrConfigNoSuchFile
+	}
+
+	k := koanf.New(".")
+	if err := k.Load(file.Provider(filepath), yaml.Parser()); err != nil {
+		return Config{}, errors.Join(ErrConfigParseFailed, err)
+	}
+
+	config := Config{}
+	if err := k.Unmarshal("", &config); err != nil {
+		return Config{}, errors.Join(ErrConfigParseFailed, err)
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(config); err != nil {
+		return Config{}, errors.Join(ErrConfigInvalid, err)
+	}
+
+	return config, nil
+}
+
+// MustLoadConfig is a helper function to load the config file and panic if an error occurs
+func MustLoadConfig(filepath string) Config {
+	config, err := LoadConfig(filepath)
+	if err != nil {
+		panic(err)
+	}
+	return config
+}
