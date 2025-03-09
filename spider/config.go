@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"os"
 	"time"
 
@@ -24,9 +23,16 @@ type Config struct {
 	Redis RedisConfig `koanf:"redis" validate:"required"`
 	// S3 is the s3 configuration
 	S3 S3Config `koanf:"s3" validate:"required"`
+	// MongoDB is the Mongodb configuration
+	MongoDB MongoDBConfig `koanf:"mongodb" validate:"required"`
 }
 
 type SpiderConfig struct {
+	// Workers is the number of workers to be spawned to crawl websites from the queue
+	Workers int `koanf:"workers" validate:"required"`
+	// CacheDir is the directory to store the downloaded files
+	CacheDir string `koanf:"cache_dir" validate:"required"`
+	// LimitRules is a list of LimitRule to be used to limit the number of concurrent requests to the websites
 	LimitRules []struct {
 		// DomainGlob is a glob pattern to match the domain, e.g. "*httpbin.*"
 		DomainGlob string `koanf:"domain" validate:"required"`
@@ -75,27 +81,38 @@ type S3Config struct {
 	SecretKey string `koanf:"secret_key" validate:"required"`
 	// Bucket is the s3 bucket name
 	Bucket string `koanf:"bucket" validate:"required"`
+	// SSL sets whether to use HTTPS or HTTP
+	SSL bool `koanf:"ssl" validate:""`
+}
+
+type MongoDBConfig struct {
+	// URL is a string defining connection to mongodb clustrer
+	URL string `koanf:"url" validate:"required"`
+	// Db is a database to use
+	Db string `koanf:"db" validate:"required"`
+	// Collection is a collection to use
+	Collection string `koanf:"collection" validate:"required"`
 }
 
 // LoadConfig loads the config file from the given path
 func LoadConfig(filepath string) (Config, error) {
 	if _, err := os.Stat(filepath); err != nil {
-		return Config{}, ErrConfigNoSuchFile
+		return Config{}, err
 	}
 
 	k := koanf.New(".")
 	if err := k.Load(file.Provider(filepath), yaml.Parser()); err != nil {
-		return Config{}, errors.Join(ErrConfigParseFailed, err)
+		return Config{}, err
 	}
 
 	config := Config{}
 	if err := k.Unmarshal("", &config); err != nil {
-		return Config{}, errors.Join(ErrConfigParseFailed, err)
+		return Config{}, err
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(config); err != nil {
-		return Config{}, errors.Join(ErrConfigInvalid, err)
+		return Config{}, err
 	}
 
 	return config, nil

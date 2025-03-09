@@ -3,6 +3,9 @@ debug: true
 metrics: true
 
 spider:
+  workers: 10
+  cache_dir: "./cache"
+
   limit_rules:
     - domain: "*httpbin.*"
       limit: 10
@@ -24,6 +27,12 @@ s3:
   access_key: "EXAMPLEACCESSKEY"
   secret_key: "EXAMPLESECRETKEY"
   bucket: "bucket"
+  ssl: true
+
+mongodb:
+  url: "mongodb://username:password@localhost:27017"
+  db: "crawler"
+  collection: "pages"
 
 targets:
   - name: "example.com"

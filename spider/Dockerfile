@@ -15,7 +15,8 @@ COPY . .
 RUN go build -ldflags="-s -w" -o /app/spider .
 
 
-FROM scratch
+FROM alpine:3.21
+RUN apk update --no-cache && apk add --no-cache curl
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /usr/share/zoneinfo/Europe/Moscow /usr/share/zoneinfo/Europe/Moscow
