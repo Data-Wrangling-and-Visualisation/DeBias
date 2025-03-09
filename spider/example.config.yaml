@@ -12,6 +12,19 @@ spider:
       limit: 10
       delay: 20s
 
+redis:
+  address: "localhost:6379"
+  password: ""
+  db: 0
+  prefix: "spider"
+
+s3:
+  endpoint: "s3.amazonaws.com"
+  region: "us-east-1"
+  access_key: "EXAMPLEACCESSKEY"
+  secret_key: "EXAMPLESECRETKEY"
+  bucket: "bucket"
+
 targets:
   - name: "example.com"
     root: "https://example.com"
@@ -28,9 +41,3 @@ targets:
     rate_limit: 10
     ref_filters:
       - "a[href]"
-
-redis:
-  address: "localhost:6379"
-  password: ""
-  db: 0
-  prefix: "spider"

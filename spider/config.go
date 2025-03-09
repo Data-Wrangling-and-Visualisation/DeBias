@@ -22,6 +22,8 @@ type Config struct {
 	Targets []TargetConfig `koanf:"targets" validate:"required"`
 	// Redis is the redis configuration
 	Redis RedisConfig `koanf:"redis" validate:"required"`
+	// S3 is the s3 configuration
+	S3 S3Config `koanf:"s3" validate:"required"`
 }
 
 type SpiderConfig struct {
@@ -60,6 +62,19 @@ type RedisConfig struct {
 	DB int `koanf:"db"`
 	// Prefix is the prefix to be used for all keys in redis, optional
 	Prefix string `koanf:"prefix"`
+}
+
+type S3Config struct {
+	// Endpoint is the s3 endpoint, e.g. "s3.amazonaws.com"
+	Endpoint string `koanf:"endpoint" validate:"required"`
+	// Region is the s3 region, e.g. "us-east-1"
+	Region string `koanf:"region" validate:"required"`
+	// AccessKey is the s3 access key
+	AccessKey string `koanf:"access_key" validate:"required"`
+	// SecretKey is the s3 secret key
+	SecretKey string `koanf:"secret_key" validate:"required"`
+	// Bucket is the s3 bucket name
+	Bucket string `koanf:"bucket" validate:"required"`
 }
 
 // LoadConfig loads the config file from the given path
