@@ -1,0 +1,39 @@
+Name,Link,Country,Vpn,Political association
+Sky News,https://news.sky.com/,UK,FALSE,Lean Left
+GBN,https://www.gbnews.com/,UK,FALSE,Lean Right
+ABC News,http://abcnews.go.com/,USA,FALSE,Lean Left
+Daily Mail,https://www.dailymail.co.uk/home/index.html,UK,FALSE,Right
+The Times,https://www.thetimes.com/,UK,FALSE,Center
+The Mirror,https://www.mirror.co.uk/,UK,FALSE,Left
+Metro,https://metro.co.uk/,UK,FALSE,Lean Left
+The Standard,https://www.standard.co.uk/,UK,FALSE,Center
+Wales Online,https://www.walesonline.co.uk/,UK,FALSE,Lean Left
+The Sun,https://www.thesun.co.uk/,UK,FALSE,Center
+The Guardian,https://www.theguardian.com/uk-news,UK,FALSE,Left
+BBC News,http://www.bbc.com/,UK,FALSE,Center
+Bloomberg,http://www.bloomberg.com/,USA,FALSE,Lean Left
+Business Insider,https://www.insider.com/,USA,FALSE,Lean Left
+BuzzFeed News,https://www.buzzfeednews.com,USA,FALSE,Left
+CBS News,https://www.cbsnews.com,USA,FALSE,Lean Left
+CNN Digital,https://cnn.com,USA,FALSE,Lean Left
+Forbes,https://www.forbes.com,USA,FALSE,Center
+Fox News Digital,http://www.foxnews.com/,USA,TRUE,Right
+National Review,https://www.nationalreview.com/news/,USA,FALSE,Lean Right
+NBC News Digital,https://www.nbcnews.com,USA,FALSE,Lean Left
+New York Post (News),https://nypost.com,USA,FALSE,Lean Right
+New York Times (News),https://www.nytimes.com,USA,FALSE,Lean Left
+NewsNation,https://www.newsnationnow.com,USA,FALSE,Center
+The American Spectator,https://spectator.org,USA,FALSE,Right
+The Atlantic,https://www.theatlantic.com/world/,USA,FALSE,Left
+The Daily Wire,https://www.dailywire.com,USA,TRUE,Right
+The Economist,https://www.economist.com,USA,FALSE,Lean Left
+The Federalist,https://thefederalist.com,USA,FALSE,Right
+The New Yorker,https://www.newyorker.com,USA,FALSE,Left
+Time Magazine,https://time.com,USA,FALSE,Lean Left
+USA TODAY,https://www.usatoday.com,USA,FALSE,Lean Left
+Vox,https://www.vox.com,USA,FALSE,Left
+Wall Street Journal (News),https://www.wsj.com,USA,FALSE,Center
+Washington Examiner,https://washingtonexaminer.com,USA,TRUE,Lean Right
+Washington Free Beacon,https://freebeacon.com,USA,FALSE,Right
+Washington Post,https://www.washingtonpost.com,USA,FALSE,Lean Left
+Washington Times,https://www.washingtontimes.com,USA,FALSE,Lean Right
