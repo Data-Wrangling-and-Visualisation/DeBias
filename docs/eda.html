@@ -41,8 +41,8 @@
     function processData(jsonData) {
       // Assume jsonData is an array of objects with 'title' and 'text' properties.
       // Split titles and texts into words (if they are strings) by whitespace.
-      const allTitles = jsonData.map(item => item.title.split(/\s+/)).flat();
-      const allText = jsonData.map(item => item.text.split(/\s+/)).flat();
+      const allTitles = jsonData.flatMap(item => item.title);
+      const allText = jsonData.flatMap(item => item.text);
       const allWords = allTitles.concat(allText);
 
       // Compute other statistics
