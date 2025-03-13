@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Exploratory Data Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.1.1/wordcloud2.min.js"></script>
+  <style>
+    #wordCloud {
+      width: 600px;
+      height: 400px;
+      border: 1px solid #ddd;
+      margin-top: 20px;
+    }
+    .result {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Exploratory data analysis</h1>
+  <p>Analysis of news from <a href="https://abcnews.go.com/">ABC News</a> website.</p>
+
+  <div id="results"></div>
+  <div id="wordCloud"></div>
+
+  <script>
+    async function loadJSON(filePath) {
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Error loading JSON file:", error);
+      }
+    }
+
+    function processData(jsonData) {
+      // Assume jsonData is an array of objects with 'title' and 'text' properties.
+      // Split titles and texts into words (if they are strings) by whitespace.
+      const allTitles = jsonData.flatMap(item => item.title);
+      const allText = jsonData.flatMap(item => item.text);
+      const allWords = allTitles.concat(allText);
+
+      // Compute other statistics
+      const totalObjects = jsonData.length;
+      const commonWordsInTitles = getMostCommonWords(allTitles);
+      const commonWordsInAll = getMostCommonWords(allWords);
+      const frequentConnectionsInTitles = getMostFrequentConnections(allTitles);
+      const frequentConnectionsInAll = getMostFrequentConnections(allWords);
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = `
+        <div class="result"><strong>Total Objects:</strong> ${totalObjects}</div>
+        <div class="result"><strong>Most Common Words in Titles:</strong> ${commonWordsInTitles.join(', ')}</div>
+        <div class="result"><strong>Most Common Words in Titles and Text:</strong> ${commonWordsInAll.join(', ')}</div>
+        <div class="result"><strong>Most Frequent Connections in Titles:</strong> ${frequentConnectionsInTitles.join(', ')}</div>
+        <div class="result"><strong>Most Frequent Connections in Titles and Text:</strong> ${frequentConnectionsInAll.join(', ')}</div>
+      `;
+
+      // Generate word cloud with all words
+      generateWordCloud(allWords);
+    }
+
+    function getMostCommonWords(wordsList, topN = 5) {
+      const wordCount = {};
+      wordsList.forEach(word => {
+        // Normalize words by converting to lower case and removing punctuation
+        const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        if (cleanWord) {
+          wordCount[cleanWord] = (wordCount[cleanWord] || 0) + 1;
+        }
+      });
+      return Object.entries(wordCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([word, count]) => `${word} (${count})`);
+    }
+
+    function getMostFrequentConnections(wordsList, topN = 5) {
+      const connections = {};
+      for (let i = 0; i < wordsList.length - 1; i++) {
+        // Normalize both words
+        const word1 = wordsList[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        const word2 = wordsList[i + 1].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        const bigram = `${word1} ${word2}`;
+        connections[bigram] = (connections[bigram] || 0) + 1;
+      }
+      return Object.entries(connections)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([bigram, count]) => `${bigram} (${count})`);
+    }
+
+    function generateWordCloud(wordsList) {
+      // Create a frequency dictionary for the word cloud
+      const frequency = {};
+      wordsList.forEach(word => {
+        const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        if (cleanWord) {
+          frequency[cleanWord] = (frequency[cleanWord] || 0) + 1;
+        }
+      });
+      // Transform the frequency dictionary into a list for wordcloud2.js
+      const wordList = Object.entries(frequency).map(([word, count]) => [word, count]);
+      
+      // Generate the word cloud in the specified div
+      WordCloud(document.getElementById('wordCloud'), { list: wordList });
+    }
+
+    (async () => {
+      const jsonData = await loadJSON('files/parsed_sites/abcnews.json'); // Update path as needed
+      if (jsonData) {
+        processData(jsonData);
+      }
+    })();
+  </script>
+
+</body>
+</html>
