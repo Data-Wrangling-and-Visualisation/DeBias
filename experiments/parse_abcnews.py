@@ -33,5 +33,5 @@ if __name__ == "__main__":
         if file.is_file():
             title, date, text = parse_abcnews(file.path)
             data.append({"title": title, "date": date, "text": text})
-    with open("../data/parsed_sites/abcnews.json", "w") as outfile:
+    with open("../docs/files/parsed_sites/abcnews.json", "w") as outfile:
         json.dump(data, outfile)
