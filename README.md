@@ -50,7 +50,7 @@ The final goal is to create an interactive visualization, which would show how c
 
 ## Deploy
 
-WIP
+The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
 
 ### Port Mapping
 
@@ -138,3 +138,7 @@ We have collected 38 sources of news from USA and UK and found out their politic
 <img src=".github/assets/Political bias distribution for sites that require VPN-2.png"></img>
 
 It seems left parties are indeed more liberal.
+
+We have parsed several news articles using python and prepared a deployment describing general trends in these articles.
+
+The deployment can be found on [Github Pages](https://data-wrangling-and-visualisation.github.io/DeBias/)
