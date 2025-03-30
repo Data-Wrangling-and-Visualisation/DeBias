@@ -1,11 +1,16 @@
 from faststream import ContextRepo, FastStream, Logger
-from faststream.nats import NatsBroker, NatsMessage, PullSub
+from faststream.nats import NatsBroker, PullSub
 
 from debias_spider.config import Config
 from debias_spider.models import FetchRequest
 
 broker = NatsBroker(pedantic=True)
 app = FastStream(broker)
+
+fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
+render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")
+process_queue_publisher = broker.publisher(subject="process-queue", stream="debias")
+metadata_queue_publisher = broker.publisher(subject="metadata-queue", stream="debias")
 
 
 @app.on_startup
@@ -22,7 +27,7 @@ async def app_on_startup(context: ContextRepo):
 
 
 @broker.subscriber(subject="fetch-queue", stream="debias", pull_sub=PullSub(batch_size=1))
-async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger: Logger, context: ContextRepo):
+async def broker_stream_subscriber(data: FetchRequest, logger: Logger, context: ContextRepo):
     """Handler which process each message from the queue.
     It subscribes to subject "fetch-queue", so all messages published exactly to "fetch-queue" subject
     would be processed by this handler.
@@ -37,5 +42,4 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
     - https://docs.nats.io/nats-concepts/jetstream/consumers
     - https://faststream.airt.ai/latest/nats/jetstream/pull
     """
-    logger.info(f"received message {msg} ({data})")
-    await msg.ack()
+    logger.info(f"received message {data}")
