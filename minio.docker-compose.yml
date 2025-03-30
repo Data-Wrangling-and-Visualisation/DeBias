@@ -1,8 +1,6 @@
 volumes:
   cache_volume:
     driver: local
-  spider_volume:
-    driver: local
   mongodb_volume:
     driver: local
   minio_data:
@@ -11,33 +9,6 @@ volumes:
     driver: local
 
 services:
-  spider:
-    build:
-      context: spider
-      dockerfile: Dockerfile
-    container_name: debias_spider
-    hostname: debias_spider
-    restart: on-failure
-    depends_on:
-      cache:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    ports:
-      - "127.0.0.1:11001:8080"
-    volumes:
-      - ./spider/config.yaml:/app/config.yaml
-      - spider_volume:/app/.cache
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_interval: 5s
-
   cache:
     image: valkey/valkey:8.0.2-alpine
     container_name: debias_cache
