@@ -1,0 +1,13 @@
+volumes:
+  message_queue_volume:
+    driver: local
+
+services:
+  message-queue:
+    image: nats:latest
+    ports:
+      - "127.0.0.1:4222:4222"
+      - "127.0.0.1:8222:8222"
+    command: "--jetstream --store_dir /data"
+    volumes:
+      - message_queue_volume:/data
