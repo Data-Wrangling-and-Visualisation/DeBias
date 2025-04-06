@@ -1,8 +1,9 @@
-from contextlib import AbstractAsyncContextManager
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
 
 import psycopg
+from faststream import Logger
 
 
 @dataclass
@@ -22,11 +23,12 @@ class Metastore:
         self._conn_str = connection
         self._connection: psycopg.AsyncConnection | None = None
 
-    async def init(self):
-        conn = await self._get_connection()
+    async def init(self, logger: Logger):
+        conn = await self._get_connection(logger)
         async with conn.cursor() as cur:
+            logger.info("creating if metadata table if not exists")
             await cur.execute("""
-                CREATE TABLE IF NOT EXISTS metadata (
+                CREATE TABLE IF NOT EXISTS public.metadata (
                     id BIGSERIAL PRIMARY KEY,
                     target_id TEXT NOT NULL,
                     target_name TEXT NOT NULL,
@@ -38,21 +40,33 @@ class Metastore:
                     content_size INTEGER NOT NULL
                 );
             """)
+            await conn.commit()
 
-    async def _get_connection(self) -> psycopg.AsyncConnection:
+        logger.info("created metadata table")
+
+    async def _get_connection(self, logger: Logger) -> psycopg.AsyncConnection:
         if self._connection is None or self._connection.closed:
             self._connection = await psycopg.AsyncConnection.connect(self._conn_str)
+        logger.debug(f"connected to {self._connection.info}")
         return self._connection
 
-    async def with_transaction(self) -> AbstractAsyncContextManager[psycopg.AsyncTransaction, None]:
-        return (await self._get_connection()).transaction()  # type: ignore
+    @asynccontextmanager
+    async def with_transaction(self, logger: Logger):
+        async with (await self._get_connection(logger)).transaction() as t:
+            try:
+                yield t
+            except Exception as e:
+                logger.error(f"transaction failed: {e}")
+                raise e from e
+            else:
+                logger.debug("committing transaction")
 
-    async def save_metadata(self, metadata: Metadata) -> int:
-        conn = await self._get_connection()
+    async def save_metadata(self, metadata: Metadata, logger: Logger) -> int:
+        conn = await self._get_connection(logger)
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                INSERT INTO metadata (
+                INSERT INTO public.metadata (
                     target_id, target_name, absolute_url, last_scrape,
                     filepath, url_hash, content_hash, content_size
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
@@ -70,4 +84,5 @@ class Metastore:
                 ),
             )
             result = await cur.fetchone()
+            logger.info(f"saved metadata: {result}")
             return result[0]  # type: ignore

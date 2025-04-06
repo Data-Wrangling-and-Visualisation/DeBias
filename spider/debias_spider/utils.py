@@ -7,7 +7,7 @@ def normalize_url(url: str) -> str:
     scheme, netloc, path, qs, anchor = urlparse.urlsplit(url)
     path = urllib.quote(path, "/%")
     qs = urllib.quote_plus(qs, ":&=")
-    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+    return urlparse.urlunsplit((scheme, netloc, path))
 
 
 def hashsum(value: str) -> str:

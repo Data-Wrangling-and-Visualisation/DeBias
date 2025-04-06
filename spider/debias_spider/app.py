@@ -13,7 +13,7 @@ from debias_spider.metastore import Metadata, Metastore
 from debias_spider.models import FetchRequest, ProcessRequest, RenderRequest
 from debias_spider.parser import Parser
 from debias_spider.s3 import S3Client
-from debias_spider.utils import extract_domain, hashsum, normalize_url
+from debias_spider.utils import absolute_url, extract_domain, hashsum, normalize_url
 
 # calling __init__ function of Config class will load all configuration
 # however, type checkers do not like it
@@ -41,12 +41,20 @@ async def app_on_startup(context: ContextRepo):
     context.set_global("config", config)
     await http.__aenter__()
 
-    await metastore.init()
-
     for target_config in config.app.targets:
         parser = Parser(target_config)
         parsers[parser.domain] = parser
     await broker.connect(config.nats.dsn.encoded_string())
+
+
+@app.after_startup
+async def app_after_startup(context: ContextRepo, logger: Logger):
+    """Lifespan hook that is called after application is started"""
+    logger.info(f"registered parsers for domain {list(parsers.keys())}")
+
+    await metastore.init(logger)
+
+    logger.info("app started")
 
 
 @app.on_shutdown
@@ -137,7 +145,7 @@ async def finish(
     filepath: str,
 ):
     try:
-        async with await metastore.with_transaction():
+        async with metastore.with_transaction(logger):
             await s3.upload(filepath, content)
 
             id = await metastore.save_metadata(
@@ -150,7 +158,8 @@ async def finish(
                     url_hash=url_hash,
                     content_hash=content_hash,
                     content_size=len(content),
-                )
+                ),
+                logger,
             )
 
             await process_queue_publisher.publish(
@@ -168,7 +177,8 @@ async def finish(
 
     try:
         next_urls = parser.extract_hrefs(content, logger)
-        await asyncio.gather(*[fetch_queue_publisher.publish(FetchRequest(url=next_url)) for next_url in next_urls])
+        urls = [normalize_url(absolute_url(extract_domain(url), next_url)) for next_url in next_urls]
+        await asyncio.gather(*[fetch_queue_publisher.publish(FetchRequest(url=next_url)) for next_url in urls])
     except Exception as e:
         logger.warning(f"failed to spawn new fetch requests: {e}")
         raise NackMessage() from e

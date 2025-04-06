@@ -13,7 +13,7 @@ services:
       dockerfile: dockerfile
     volumes:
       - ./spider/config.toml:/app/config.toml
-    command: "uv run faststream run debias_spider:app --workers 5"
+    command: "uv run faststream run debias_spider:app --workers 1"
 
   message-queue:
     image: nats:2.11-linux
@@ -41,6 +41,5 @@ services:
     environment:
       - POSTGRES_USER=${PG_USERNAME}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
-      - POSTGRES_DB=debias
     volumes:
       - postgres_volume:/var/lib/postgresql/data
