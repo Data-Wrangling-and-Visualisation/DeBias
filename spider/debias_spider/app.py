@@ -152,7 +152,7 @@ async def finish(
                 Metadata(
                     target_id=parser.config.id,
                     target_name=parser.config.name,
-                    absolute_url=url,
+                    absolute_url=normalize_url(url),
                     last_scrape=datetime.now(),
                     filepath=filepath,
                     url_hash=url_hash,
