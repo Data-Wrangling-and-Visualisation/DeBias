@@ -17,8 +17,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     restart: on-failure
     ports:
-      - "127.0.0.1:11004:9000"
-      - "127.0.0.1:11005:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - minio_data_volume:/data
       - minio_config_volume:/root/.minio

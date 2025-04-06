@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 
 
 class FetchRequest(BaseModel):
-    target_id: str = Field(description="ID of the target")
     url: str = Field(description="URL to fetch")
 
 
@@ -17,5 +16,4 @@ class ProcessRequest(BaseModel):
 
 
 class RenderRequest(BaseModel):
-    target_id: str
     url: str

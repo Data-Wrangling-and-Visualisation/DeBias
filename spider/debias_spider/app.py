@@ -1,3 +1,4 @@
+import asyncio
 from collections import defaultdict
 from datetime import datetime
 
@@ -45,7 +46,6 @@ async def app_on_startup(context: ContextRepo):
     for target_config in config.app.targets:
         parser = Parser(target_config)
         parsers[parser.domain] = parser
-
     await broker.connect(config.nats.dsn.encoded_string())
 
 
@@ -124,7 +124,8 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
             await finish(logger, parser, url, url_hash, content, content_hash, filepath)
         raise AckMessage()
 
-    raise NackMessage() # didnt hit any path
+    raise NackMessage()  # didnt hit any path
+
 
 async def finish(
     logger: Logger,
@@ -165,10 +166,17 @@ async def finish(
         logger.error(f"failed to finish message processing: {e}")
         raise NackMessage() from e
 
+    try:
+        next_urls = parser.extract_hrefs(content, logger)
+        await asyncio.gather(*[fetch_queue_publisher.publish(FetchRequest(url=next_url)) for next_url in next_urls])
+    except Exception as e:
+        logger.warning(f"failed to spawn new fetch requests: {e}")
+        raise NackMessage() from e
+
 
 async def render(logger: Logger, parser: Parser, url: str):
     try:
-        await render_queue_publisher.publish(RenderRequest(url=url, target_id=parser.config.id))
+        await render_queue_publisher.publish(RenderRequest(url=url))
     except Exception as e:
         logger.error(f"failed to finish message processing: {e}")
         raise NackMessage() from e

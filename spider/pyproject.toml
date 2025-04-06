@@ -2,7 +2,7 @@
 name = "debias_spider"
 dynamic = ["version"]
 description = ""
-readme = "readme.md"
+readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "aiobotocore>=2.14,<2.15",

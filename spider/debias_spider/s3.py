@@ -23,7 +23,7 @@ class S3Client:
             "aws_secret_access_key": self.cfg.secret_key,
         }
         async with session.create_client("s3", **client_kwargs) as client:
-            await client.put_object(Bucket=self.bucket_name, Key=path, Body=content.encode("utf-8"))  # type: ignore
+            await client.put_object(Bucket=self.cfg.bucket_name, Key=path, Body=content.encode("utf-8"))  # type: ignore
 
     async def download(self, path: str) -> str:
         """
@@ -44,7 +44,7 @@ class S3Client:
         }
 
         async with session.create_client("s3", **client_kwargs) as client:
-            response = await client.get_object(Bucket=self.bucket_name, Key=path)  # type: ignore
+            response = await client.get_object(Bucket=self.cfg.bucket_name, Key=path)  # type: ignore
             async with response["Body"] as stream:
                 data = await stream.read()
                 return data.decode("utf-8")
