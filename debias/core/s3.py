@@ -1,6 +1,9 @@
-import aiobotocore.session
+import logging
 
-from debias_spider.config import S3Config
+import aiobotocore.session
+from core.configs import S3Config
+
+logger = logging.getLogger(__name__)
 
 
 class S3Client:
@@ -23,6 +26,7 @@ class S3Client:
             "aws_secret_access_key": self.cfg.secret_key,
         }
         async with session.create_client("s3", **client_kwargs) as client:
+            logger.debug(f"uploading {path} to s3://{self.cfg.bucket_name}/{path}")
             await client.put_object(Bucket=self.cfg.bucket_name, Key=path, Body=content.encode("utf-8"))  # type: ignore
 
     async def download(self, path: str) -> str:
@@ -44,6 +48,7 @@ class S3Client:
         }
 
         async with session.create_client("s3", **client_kwargs) as client:
+            logger.debug(f"downloading {path} from s3://{self.cfg.bucket_name}/{path}")
             response = await client.get_object(Bucket=self.cfg.bucket_name, Key=path)  # type: ignore
             async with response["Body"] as stream:
                 data = await stream.read()

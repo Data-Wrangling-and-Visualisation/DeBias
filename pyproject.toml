@@ -1,6 +1,6 @@
 [project]
-name = "debias_spider"
-dynamic = ["version"]
+name = "debias"
+version = "1.0.0"
 description = ""
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -8,13 +8,9 @@ dependencies = [
     "aiobotocore>=2.14,<2.15",
     "beautifulsoup4>=4.13.3",
     "botocore>=1.35.0,<1.36",
-    "faststream[cli,nats]>=0.5.37",
-    "httpx>=0.28.1",
     "psycopg>=3.2.6",
     "pydantic>=2.11.1",
     "pydantic-settings>=2.8.1",
-    "redis[hiredis]>=5.2.1",
-    "uvicorn>=0.34.0",
 ]
 
 
@@ -27,10 +23,7 @@ skip-excluded-dirs = true
 
 [tool.hatch.build.targets.wheel]
 only-packages = true
-packages = ["debias_spider"]
-
-[tool.hatch.version]
-path = "debias_spider/__version__.py"
+packages = ["debias/scaper", "debias/core"]
 
 [tool.uv]
 package = true
@@ -88,3 +81,8 @@ runtime-evaluated-base-classes = [
 
 [dependency-groups]
 dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
+scaper = [
+    "faststream[cli,nats]>=0.5.37",
+    "httpx>=0.28.1",
+    "redis[hiredis]>=5.2.1",
+]

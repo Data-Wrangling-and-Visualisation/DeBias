@@ -13,13 +13,13 @@
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Technologies](#technologies)
-    - [Experiments](#experiments)
-    - [Data Scraping](#data-scraping)
   - [Deploy](#deploy)
-    - [Port Mapping](#port-mapping)
     - [Using external S3 provider](#using-external-s3-provider)
     - [Using local S3 provider](#using-local-s3-provider)
     - [Remove services](#remove-services)
+  - [Development](#development)
+    - [Structure](#structure)
+    - [Adding new service](#adding-new-service)
   - [Current state](#current-state)
     - [Distribution of political positions overall](#distribution-of-political-positions-overall)
     - [Distribution of political positions in the USA](#distribution-of-political-positions-in-the-usa)
@@ -31,50 +31,36 @@
 
 The repository is dedicated to the Debias project, dedicated to showing relationships between different concepts in the news. 
 
-We cover different geographical locations (mainly USA and UK), different political positions (taken from [AllSides](https://www.allsides.com/unbiased-balanced-news)) and varios news providers.
+We cover different geographical locations (mainly USA and UK), different political positions (taken from [AllSides](https://www.allsides.com/unbiased-balanced-news)) and various news providers.
 
 The final goal is to create an interactive visualization, which would show how concepts are interconnected within different time stamps and from different points of view.
 
 ## Technologies
 
-### Experiments
-- <img src=".github/assets/Python-logo-notext.svg.png" width="16" height="16"></img> Python
-
-### Data Scraping
-- <img src=".github/assets/4373190_docker_logo_logos_icon.png" width="16" height="16"></img> Docker 
-- <img src=".github/assets/Go-Logo_Blue.png" width="16" height="16"></img> Go 
-- <img src=".github/assets/colly.png" width="16" height="16"></img> Colly 
+- <img src=".github/assets/python.png" width="16" height="16"></img> Python
+- <img src=".github/assets/docker.png" width="16" height="16"></img> Docker
 - <img src=".github/assets/redis.svg" width="16" height="16"></img> Redis 
-- <img src=".github/assets/minio-1.svg" width="16" height="16"></img> Minio 
-- <img src=".github/assets/mongodb-icon-1.svg" width="16" height="16"></img> MongoDB 
+- <img src=".github/assets/minio.svg" width="16" height="16"></img> MinIO
+- <img src=".github/assets/nats.png" width="16" height="16"></img> NATS
+- <img src=".github/assets/postgres.png" width="16" height="16"></img> Postgres 
 
 ## Deploy
 
 The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
-
-### Port Mapping
-
-| Service       | Port  |
-| ------------- | ----- |
-| Spider        | 11001 |
-| Cache         | 11002 |
-| MongoDB       | 11003 |
-| MinIO         | 11004 |
-| MinIO Console | 11005 |
 
 ### Using external S3 provider
 
 0. Create `.env` file
 Fill in the following variables:
 ```bash
-MONGO_USERNAME=...
-MONGO_PASSWORD=...
+PG_USERNAME=...
+PG_PASSWORD=...
 ```
 
-1. Create `spider/config.yaml`
+1. Create `debias/scaper/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`spider/example.config.yaml`](spider/example.config.yaml)
+> You can find example configuration in [`scaper/example.config.toml`](debias/scaper/example.config.toml)
 
 2. Run services
 
@@ -92,16 +78,15 @@ MINIO_SECRET_KEY=...
 MINIO_BUCKET=...
 ```
 
-
 1. Create MinIO S3 service using docker:
 ```bash
 docker compose -f minio.docker-compose.yml up minio_setup
 ```
 
-2. Create `spider/config.yaml`
+2. Create `debias/scaper/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`spider/example.config.yaml`](spider/example.config.yaml)
+> You can find example configuration in [`debias/scaper/example.config.toml`](debias/scaper/example.config.toml)
 
 3. Run services
 
@@ -117,6 +102,23 @@ docker compose -f minio.docker-compose.yml down --volumes
 # or
 docker compose -f docker-compose.yml down --volumes
 ```
+
+## Development
+
+### Structure
+```
+.
+├── debias       # shared code root
+│   ├── core     # reusable components - s3, metastore, configs, etc
+│   └── scaper   # scraper related code
+```
+
+### Adding new service
+To add new service:
+1. Create new directory in `debias` directory
+2. Create `dockerfile` prefixed with `servicename` (e.g. `scaper.dockerfile`)
+3. Add all the required dependencies to `pyproject.toml` under `--group servicename`
+
 
 
 ## Current state

@@ -221,19 +221,16 @@ wheels = [
 ]
 
 [[package]]
-name = "debias-spider"
+name = "debias"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiobotocore" },
     { name = "beautifulsoup4" },
     { name = "botocore" },
-    { name = "faststream", extra = ["cli", "nats"] },
-    { name = "httpx" },
     { name = "psycopg" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "redis", extra = ["hiredis"] },
-    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -241,25 +238,31 @@ dev = [
     { name = "hatch" },
     { name = "ruff" },
 ]
+scaper = [
+    { name = "faststream", extra = ["cli", "nats"] },
+    { name = "httpx" },
+    { name = "redis", extra = ["hiredis"] },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "aiobotocore", specifier = ">=2.14,<2.15" },
     { name = "beautifulsoup4", specifier = ">=4.13.3" },
     { name = "botocore", specifier = ">=1.35.0,<1.36" },
-    { name = "faststream", extras = ["cli", "nats"], specifier = ">=0.5.37" },
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "pydantic", specifier = ">=2.11.1" },
     { name = "pydantic-settings", specifier = ">=2.8.1" },
-    { name = "redis", extras = ["hiredis"], specifier = ">=5.2.1" },
-    { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "hatch", specifier = ">=1.14.0" },
     { name = "ruff", specifier = ">=0.11.2" },
+]
+scaper = [
+    { name = "faststream", extras = ["cli", "nats"], specifier = ">=0.5.37" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "redis", extras = ["hiredis"], specifier = ">=5.2.1" },
 ]
 
 [[package]]
@@ -1004,19 +1007,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/75/d4/df57d3f40c93c21fceed94156da41183daabd15422506e0fe73236c458a1/uv-0.6.10-py3-none-win32.whl", hash = "sha256:df6560256b93441c70ea2c062975bce2307a32de280f103cedb8db4a0f542348", size = 15953827 },
     { url = "https://files.pythonhosted.org/packages/8a/21/a71c95c85624544c56695ae2469745bbda834e77dfc1e29d76711409eda5/uv-0.6.10-py3-none-win_amd64.whl", hash = "sha256:d795721fdd32e0471c952b7cb02a030657b6e67625fe836f4df14a3ae4aa4921", size = 17425178 },
     { url = "https://files.pythonhosted.org/packages/ce/07/e6ffe467e1e365f7dd7863c4d505b1941af8cf69c494d0dbda08ba907043/uv-0.6.10-py3-none-win_arm64.whl", hash = "sha256:5188dc7041f4166bf64182d76c32c873f750259b6e4621a1400c26ebeea8c8dd", size = 16169219 },
-]
-
-[[package]]
-name = "uvicorn"
-version = "0.34.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "h11" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/4d/938bd85e5bf2edeec766267a5015ad969730bb91e31b44021dfe8b22df6c/uvicorn-0.34.0.tar.gz", hash = "sha256:404051050cd7e905de2c9a7e61790943440b3416f49cb409f965d9dcd0fa73e9", size = 76568 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/14/33a3a1352cfa71812a3a21e8c9bfb83f60b0011f5e36f2b1399d51928209/uvicorn-0.34.0-py3-none-any.whl", hash = "sha256:023dc038422502fa28a09c7a30bf2b6991512da7dcdb8fd35fe57cfc154126f4", size = 62315 },
 ]
 
 [[package]]

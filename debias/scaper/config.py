@@ -1,36 +1,14 @@
 import importlib.metadata
 from typing import ClassVar, Literal, override
 
-from pydantic import BaseModel, Field, HttpUrl, NatsDsn
+from core.configs import HttpConfig, NatsConfig, PostgresConfig, S3Config
+from pydantic import BaseModel, Field, HttpUrl
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
     TomlConfigSettingsSource,
 )
-
-
-class NatsConfig(BaseModel):
-    dsn: NatsDsn = Field(
-        default_factory=lambda: NatsDsn("nats://localhost:4222"),
-        description="Domain Service Name (DSN) of the NATS server",
-    )
-
-
-class HttpConfig(BaseModel):
-    user_agent: str = Field(default="debias-spider", description="User agent string")
-
-
-class S3Config(BaseModel):
-    access_key: str = Field(description="Access key for S3")
-    secret_key: str = Field(description="Secret key for S3")
-    endpoint: str = Field(description="Endpoint for S3")
-    bucket_name: str = Field(description="Bucket name for S3")
-    region: str = Field(description="Region for S3")
-
-
-class PostgresConfig(BaseModel):
-    connection: str = Field(description="Connection string for PostgreSQL")
 
 
 class TargetConfig(BaseModel):
@@ -77,18 +55,16 @@ class Config(BaseSettings):
 
     @property
     def version(self) -> str:
-        return importlib.metadata.version("debias_spider")
+        return importlib.metadata.version("debias_scaper")
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        # look for enviroment variabled prefixed with `spider.` (case-insensitive). e.g. spider.log.level = debug
-        env_prefix="spider.",
+        # look for enviroment variabled prefixed with `scaper.` (case-insensitive). e.g. scaper.log.level = debug
+        env_prefix="scaper.",
         case_sensitive=False,
         env_nested_delimiter=".",
         # if .env file is present - load it
         env_file=".env",
         env_file_encoding="utf-8",
-        # look for config.toml file as main configuration file
-        toml_file="config.toml",
         # ignore additional fields stated in configuration file (do not load them to memory for security)
         extra="ignore",
     )

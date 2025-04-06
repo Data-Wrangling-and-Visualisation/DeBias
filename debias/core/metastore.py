@@ -1,9 +1,11 @@
+import logging
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
 
 import psycopg
-from faststream import Logger
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -23,8 +25,8 @@ class Metastore:
         self._conn_str = connection
         self._connection: psycopg.AsyncConnection | None = None
 
-    async def init(self, logger: Logger):
-        conn = await self._get_connection(logger)
+    async def init(self):
+        conn = await self._get_connection()
         async with conn.cursor() as cur:
             logger.info("creating if metadata table if not exists")
             await cur.execute("""
@@ -44,15 +46,15 @@ class Metastore:
 
         logger.info("created metadata table")
 
-    async def _get_connection(self, logger: Logger) -> psycopg.AsyncConnection:
+    async def _get_connection(self) -> psycopg.AsyncConnection:
         if self._connection is None or self._connection.closed:
             self._connection = await psycopg.AsyncConnection.connect(self._conn_str)
         logger.debug(f"connected to {self._connection.info}")
         return self._connection
 
     @asynccontextmanager
-    async def with_transaction(self, logger: Logger):
-        async with (await self._get_connection(logger)).transaction() as t:
+    async def with_transaction(self):
+        async with (await self._get_connection()).transaction() as t:
             try:
                 yield t
             except Exception as e:
@@ -61,8 +63,8 @@ class Metastore:
             else:
                 logger.debug("committing transaction")
 
-    async def save_metadata(self, metadata: Metadata, logger: Logger) -> int:
-        conn = await self._get_connection(logger)
+    async def save(self, metadata: Metadata) -> int:
+        conn = await self._get_connection()
         async with conn.cursor() as cur:
             await cur.execute(
                 """
@@ -86,3 +88,22 @@ class Metastore:
             result = await cur.fetchone()
             logger.info(f"saved metadata: {result}")
             return result[0]  # type: ignore
+
+    async def read(self, metadata_id: int) -> Metadata | None:
+        conn = await self._get_connection()
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT * FROM public.metadata WHERE id = %s;", (metadata_id,))
+            result = await cur.fetchone()
+            if result is None:
+                return None
+
+            return Metadata(
+                target_id=result[1],
+                target_name=result[2],
+                absolute_url=result[3],
+                last_scrape=result[4],
+                filepath=result[5],
+                url_hash=result[6],
+                content_hash=result[7],
+                content_size=result[8],
+            )

@@ -1,5 +1,5 @@
 assets
-config.toml
+**/config.toml
 volumes
 
 # Mac OS
