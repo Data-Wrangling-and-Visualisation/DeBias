@@ -18,14 +18,26 @@ class NatsConfig(BaseModel):
 
 
 class HttpConfig(BaseModel):
-    host: str = Field(default="0.0.0.0", description="Host address to bind application to")
-    port: int = Field(default=8080, description="Port number to bind application to")
+    user_agent: str = Field(default="debias-spider", description="User agent string")
+
+
+class S3Config(BaseModel):
+    access_key: str = Field(description="Access key for S3")
+    secret_key: str = Field(description="Secret key for S3")
+    endpoint: str = Field(description="Endpoint for S3")
+    bucket_name: str = Field(description="Bucket name for S3")
+    region: str = Field(description="Region for S3")
+
+
+class PostgresConfig(BaseModel):
+    connection: str = Field(description="Connection string for PostgreSQL")
 
 
 class TargetConfig(BaseModel):
     id: str = Field(description="ID of the target")
     name: str = Field(description="Human-readable name of the target")
     root: HttpUrl = Field(description="Root URL of the target")
+    domain_only: bool = Field(default=True, description="Whether to visit links on other domains")
     render: Literal["auto", "always", "never"] = Field(
         default="auto",
         description="""Whether the webpase need rendering.
@@ -33,7 +45,13 @@ class TargetConfig(BaseModel):
         Other options are 'always' and 'never'.
         """,
     )
-    selector: str = Field(
+    text_selector: str = Field(
+        default="",
+        description="""Selector to find the text content of the target.
+        Default is '' which would not find any text content.
+        """,
+    )
+    href_selector: str = Field(
         default="a[href]",
         description="""Selector to find the link to the target.
         Default is 'a[href]' which would find all links.
@@ -45,10 +63,17 @@ class AppConfig(BaseModel):
     targets: list[TargetConfig] = Field(default_factory=list, description="Targets configuration")
 
 
+class KeyValueConfig(BaseModel):
+    dsn: str = Field(description="Redis DSN")
+
+
 class Config(BaseSettings):
     nats: NatsConfig = Field(default_factory=NatsConfig, description="NATS configuration")
     http: HttpConfig = Field(default_factory=HttpConfig, description="HTTP configuration")
     app: AppConfig = Field(default_factory=AppConfig, description="Application configuration")
+    s3: S3Config = Field(description="S3 configuration")
+    pg: PostgresConfig = Field(description="PostgreSQL configuration")
+    keyvalue: KeyValueConfig = Field(description="Key-Value configuration")
 
     @property
     def version(self) -> str:

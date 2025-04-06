@@ -1,13 +1,46 @@
 volumes:
   message_queue_volume:
     driver: local
+  key_value_volume:
+    driver: local
+  postgres_volume:
+    driver: local
 
 services:
+  spider:
+    build:
+      context: spider
+      dockerfile: dockerfile
+    volumes:
+      - ./spider/config.toml:/app/config.toml
+    command: "uv run faststream run debias_spider:app --workers 5"
+
   message-queue:
-    image: nats:latest
+    image: nats:2.11-linux
     ports:
       - "127.0.0.1:4222:4222"
       - "127.0.0.1:8222:8222"
     command: "--jetstream --store_dir /data"
     volumes:
       - message_queue_volume:/data
+
+  key-value:
+    image: valkey/valkey:8.1
+    ports:
+      - "127.0.0.1:6379:6379"
+    environment:
+      - VALKEY_DB=0
+    volumes:
+      - key_value_volume:/data
+    command: ["--appendonly", "yes"]
+
+  postgres:
+    image: postgres:16
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      - POSTGRES_USER=${PG_USERNAME}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=debias
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data

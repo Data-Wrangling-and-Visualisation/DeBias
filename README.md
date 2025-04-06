@@ -79,7 +79,7 @@ MONGO_PASSWORD=...
 2. Run services
 
 ```bash
-docker compose -f s3.docker-compose.yml up --build --detach
+docker compose -f docker-compose.yml up --build --detach
 ```
 
 ### Using local S3 provider
@@ -87,8 +87,6 @@ docker compose -f s3.docker-compose.yml up --build --detach
 0. Create `.env` file
 Fill in the following variables:
 ```bash
-MONGO_USERNAME=...
-MONGO_PASSWORD=...
 MINIO_ACCESS_KEY=...
 MINIO_SECRET_KEY=...
 MINIO_BUCKET=...
@@ -117,7 +115,7 @@ To stop all remove all containers AND THEIR VOLUMES:
 ```bash
 docker compose -f minio.docker-compose.yml down --volumes
 # or
-docker compose -f s3.docker-compose.yml down --volumes
+docker compose -f docker-compose.yml down --volumes
 ```
 
 

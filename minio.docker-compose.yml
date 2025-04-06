@@ -1,0 +1,49 @@
+include:
+  - docker-compose.yml
+
+volumes:
+  minio_data_volume:
+    driver: local
+  minio_config_volume:
+    driver: local
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: debias_minio
+    hostname: debias_minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    restart: on-failure
+    ports:
+      - "127.0.0.1:11004:9000"
+      - "127.0.0.1:11005:9001"
+    volumes:
+      - minio_data_volume:/data
+      - minio_config_volume:/root/.minio
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_interval: 5s
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: debias_minio_setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set minioacc http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY} &&
+      mc mb --ignore-existing minioacc/${MINIO_BUCKET} &&
+      echo 'Bucket ${MINIO_BUCKET} created successfully'"

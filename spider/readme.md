@@ -1,5 +1,8 @@
 # De Bias - Spider
 
+## Architecture
+![Architecture](assets/architecture.png)
+
 ## Prerequisites
 
 - [uv](https://github.com/astral-sh/uv)
