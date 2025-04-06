@@ -57,10 +57,10 @@ PG_USERNAME=...
 PG_PASSWORD=...
 ```
 
-1. Create `debias/scaper/config.toml`
+1. Create `debias/scraper/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`scaper/example.config.toml`](debias/scaper/example.config.toml)
+> You can find example configuration in [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
 
 2. Run services
 
@@ -83,10 +83,10 @@ MINIO_BUCKET=...
 docker compose -f minio.docker-compose.yml up minio_setup
 ```
 
-2. Create `debias/scaper/config.toml`
+2. Create `debias/scraper/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`debias/scaper/example.config.toml`](debias/scaper/example.config.toml)
+> You can find example configuration in [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
 
 3. Run services
 
@@ -110,13 +110,13 @@ docker compose -f docker-compose.yml down --volumes
 .
 ├── debias       # shared code root
 │   ├── core     # reusable components - s3, metastore, configs, etc
-│   └── scaper   # scraper related code
+│   └── scraper   # scraper related code
 ```
 
 ### Adding new service
 To add new service:
 1. Create new directory in `debias` directory
-2. Create `dockerfile` prefixed with `servicename` (e.g. `scaper.dockerfile`)
+2. Create `dockerfile` prefixed with `servicename` (e.g. `scraper.dockerfile`)
 3. Add all the required dependencies to `pyproject.toml` under `--group servicename`
 
 

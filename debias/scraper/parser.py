@@ -3,8 +3,8 @@ from typing import Literal
 from bs4 import BeautifulSoup
 from faststream import Logger
 
-from debias.scaper.config import TargetConfig
-from debias.scaper.utils import absolute_url, extract_domain
+from debias.scraper.config import TargetConfig
+from debias.scraper.utils import absolute_url, extract_domain
 
 
 class Parser:

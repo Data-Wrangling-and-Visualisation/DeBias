@@ -7,13 +7,13 @@ volumes:
     driver: local
 
 services:
-  scaper:
+  scraper:
     build:
       context: .
-      dockerfile: scaper.dockerfile
+      dockerfile: scraper.dockerfile
     volumes:
-      - ./debias/scaper/config.toml:/app/config.toml
-    command: "uv run faststream run debias.scaper:app --config=/app/config.toml --workers 1"
+      - ./debias/scraper/config.toml:/app/config.toml
+    command: "uv run faststream run debias.scraper:app --config=/app/config.toml --workers 1"
 
   message-queue:
     image: nats:2.11-linux

@@ -55,11 +55,11 @@ class Config(BaseSettings):
 
     @property
     def version(self) -> str:
-        return importlib.metadata.version("debias_scaper")
+        return importlib.metadata.version("debias_scraper")
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        # look for enviroment variabled prefixed with `scaper.` (case-insensitive). e.g. scaper.log.level = debug
-        env_prefix="scaper.",
+        # look for enviroment variabled prefixed with `scraper.` (case-insensitive). e.g. scraper.log.level = debug
+        env_prefix="scraper.",
         case_sensitive=False,
         env_nested_delimiter=".",
         # if .env file is present - load it

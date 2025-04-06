@@ -1,4 +1,4 @@
-# De Bias - Scaper
+# De Bias - scraper
 
 ## Architecture
 ![Architecture](assets/architecture.png)
@@ -10,14 +10,14 @@
 
 ## Development
 
-1. Create `config.toml` file in the `debias/scaper` directory
+1. Create `config.toml` file in the `debias/scraper` directory
 
 2. Install dependencies:
 ```bash
-uv sync --group scaper
+uv sync --group scraper
 ```
 
 3. Launch application with hot reload:
 ```bash
-uv run faststream run debias.scaper:app --config=/app/config.toml --workers 1
+uv run faststream run debias.scraper:app --config=/app/config.toml --workers 1
 ```

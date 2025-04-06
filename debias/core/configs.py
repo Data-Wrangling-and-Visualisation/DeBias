@@ -9,7 +9,7 @@ class NatsConfig(BaseModel):
 
 
 class HttpConfig(BaseModel):
-    user_agent: str = Field(default="debias-scaper", description="User agent string")
+    user_agent: str = Field(default="debias-scraper", description="User agent string")
 
 
 class S3Config(BaseModel):

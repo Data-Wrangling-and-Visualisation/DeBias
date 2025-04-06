@@ -23,7 +23,7 @@ skip-excluded-dirs = true
 
 [tool.hatch.build.targets.wheel]
 only-packages = true
-packages = ["debias/scaper", "debias/core"]
+packages = ["debias/scraper", "debias/core"]
 
 [tool.uv]
 package = true
@@ -81,7 +81,7 @@ runtime-evaluated-base-classes = [
 
 [dependency-groups]
 dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
-scaper = [
+scraper = [
     "faststream[cli,nats]>=0.5.37",
     "httpx>=0.28.1",
     "redis[hiredis]>=5.2.1",

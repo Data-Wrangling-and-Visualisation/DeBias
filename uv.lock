@@ -238,7 +238,7 @@ dev = [
     { name = "hatch" },
     { name = "ruff" },
 ]
-scaper = [
+scraper = [
     { name = "faststream", extra = ["cli", "nats"] },
     { name = "httpx" },
     { name = "redis", extra = ["hiredis"] },
@@ -259,7 +259,7 @@ dev = [
     { name = "hatch", specifier = ">=1.14.0" },
     { name = "ruff", specifier = ">=0.11.2" },
 ]
-scaper = [
+scraper = [
     { name = "faststream", extras = ["cli", "nats"], specifier = ">=0.5.37" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "redis", extras = ["hiredis"], specifier = ">=5.2.1" },

@@ -9,11 +9,11 @@ ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-group dev --group scaper
+    uv sync --frozen --no-install-project --no-group dev --group scraper
 
 ADD . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-group dev --group scaper
+    uv sync --frozen --no-group dev --group scraper
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
