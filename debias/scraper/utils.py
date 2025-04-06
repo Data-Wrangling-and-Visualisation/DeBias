@@ -1,12 +1,11 @@
 import hashlib
 import urllib.parse as urllib
-import urllib.parse as urlparse
 
 
 def normalize_url(url: str) -> str:
-    scheme, netloc, path, _, _ = urlparse.urlsplit(url)
+    scheme, netloc, path, _, _ = urllib.urlsplit(url)
     path = urllib.quote(path, "/%")
-    return urlparse.urlunsplit((scheme, netloc, path, "", ""))
+    return urllib.urlunsplit((scheme, netloc, path, "", ""))
 
 
 def hashsum(value: str) -> str:
@@ -14,7 +13,7 @@ def hashsum(value: str) -> str:
 
 
 def extract_domain(url: str) -> str:
-    scheme, netloc, path, qs, anchor = urlparse.urlsplit(url)
+    scheme, netloc, path, qs, anchor = urllib.urlsplit(url)
     return netloc
 
 

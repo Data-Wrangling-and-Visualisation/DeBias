@@ -159,7 +159,7 @@ async def finish(
         async with DI.metastore.with_transaction():
             await DI.s3.upload(filepath, content)
 
-            id = await DI.metastore.save(
+            metadata_id = await DI.metastore.save(
                 Metadata(
                     target_id=parser.config.id,
                     target_name=parser.config.name,
@@ -177,7 +177,7 @@ async def finish(
                     url=url,
                     target_id=parser.config.id,
                     filepath=filepath,
-                    metadata=id,
+                    metadata=metadata_id,
                     datetime=datetime.now(),
                 )
             )
