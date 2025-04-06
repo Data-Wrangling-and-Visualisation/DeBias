@@ -18,8 +18,8 @@ class TargetConfig(BaseModel):
     domain_only: bool = Field(default=True, description="Whether to visit links on other domains")
     render: Literal["auto", "always", "never"] = Field(
         default="auto",
-        description="""Whether the webpase need rendering.
-        Default is 'auto' which would determine  based on the first request content."
+        description="""Whether the webpage needs rendering.
+        Default is 'auto' which would determine based on the first request content."
         Other options are 'always' and 'never'.
         """,
     )
