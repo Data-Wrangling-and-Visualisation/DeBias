@@ -1,0 +1,88 @@
+[project]
+name = "debias"
+version = "1.0.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "aiobotocore>=2.14,<2.15",
+    "beautifulsoup4>=4.13.3",
+    "botocore>=1.35.0,<1.36",
+    "psycopg>=3.2.6",
+    "pydantic>=2.11.1",
+    "pydantic-settings>=2.8.1",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+skip-excluded-dirs = true
+
+[tool.hatch.build.targets.wheel]
+only-packages = true
+packages = ["debias/scraper", "debias/core"]
+
+[tool.uv]
+package = true
+
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
+reportUnknownMemberType = false
+exclude = ["**/__pycache__", "**/.*"]
+
+[tool.ruff]
+exclude = [".mypy_cache", ".ruff_cache", ".venv", "venv", "build", "dist"]
+line-length = 120
+indent-width = 4
+target-version = "py312"
+fix = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+select = ["E", "F", "Q", "B", "I", "UP", "C"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 128
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+force-single-line = false
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = []
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic_settings.BaseSettings",
+]
+
+[dependency-groups]
+dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
+scraper = [
+    "faststream[cli,nats]>=0.5.37",
+    "httpx>=0.28.1",
+    "redis[hiredis]>=5.2.1",
+]
