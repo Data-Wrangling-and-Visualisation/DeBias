@@ -120,7 +120,7 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
     content = response.text
     content_hash = hashsum(content)
     if (await DI.keyvalue.get(f"content_hash:{url_hash}")) == content_hash:
-        logger.warning(f"skiping url {url}: content_hash {content_hash} has not changed")
+        logger.warning(f"skipping url {url}: content_hash {content_hash} has not changed")
         raise AckMessage()  # ok, no retry needed
     await DI.keyvalue.set(f"content_hash:{url_hash}", content_hash, ex=60 * 60 * 24 * 30)  # expires in 30 days
     logger.debug(f"content hash {content_hash} is not present, processing content")
