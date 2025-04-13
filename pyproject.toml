@@ -13,6 +13,15 @@ dependencies = [
     "pydantic-settings>=2.8.1",
 ]
 
+[dependency-groups]
+dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
+scraper = [
+    "faststream[cli,nats]>=0.5.37",
+    "httpx>=0.28.1",
+    "redis[hiredis]>=5.2.1",
+]
+renderer = ["faststream[cli,nats]>=0.5.37", "redis[hiredis]>=5.2.1"]
+
 
 [build-system]
 requires = ["hatchling"]
@@ -77,12 +86,4 @@ extend-immutable-calls = []
 runtime-evaluated-base-classes = [
     "pydantic.BaseModel",
     "pydantic_settings.BaseSettings",
-]
-
-[dependency-groups]
-dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
-scraper = [
-    "faststream[cli,nats]>=0.5.37",
-    "httpx>=0.28.1",
-    "redis[hiredis]>=5.2.1",
 ]

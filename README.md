@@ -13,6 +13,15 @@
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Technologies](#technologies)
+  - [Services](#services)
+    - [Scraper](#scraper)
+    - [Renderer](#renderer)
+    - [Processor](#processor)
+    - [Server](#server)
+    - [Metastore](#metastore)
+    - [S3](#s3)
+    - [Wordstore](#wordstore)
+    - [Message queue](#message-queue)
   - [Deploy](#deploy)
     - [Using external S3 provider](#using-external-s3-provider)
     - [Using local S3 provider](#using-local-s3-provider)
@@ -42,7 +51,37 @@ The final goal is to create an interactive visualization, which would show how c
 - <img src=".github/assets/redis.svg" width="16" height="16"></img> Redis 
 - <img src=".github/assets/minio.svg" width="16" height="16"></img> MinIO
 - <img src=".github/assets/nats.png" width="16" height="16"></img> NATS
-- <img src=".github/assets/postgres.png" width="16" height="16"></img> Postgres 
+- <img src=".github/assets/postgres.svg" width="16" height="16"></img> Postgres 
+
+## Services
+
+![Architecture](.github/assets/architecture.png)
+
+### [Scraper](debias/scraper/readme.md)
+Scaper is a service which scrapers news from different news providers. This service is recursively calling itself to scrape the next news pages.
+If page requires rendering, it will be sent to the `renderer` service. If page is static, it is stored in the `s3` service, metadata is stored in the `metastore` service, and a `processor` service is called to process the page.
+
+### [Renderer](debias/renderer/readme.md)
+Renderer is a service which renders news pages using browser API. It is called by the `scraper` service. After render, it saves HTML content to the `s3` service and metadata to the `metastore` service and sends a request to the `processor` service to process the page.
+
+### [Processor](debias/processor/readme.md)
+Processor is a service which processes news pages. It extracts human-readable text from the page, performs NLP pipelines and stores the results in the `wordstore` service.
+
+### [Server](debias/server/readme.md)
+Web server which serves the results of the `processor`. It aggregates the statistics of the words, precomputes and caches aggregations, and serves them to the client. It serves the frontend files as well.
+
+### Metastore
+A postgres database which stores metadata of the scraped pages.
+
+### S3
+A S3 provider which stores the static pages. Could be a local MinIO deployment or an external S3 cloud service.
+
+### Wordstore
+A postgres database which stores the words of the processed pages.
+
+### Message queue
+A NATS message queue which is used for S2S communication.
+
 
 ## Deploy
 

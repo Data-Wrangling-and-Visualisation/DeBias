@@ -238,6 +238,10 @@ dev = [
     { name = "hatch" },
     { name = "ruff" },
 ]
+renderer = [
+    { name = "faststream", extra = ["cli", "nats"] },
+    { name = "redis", extra = ["hiredis"] },
+]
 scraper = [
     { name = "faststream", extra = ["cli", "nats"] },
     { name = "httpx" },
@@ -258,6 +262,10 @@ requires-dist = [
 dev = [
     { name = "hatch", specifier = ">=1.14.0" },
     { name = "ruff", specifier = ">=0.11.2" },
+]
+renderer = [
+    { name = "faststream", extras = ["cli", "nats"], specifier = ">=0.5.37" },
+    { name = "redis", extras = ["hiredis"], specifier = ">=5.2.1" },
 ]
 scraper = [
     { name = "faststream", extras = ["cli", "nats"], specifier = ">=0.5.37" },
