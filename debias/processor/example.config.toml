@@ -1,0 +1,9 @@
+[s3]
+access_key = "someaccesskey"
+secret_key = "somesecretkey"
+bucket_name = "somebucketname"
+endpoint = "https://someendpoint"
+region = "someregion"
+
+[pg]
+connection = "user=someuser password=somepassword host=postgres port=5432 dbname=postgres"

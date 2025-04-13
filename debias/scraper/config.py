@@ -55,7 +55,7 @@ class Config(BaseSettings):
 
     @property
     def version(self) -> str:
-        return importlib.metadata.version("debias_scraper")
+        return importlib.metadata.version("debias")
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         # look for enviroment variabled prefixed with `scraper.` (case-insensitive). e.g. scraper.log.level = debug
