@@ -24,6 +24,7 @@
     - [Wordstore](#wordstore)
     - [Message queue](#message-queue)
   - [Deploy](#deploy)
+    - [Port Mapping](#port-mapping)
     - [Using external S3 provider](#using-external-s3-provider)
     - [Using local S3 provider](#using-local-s3-provider)
     - [Scale services for better performance!](#scale-services-for-better-performance)
@@ -31,11 +32,12 @@
   - [Development](#development)
     - [Structure](#structure)
     - [Adding new service](#adding-new-service)
-  - [Current state](#current-state)
+  - [EDA](#eda)
     - [Distribution of political positions overall](#distribution-of-political-positions-overall)
     - [Distribution of political positions in the USA](#distribution-of-political-positions-in-the-usa)
     - [Distribution of political positions in the UK](#distribution-of-political-positions-in-the-uk)
     - [Bonus: Distribution of political positions of sources which require VPN](#bonus-distribution-of-political-positions-of-sources-which-require-vpn)
+  - [Current state](#current-state)
 
 
 ## Overview
@@ -91,6 +93,18 @@ A NATS message queue which is used for S2S communication.
 ## Deploy
 
 The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
+The EDA is available at https://data-wrangling-and-visualisation.github.io/DeBias/
+The draft Javascript visualization is available at https://debias.inno.dartt0n.ru/
+
+### Port Mapping
+
+| Service       | Port  |
+| ------------- | ----- |
+| Spider        | 11001 |
+| Cache         | 11002 |
+| MongoDB       | 11003 |
+| MinIO         | 11004 |
+| MinIO Console | 11005 |
 
 ### Using external S3 provider
 
