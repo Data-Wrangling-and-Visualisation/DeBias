@@ -241,3 +241,5 @@ The collected keywords are then combined for future analysis.
 Example of NLP preprocessing can be found in **debias/processor directory**, in **processor.py** file.
 
 Deploy can be found at: https://debias.inno.dartt0n.ru/
+
+We have added the functionality to filter by date, category, number of keyword occurences. The number of shown nodes can also be limited.
