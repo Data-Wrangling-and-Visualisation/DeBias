@@ -24,7 +24,6 @@
     - [Wordstore](#wordstore)
     - [Message queue](#message-queue)
   - [Deploy](#deploy)
-    - [Port Mapping](#port-mapping)
     - [Using external S3 provider](#using-external-s3-provider)
     - [Using local S3 provider](#using-local-s3-provider)
     - [Scale services for better performance!](#scale-services-for-better-performance)
@@ -95,16 +94,6 @@ A NATS message queue which is used for S2S communication.
 The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
 The EDA is available at https://data-wrangling-and-visualisation.github.io/DeBias/
 The draft Javascript visualization is available at https://debias.inno.dartt0n.ru/
-
-### Port Mapping
-
-| Service       | Port  |
-| ------------- | ----- |
-| Spider        | 11001 |
-| Cache         | 11002 |
-| MongoDB       | 11003 |
-| MinIO         | 11004 |
-| MinIO Console | 11005 |
 
 ### Using external S3 provider
 
