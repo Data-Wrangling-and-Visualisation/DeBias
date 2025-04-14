@@ -1,0 +1,35 @@
+[nats]
+dsn = "nats://message-queue:4222"
+
+[http]
+user_agent = "Some User Agent"
+
+[s3]
+access_key = "someaccesskey"
+secret_key = "somesecretkey"
+bucket_name = "somebucketname"
+endpoint = "https://someendpoint"
+region = "someregion"
+
+[pg]
+connection = "user=someuser password=somepassword host=postgres port=5432 dbname=postgres"
+
+[keyvalue]
+dsn = "redis://key-value:6379/0"
+
+[[app.targets]]
+id = "SKY"
+name = "Sky News"
+root = "https://news.sky.com/"
+render = "never"
+text_selector = ".sdc-article-body"
+href_selector = "a[href]"
+
+[[app.targets]]
+id = "GBN"
+name = "GBN"
+root = "https://www.gbnews.com/"
+render = "always"
+domain_only = false
+text_selector = "#main"
+href_selector = ".next a[href]"

@@ -52,6 +52,7 @@ The final goal is to create an interactive visualization, which would show how c
 - <img src=".github/assets/minio.svg" width="16" height="16"></img> MinIO
 - <img src=".github/assets/nats.png" width="16" height="16"></img> NATS
 - <img src=".github/assets/postgres.svg" width="16" height="16"></img> Postgres 
+- <img src=".github/assets/playwright.svg" width="16" height="16"></img> Playwright
 
 ## Services
 

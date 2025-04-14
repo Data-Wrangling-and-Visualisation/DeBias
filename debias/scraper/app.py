@@ -4,6 +4,7 @@ from datetime import datetime
 
 import httpx
 import redis.asyncio as aioredis
+from core.parser import Parser
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, NackMessage, RejectMessage
 from faststream.nats import NatsBroker, NatsMessage, PullSub
@@ -12,7 +13,6 @@ from debias.core.metastore import Metadata, Metastore
 from debias.core.models import FetchRequest, ProcessRequest, RenderRequest
 from debias.core.s3 import S3Client
 from debias.scraper.config import Config
-from debias.scraper.parser import Parser
 from debias.scraper.utils import absolute_url, extract_domain, hashsum, normalize_url
 
 broker = NatsBroker(pedantic=True)
@@ -103,11 +103,12 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
 
     logger.debug(f"checking if url {url} was scraped in last 12 hours")
     url_hash = hashsum(url)
-    if (await DI.keyvalue.get(f"url_hash:{url_hash}")) is not None:
+    key = f"scrape:url_hash:{url_hash}"
+    if (await DI.keyvalue.get(key)) is not None:
         logger.warning(f"skipping url {url}: url_hash {url_hash} is present")
         raise RejectMessage()  # refuse to process
     logger.debug(f"url hash {url_hash} is not present, processing url")
-    await DI.keyvalue.set(f"url_hash:{url_hash}", "1", ex=60 * 60 * 12)  # expires in 12 hours
+    await DI.keyvalue.set(key, "1", ex=60 * 60 * 12)  # expires in 12 hours
 
     logger.debug(f"retrieving url {url}")
     response = await DI.http.get(url)
