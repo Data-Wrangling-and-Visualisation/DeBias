@@ -44,6 +44,8 @@ We cover different geographical locations (mainly USA and UK), different politic
 
 The final goal is to create an interactive visualization, which would show how concepts are interconnected within different time stamps and from different points of view.
 
+![overiew diagram](.github/assets/diagram.png)
+
 ## Technologies
 
 - <img src=".github/assets/python.png" width="16" height="16"></img> Python
