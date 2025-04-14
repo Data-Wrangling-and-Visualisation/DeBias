@@ -25,6 +25,7 @@
   - [Deploy](#deploy)
     - [Using external S3 provider](#using-external-s3-provider)
     - [Using local S3 provider](#using-local-s3-provider)
+    - [Scale services for better performance!](#scale-services-for-better-performance)
     - [Remove services](#remove-services)
   - [Development](#development)
     - [Structure](#structure)
@@ -134,6 +135,23 @@ docker compose -f minio.docker-compose.yml up minio_setup
 
 ```bash
 docker compose -f minio.docker-compose.yml up --build --detach
+```
+
+### Scale services for better performance!
+
+The following services could be automatically scaled horizontally for better performance:
+- scaper
+- renderer
+- processor
+
+For easy scaling use docker-compose `--scale` option.
+
+E.g., the following command will launch 5 `scaper instances, 2 `renderer` instances. 2 `processor` instances:
+```bash
+docker compose up --detach \
+  --scale scaper=5 \
+  --scale renderer=2 \
+  --scale processor=2\
 ```
 
 ### Remove services
