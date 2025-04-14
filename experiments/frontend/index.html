@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Article Keyword Network by Date</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <!-- Control Panel -->
+    <div id="controls">
+        <h3>Date Selection</h3>
+        <label for="date-select">Select Date:</label>
+        <select id="date-select"></select>
+
+        <h3>Filter by Category</h3>
+        <div id="category-filters">
+            <!-- Category checkboxes will be added by JS -->
+             <button id="select-all-cats">Select All</button>
+             <button id="deselect-all-cats">Deselect All</button>
+        </div>
+
+        <h3>Filter by Popularity</h3>
+        <label for="popularity-slider">Min Keyword Occurrences:</label>
+        <input type="range" id="popularity-slider" min="1" max="10" value="1" step="1">
+        <span id="popularity-value">1</span>
+         <label for="popularity-max-nodes">Max Nodes to Display:</label>
+         <input type="number" id="popularity-max-nodes" min="10" value="150" step="10">
+
+        <button id="reset-filters" style="margin-top: 15px;">Reset Filters</button>
+    </div>
+
+    <!-- Graph Container -->
+    <div id="graph-container">
+        <div id="graph"></div>          <!-- SVG will be appended here by JS -->
+        <div class="tooltip"></div>     <!-- Tooltip div -->
+        <div class="edge-info"></div>   <!-- Edge info div -->
+        <div class="legend"></div>      <!-- Legend div -->
+        <div id="no-data-message">No data available for the selected date and filters.</div> <!-- Message div -->
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading">Loading data...</div>
+
+    <!-- Link to the external JavaScript file -->
+    <!-- Place it at the end of body so DOM is loaded before script runs -->
+    <script src="script.js"></script>
+</body>
+</html>
