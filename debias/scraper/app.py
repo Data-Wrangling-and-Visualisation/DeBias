@@ -4,6 +4,7 @@ from datetime import datetime
 
 import httpx
 import redis.asyncio as aioredis
+from core.parser import Parser
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, NackMessage, RejectMessage
 from faststream.nats import NatsBroker, NatsMessage, PullSub
@@ -12,7 +13,6 @@ from debias.core.metastore import Metadata, Metastore
 from debias.core.models import FetchRequest, ProcessRequest, RenderRequest
 from debias.core.s3 import S3Client
 from debias.scraper.config import Config
-from debias.scraper.parser import Parser
 from debias.scraper.utils import absolute_url, extract_domain, hashsum, normalize_url
 
 broker = NatsBroker(pedantic=True)

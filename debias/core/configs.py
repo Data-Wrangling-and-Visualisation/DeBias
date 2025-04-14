@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field, NatsDsn
+from typing import Literal
+
+from pydantic import BaseModel, Field, HttpUrl, NatsDsn
 
 
 class NatsConfig(BaseModel):
@@ -22,3 +24,29 @@ class S3Config(BaseModel):
 
 class PostgresConfig(BaseModel):
     connection: str = Field(description="Connection string for PostgreSQL")
+
+
+class TargetConfig(BaseModel):
+    id: str = Field(description="ID of the target")
+    name: str = Field(description="Human-readable name of the target")
+    root: HttpUrl = Field(description="Root URL of the target")
+    domain_only: bool = Field(default=True, description="Whether to visit links on other domains")
+    render: Literal["auto", "always", "never"] = Field(
+        default="auto",
+        description="""Whether the webpage needs rendering.
+        Default is 'auto' which would determine based on the first request content."
+        Other options are 'always' and 'never'.
+        """,
+    )
+    text_selector: str = Field(
+        default="",
+        description="""Selector to find the text content of the target.
+        Default is '' which would not find any text content.
+        """,
+    )
+    href_selector: str = Field(
+        default="a[href]",
+        description="""Selector to find the link to the target.
+        Default is 'a[href]' which would find all links.
+        """,
+    )

@@ -1,0 +1,9 @@
+class Renderer:
+    def __init__(self):
+        pass
+
+    def init(self): ...
+
+    def close(self): ...
+
+    def render(self, url: str) -> str: ...
