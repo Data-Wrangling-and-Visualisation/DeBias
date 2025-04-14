@@ -223,3 +223,7 @@ We are also incorporating NLP into data analysis. We perform the following opera
 - Find themes in the data: identify general theme of the text (politics, economics, etc.). Performed with transformers.
 
 The collected keywords are then combined for future analysis.
+
+Example of NLP preprocessing can be found in **debias/processor directory**, in **processor.py** file.
+
+Deploy can be found at: https://debias.inno.dartt0n.ru/
