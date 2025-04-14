@@ -103,11 +103,12 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
 
     logger.debug(f"checking if url {url} was scraped in last 12 hours")
     url_hash = hashsum(url)
-    if (await DI.keyvalue.get(f"url_hash:{url_hash}")) is not None:
+    key = f"scrape:url_hash:{url_hash}"
+    if (await DI.keyvalue.get(key)) is not None:
         logger.warning(f"skipping url {url}: url_hash {url_hash} is present")
         raise RejectMessage()  # refuse to process
     logger.debug(f"url hash {url_hash} is not present, processing url")
-    await DI.keyvalue.set(f"url_hash:{url_hash}", "1", ex=60 * 60 * 12)  # expires in 12 hours
+    await DI.keyvalue.set(key, "1", ex=60 * 60 * 12)  # expires in 12 hours
 
     logger.debug(f"retrieving url {url}")
     response = await DI.http.get(url)
