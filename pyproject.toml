@@ -20,7 +20,11 @@ scraper = [
     "httpx>=0.28.1",
     "redis[hiredis]>=5.2.1",
 ]
-renderer = ["faststream[cli,nats]>=0.5.37", "redis[hiredis]>=5.2.1"]
+renderer = [
+    "faststream[cli,nats]>=0.5.37",
+ "playwright>=1.51.0",
+ "redis[hiredis]>=5.2.1",
+]
 
 
 [build-system]

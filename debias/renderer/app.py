@@ -53,7 +53,7 @@ async def app_on_startup(context: ContextRepo, config: str):
     for target_config in DI.config.app.targets:
         parser = Parser(target_config)
         DI.parsers[parser.domain] = parser
-    DI.renderer.init()
+    await DI.renderer.init()
 
     await broker.connect(DI.config.nats.dsn.encoded_string())
 
@@ -71,7 +71,7 @@ async def app_on_shutdown(context: ContextRepo):
     """Lifespan hook that is called when application is shutting down
     after it stops accepting any request or declaring queues
     """
-    DI.renderer.close()
+    await DI.renderer.close()
 
 
 @broker.subscriber(subject="render-queue", stream="debias", pull_sub=PullSub(batch_size=1))
@@ -108,7 +108,7 @@ async def broker_stream_subscriber(msg: NatsMessage, data: RenderRequest, logger
     logger.debug(f"url hash {url_hash} is not present, processing url")
     await DI.keyvalue.set(key, "1", ex=60 * 60 * 12)  # expires in 12 hours
 
-    content = DI.renderer.render(url)
+    content = await DI.renderer.render(url)
     content_hash = hashsum(content)
 
     filepath = f"{parser.config.id}/{url_hash}/{content_hash}.html"

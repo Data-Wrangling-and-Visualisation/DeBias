@@ -14,6 +14,30 @@ services:
     volumes:
       - ./debias/scraper/config.toml:/app/config.toml
     command: "uv run faststream run debias.scraper:app --config=/app/config.toml --workers 1"
+    depends_on:
+      - message-queue
+      - postgres
+      - key-value
+
+  renderer:
+    build:
+      context: .
+      dockerfile: renderer.dockerfile
+    volumes:
+      - ./debias/renderer/config.toml:/app/config.toml
+    command: "uv run faststream run debias.renderer:app --config=/app/config.toml --workers 1"
+    depends_on:
+      - message-queue
+      - postgres
+      - key-value
+
+  # processor:
+  #   build:
+  #     context: .
+  #     dockerfile: processor.dockerfile
+  #   volumes:
+  #     - ./debias/processor/config.toml:/app/config.toml
+  #   command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
 
   message-queue:
     image: nats:2.11-linux
