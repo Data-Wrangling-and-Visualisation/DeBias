@@ -5,6 +5,7 @@
 &ensp;[<kbd> <br> Overview <br> </kbd>](#overview)&ensp;
 &ensp;[<kbd> <br> Technologies <br> </kbd>](#technologies)&ensp;
 &ensp;[<kbd> <br> Deploy <br> </kbd>](#deploy)&ensp;
+&ensp;[<kbd> <br> EDA <br> </kbd>](#eda)&ensp;
 &ensp;[<kbd> <br> Current state <br> </kbd>](#current-state)&ensp;
 <br><br><br><br></div>
 
@@ -30,11 +31,12 @@
   - [Development](#development)
     - [Structure](#structure)
     - [Adding new service](#adding-new-service)
-  - [Current state](#current-state)
+  - [EDA](#eda)
     - [Distribution of political positions overall](#distribution-of-political-positions-overall)
     - [Distribution of political positions in the USA](#distribution-of-political-positions-in-the-usa)
     - [Distribution of political positions in the UK](#distribution-of-political-positions-in-the-uk)
     - [Bonus: Distribution of political positions of sources which require VPN](#bonus-distribution-of-political-positions-of-sources-which-require-vpn)
+  - [Current state](#current-state)
 
 
 ## Overview
@@ -90,6 +92,8 @@ A NATS message queue which is used for S2S communication.
 ## Deploy
 
 The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
+The EDA is available at https://data-wrangling-and-visualisation.github.io/DeBias/
+The draft Javascript visualization is available at https://debias.inno.dartt0n.ru/
 
 ### Using external S3 provider
 
@@ -181,7 +185,7 @@ To add new service:
 
 
 
-## Current state
+## EDA
 
 We have collected 38 sources of news from USA and UK and found out their political positions.
 
@@ -202,3 +206,29 @@ It seems left parties are indeed more liberal.
 We have parsed several news articles using python and prepared a deployment describing general trends in these articles.
 
 The deployment can be found on [Github Pages](https://data-wrangling-and-visualisation.github.io/DeBias/)
+
+
+## Current state
+
+We have added a draft of our frontend visualization. It can be viewed in the **frontend** directory, in the **index.html** file. 
+
+For now we have not created connection with the backend, however the file respresent our vision of the final visualization: graph of connections between keywords, their corresponding themes and number of occurence.
+
+The file can be opened as an html file, or py running the following script from the **frontend** directory:
+
+```python
+python3 -m http.server
+```
+
+We are also incorporating NLP into data analysis. We perform the following operations on the extracted websites data:
+
+- Extract names entities from text: helps identify the most important keywords (people's names, countries, organizations). Performed with spacy.
+- Find themes in the data: identify general theme of the text (politics, economics, etc.). Performed with transformers.
+
+The collected keywords are then combined for future analysis.
+
+Example of NLP preprocessing can be found in **debias/processor directory**, in **processor.py** file.
+
+Deploy can be found at: https://debias.inno.dartt0n.ru/
+
+We have added the functionality to filter by date, category, number of keyword occurences. The number of shown nodes can also be limited.
