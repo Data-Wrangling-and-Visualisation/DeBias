@@ -19,7 +19,7 @@ This tool parses HTML news articles and extracts useful information in a standar
 
 1. Install dependencies:
    ```bash
-   pip install bs4 nltk spacy dateutil transformers torch
+   uv add bs4 nltk spacy dateutil transformers torch
    ```
 2. Download required spaCy models (at least one is required):
    ```bash
