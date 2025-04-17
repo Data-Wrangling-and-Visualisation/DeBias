@@ -9,7 +9,7 @@ from utils import initialize_nltk, get_all_html_files, DateTimeEncoder
 from models import RawNewsData, FormattedNewsData, Topic
 from parser import parse_news
 from extractor import extract_unique_keywords
-from classifier import classify_news
+from classifier import ZeroShotClassifier
 
 def process_html_file(file_path: str) -> RawNewsData:
     """Process a single HTML file and return the extracted data"""
@@ -27,8 +27,9 @@ def process_html_file(file_path: str) -> RawNewsData:
         news_data.content
     )
     
+    classifier = ZeroShotClassifier()
     # Classify article
-    news_data.category = classify_news(
+    news_data.category = classifier.classify(
         news_data.title_normalized, 
         news_data.content_normalized
     )

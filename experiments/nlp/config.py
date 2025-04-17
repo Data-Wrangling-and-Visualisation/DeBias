@@ -32,19 +32,6 @@ NEWS_CATEGORIES = [
     "sports", "entertainment", "world", "environment"
 ]
 
-# Category keywords for fallback classification
-CATEGORY_KEYWORDS = {
-    "politics": ["government", "president", "election", "vote", "democracy", "political", "minister"],
-    "business": ["economy", "market", "company", "stock", "trade", "economic", "finance"],
-    "technology": ["tech", "innovation", "digital", "app", "software", "internet", "ai"],
-    "health": ["health", "covid", "disease", "hospital", "vaccine", "doctor", "medical"],
-    "science": ["research", "study", "discovery", "scientist", "space", "climate"],
-    "sports": ["game", "team", "win", "player", "score", "match", "championship"],
-    "entertainment": ["movie", "film", "music", "star", "actor", "show", "celebrity"],
-    "world": ["country", "international", "foreign", "global", "world", "nation"],
-    "environment": ["climate", "pollution", "environmental", "warming", "carbon", "green"]
-}
-
 # NLP settings
 DEFAULT_SPACY_MODEL = "en_core_web_sm"
 PREFERRED_SPACY_MODELS = ["en_core_web_lg", "en_core_web_trf", "en_core_web_sm"]
