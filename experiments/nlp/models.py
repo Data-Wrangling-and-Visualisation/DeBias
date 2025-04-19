@@ -37,5 +37,6 @@ class FormattedNewsData:
     """Model for the final output format"""
     article_datetime: Optional[datetime]
     snippet: str
+    title: str
     keywords: List[Dict[str, str]]
     topics: List[Dict[str, str]]

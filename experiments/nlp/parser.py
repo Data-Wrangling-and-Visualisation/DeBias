@@ -7,23 +7,19 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 from utils import clean_text, normalize_text
+from config import MAX_CONTENT_LENGTH
 from models import RawNewsData
 
-def parse_news(path: str) -> RawNewsData:
-    """Parse HTML files to extract article data"""
+def parse_news(html_content: str, url: str = None) -> RawNewsData:
+    """Parse HTML content to extract article data"""
     # Parse HTML
-    with open(path, encoding="utf8", errors='ignore') as f:
-        soup = BeautifulSoup(f, "html.parser")
-    
+    soup = BeautifulSoup(html_content, "html.parser")
     # Extract title
     title = extract_title(soup)
-    
     # Extract datetime
     datetime_obj = extract_date(soup)
-    
     # Extract website name
-    website_name = extract_website(soup, path)
-    
+    website_name = extract_website(soup, url)
     # Extract content
     content = extract_content(soup)
     
@@ -92,7 +88,7 @@ def extract_date(soup: BeautifulSoup) -> Optional[datetime]:
     return None
 
 
-def extract_website(soup: BeautifulSoup, path: str) -> str:
+def extract_website(soup: BeautifulSoup, url: str = None) -> str:
     """Extract website name from HTML"""
     website_name = "Unknown"
     site_meta = soup.find('meta', {'property': 'og:site_name'})
@@ -103,8 +99,12 @@ def extract_website(soup: BeautifulSoup, path: str) -> str:
         if canonical and canonical.get('href'):
             domain = urlparse(canonical.get('href')).netloc
             website_name = domain.replace('www.', '')
-        else:
-            website_name = os.path.basename(os.path.dirname(path))
+        elif url:
+            try:
+                domain = urlparse(url).netloc
+                website_name = domain.replace('www.', '')
+            except:
+                pass
     
     return website_name
 
@@ -114,4 +114,4 @@ def extract_content(soup: BeautifulSoup) -> str:
     article = soup.find('article') or soup.find('main')
     paragraphs = article.find_all('p') if article else soup.find_all('p', limit=30)
     content = ' '.join(p.get_text(strip=True) for p in paragraphs)
-    return clean_text(content[:3000])
+    return clean_text(content[:MAX_CONTENT_LENGTH])

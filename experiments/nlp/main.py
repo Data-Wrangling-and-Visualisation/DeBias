@@ -11,23 +11,26 @@ from parser import parse_news
 from extractor import SpacyKeywordExtractor
 from classifier import ZeroShotClassifier
 
-def process_html_file(file_path: str, keyword_extractor: SpacyKeywordExtractor, classifier: ZeroShotClassifier) -> RawNewsData:
-    """Process a single HTML file and return the extracted data"""
-    news_data = parse_news(file_path)
-    news_data.source_file = file_path
+def process_html_content(html_content: str, url: str = None, keyword_extractor: SpacyKeywordExtractor = None, 
+                         classifier: ZeroShotClassifier = None) -> RawNewsData:
+    """Process HTML content and return the extracted data"""
+    news_data = parse_news(html_content, url)
+    news_data.source_file = url
     
     if not news_data.title or news_data.title == "No title found":
         raise ValueError("No valid title found")
     
-    news_data.keywords_data = keyword_extractor.extract_unique_keywords(
-        news_data.title, 
-        news_data.content
-    )
+    if keyword_extractor:
+        news_data.keywords_data = keyword_extractor.extract_unique_keywords(
+            news_data.title, 
+            news_data.content
+        )
     
-    news_data.category = classifier.classify(
-        news_data.title_normalized, 
-        news_data.content_normalized
-    )
+    if classifier:
+        news_data.category = classifier.classify(
+            news_data.title_normalized, 
+            news_data.content_normalized
+        )
     
     return news_data
 
@@ -43,6 +46,7 @@ def format_output(news_data: RawNewsData) -> FormattedNewsData:
     return FormattedNewsData(
         article_datetime=news_data.datetime_obj,
         snippet=snippet,
+        title=news_data.title,
         keywords=keywords,
         topics=topics
     )
@@ -64,7 +68,9 @@ def process_input(input_path: str, keyword_extractor: SpacyKeywordExtractor, cla
         
     for file_path in html_files:
         try:
-            news_data = process_html_file(file_path, keyword_extractor, classifier)
+            with open(file_path, encoding="utf8", errors='ignore') as f:
+                html_content = f.read()
+            news_data = process_html_content(html_content, file_path, keyword_extractor, classifier)
             formatted_data = format_output(news_data)
             
             data.append(formatted_data)
@@ -98,9 +104,19 @@ def main():
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
         
-        # Save to JSON
+        serializable_data = []
+        for item in data:
+            serializable_data.append({
+                "article_datetime": item.article_datetime,
+                "snippet": item.snippet,
+                "title": item.title,
+                "keywords": item.keywords,
+                "topics": item.topics
+            })
+
+        # Then serialize serializable_data instead of data
         with open(args.output, "w", encoding="utf-8") as outfile:
-            json.dump(data, outfile, cls=DateTimeEncoder, indent=2, ensure_ascii=False)
+            json.dump(serializable_data, outfile, cls=DateTimeEncoder, indent=2, ensure_ascii=False)
         
         print(f"Processed {len(data)} news articles successfully.")
         print(f"Output saved to {args.output}")

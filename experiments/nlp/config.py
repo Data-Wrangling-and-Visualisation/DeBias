@@ -32,3 +32,4 @@ TRANSFORMER_MODEL = 'facebook/bart-large-mnli'
 # Output settings
 SNIPPET_LENGTH = 200
 MAX_KEYWORDS = 8
+MAX_CONTENT_LENGTH = 1000

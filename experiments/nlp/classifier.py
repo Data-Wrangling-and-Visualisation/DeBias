@@ -3,10 +3,9 @@ from nltk.tokenize import word_tokenize
 from config import NEWS_CATEGORIES, TRANSFORMER_MODEL
 from utils import normalize_text
 from transformers import pipeline
-from utils import Singleton
 
 
-class ZeroShotClassifier(metaclass=Singleton):
+class ZeroShotClassifier():
     """Classify news articles with zero-shot classification"""
     def __init__(self):
         super().__init__()
