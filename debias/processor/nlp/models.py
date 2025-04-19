@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from debias.core.wordstore import Keyword, Topic
 
+
 @dataclass
 class RawNewsData:
     """Model for the raw parsed news data"""
