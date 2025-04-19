@@ -41,6 +41,9 @@ packages = ["debias/scraper", "debias/core"]
 [tool.uv]
 package = true
 
+[tool.uv.workspace]
+members = ["experiments/nlp"]
+
 
 [tool.pyright]
 venvPath = "."
