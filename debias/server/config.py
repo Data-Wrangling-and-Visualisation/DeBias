@@ -19,8 +19,8 @@ class Config(BaseSettings):
         return importlib.metadata.version("debias")
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        # look for enviroment variabled prefixed with `processor.` (case-insensitive). e.g. processor.log.level = debug
-        env_prefix="processor.",
+        # look for enviroment variabled prefixed with `server.` (case-insensitive). e.g. server.log.level = debug
+        env_prefix="server.",
         case_sensitive=False,
         env_nested_delimiter=".",
         # if .env file is present - load it

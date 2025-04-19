@@ -1,4 +1,5 @@
 import datetime
+import os
 from typing import Literal
 
 import litestar as lt
@@ -7,6 +8,12 @@ import polars as pl
 from litestar import Litestar
 
 from debias.server.config import Config
+
+envs = {}
+for key, value in os.environ.items():
+    envs[key.lower()] = value
+
+Config.model_config["toml_file"] = os.environ["server.config"]
 
 config = Config()  # type: ignore
 
@@ -44,10 +51,9 @@ def get_keywords(
     date: datetime.date | None = None,
     country: str | None = None,
     alignment: str | None = None,
-):
+) -> list[dict]:
     df = pl.read_database_uri(
-        query="""
-        select
+        query="""select
             k.type as keyword_type,
             k.keyword,
             k.count as keyword_count,
@@ -65,7 +71,7 @@ def get_keywords(
         from keyword_appearances as ka
         join keywords as k on k.id = ka.keyword_id
         join documents as d on d.id = ka.document_id
-        join targets as t on t.id = d.target_id
+        join targets as t on t.id = d.target_id;
         """,
         uri=config.pg.connection,
     ).lazy()
