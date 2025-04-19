@@ -7,7 +7,6 @@ from debias.processor.nlp.extractor import SpacyKeywordExtractor
 from debias.processor.nlp.parser import parse_news
 from debias.processor.nlp.models import RawNewsData, FormattedNewsData
 from debias.processor.nlp.config import SNIPPET_LENGTH
-from debias.processor.app import keyword_extractor, classifier
 
 
 class WebpageData(BaseModel):
@@ -64,7 +63,7 @@ def format_output(news_data: RawNewsData) -> FormattedNewsData:
     )
 
 
-def process_webpage(input: WebpageData) -> ProcessingResult | None:
+def process_webpage(keyword_extractor, classifier, input: WebpageData) -> ProcessingResult | None:
     html_content = input.content
     news_data = process_html_content(html_content, input.url, keyword_extractor, classifier)
     formatted_data = format_output(news_data)
