@@ -36,6 +36,7 @@ def parse_news(path: str) -> RawNewsData:
         content_normalized=normalize_text(content)
     )
 
+
 def extract_title(soup: BeautifulSoup) -> str:
     """Extract article title from HTML"""
     title = None
@@ -51,46 +52,45 @@ def extract_title(soup: BeautifulSoup) -> str:
     # Clean title
     return clean_text(title)
 
+
 def extract_date(soup: BeautifulSoup) -> Optional[datetime]:
-    """Extract article date from HTML"""
-    date = None
-    datetime_obj = None
-    date_elements = [
-        ('meta', {'property': 'article:published_time'}),
-        ('meta', {'property': 'og:published_time'}),
-        ('meta', {'name': 'date'}),
-        ('meta', {'name': 'pubdate'}),
-        ('meta', {'itemprop': 'datePublished'}),
-        ('time', {'datetime': True})
-    ]
-    
-    for tag, attrs in date_elements:
-        element = soup.find(tag, attrs)
-        if element:
-            date_text = element.get('content') or element.get('datetime') or element.get_text(strip=True)
+    """Extract article date from HTML using a simple, generalized approach"""
+    # Try meta tags with common date attributes
+    for meta in soup.find_all('meta'):
+        attr_value = meta.get('content')
+        if attr_value and any(date_attr in meta.attrs for date_attr in ['pubdate', 'publishdate', 'timestamp', 'date']):
             try:
-                parsed_date = dateutil.parser.parse(date_text, fuzzy=True)
-                datetime_obj = parsed_date
-                date = parsed_date.isoformat()
-                break
+                return dateutil.parser.parse(attr_value)
             except:
-                continue
+                pass
     
-    # Check JSON-LD for date
-    if not date:
-        for script in soup.find_all('script', {'type': 'application/ld+json'}):
-            try:
-                json_data = json.loads(script.string)
-                date_field = json_data.get('datePublished') or json_data.get('dateModified')
-                if date_field:
-                    parsed_date = dateutil.parser.parse(date_field, fuzzy=True)
-                    datetime_obj = parsed_date
-                    date = parsed_date.isoformat()
-                    break
-            except:
-                continue
+    # Try time tags
+    for time in soup.find_all('time'):
+        date_text = time.get('datetime') or time.text
+        try:
+            return dateutil.parser.parse(date_text)
+        except:
+            pass
     
-    return datetime_obj
+    # Try JSON-LD
+    for script in soup.find_all('script', {'type': 'application/ld+json'}):
+        try:
+            data = json.loads(script.string)
+            date_str = data.get('datePublished') or data.get('dateModified')
+            if date_str:
+                return dateutil.parser.parse(date_str)
+        except:
+            pass
+    
+    # Try common date-related classes
+    for element in soup.find_all(class_=lambda c: c and 'date' in c.lower()):
+        try:
+            return dateutil.parser.parse(element.text)
+        except:
+            pass
+    
+    return None
+
 
 def extract_website(soup: BeautifulSoup, path: str) -> str:
     """Extract website name from HTML"""
@@ -107,6 +107,7 @@ def extract_website(soup: BeautifulSoup, path: str) -> str:
             website_name = os.path.basename(os.path.dirname(path))
     
     return website_name
+
 
 def extract_content(soup: BeautifulSoup) -> str:
     """Extract article content from HTML"""
