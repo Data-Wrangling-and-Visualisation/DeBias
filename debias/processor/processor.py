@@ -27,6 +27,7 @@ def process_webpage(input: WebpageData) -> ProcessingResult | None:
     article_datetime = None
     keywords: list[Keyword] = []
     topics: list[Topic] = []
+    title: str = ""
 
     if article_datetime is None:
         return None
@@ -40,4 +41,5 @@ def process_webpage(input: WebpageData) -> ProcessingResult | None:
         snippet=snippet,
         keywords=keywords,
         topics=topics,
+        title=title,
     )
