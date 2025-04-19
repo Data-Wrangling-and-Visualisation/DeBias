@@ -14,7 +14,8 @@ The data in news_sources was collected manually by our team.
 """
 
 # Configure logging to output to the console.
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 def get_country(source_name):
     """
@@ -49,47 +50,52 @@ def get_country(source_name):
         logging.error(f"Error determining country for {source_name}: {e}")
     return "Unknown"
 
+
 def main():
-    url = ("https://www.allsides.com/media-bias/ratings?"
-           "field_featured_bias_rating_value=All&"
-           "field_news_source_type_tid[1]=1&"
-           "field_news_source_type_tid[2]=2&"
-           "field_news_source_type_tid[3]=3&"
-           "field_news_source_type_tid[4]=4")
-    
+    url = (
+        "https://www.allsides.com/media-bias/ratings?"
+        "field_featured_bias_rating_value=All&"
+        "field_news_source_type_tid[1]=1&"
+        "field_news_source_type_tid[2]=2&"
+        "field_news_source_type_tid[3]=3&"
+        "field_news_source_type_tid[4]=4"
+    )
+
     # Set up Selenium without headless mode so the browser is visible.
     options = Options()
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
-    
+
     logging.info("Launching browser...")
     driver = webdriver.Chrome(options=options)
     driver.get(url)
-    
-    logging.info("Waiting for user to pass Cloudflare test. Please complete the challenge in the opened browser, then press Enter here.")
+
+    logging.info(
+        "Waiting for user to pass Cloudflare test. Please complete the challenge in the opened browser, then press Enter here."
+    )
     input("Press Enter after you have passed the Cloudflare test...")
-    
+
     logging.info("User passed Cloudflare test. Proceeding with parsing.")
     time.sleep(3)  # Wait a moment to ensure page stability
-    
+
     html = driver.page_source
     driver.quit()
-    
-    soup = BeautifulSoup(html, 'html.parser')
-    
+
+    soup = BeautifulSoup(html, "html.parser")
+
     # Locate the news source entries (adjust the selector if needed)
     rows = soup.find_all("div", class_="views-row")
     logging.info(f"Found {len(rows)} news source rows.")
-    
+
     data = []
-    
+
     for row in rows:
         title_div = row.find("div", class_="views-field-title")
         if title_div:
             a_tag = title_div.find("a")
             if a_tag:
                 name = a_tag.get_text(strip=True)
-                link = "https://www.allsides.com" + a_tag['href']
+                link = "https://www.allsides.com" + a_tag["href"]
                 logging.info(f"Parsing news source: {name}")
             else:
                 logging.warning("No anchor tag found in title_div; skipping row.")
@@ -97,30 +103,25 @@ def main():
         else:
             logging.warning("No title_div found; skipping row.")
             continue
-        
+
         bias_div = row.find("div", class_="views-field-field-media-bias-rating-value")
         political_bias = bias_div.get_text(strip=True) if bias_div else "N/A"
-        
+
         # Determine the country of the owning company
         country = get_country(name)
-        
-        data.append({
-            "Name": name,
-            "Link": link,
-            "Country": country,
-            "Political Bias": political_bias
-        })
-    
+
+        data.append({"Name": name, "Link": link, "Country": country, "Political Bias": political_bias})
+
     logging.info(f"Writing {len(data)} entries to CSV.")
-    with open("media_bias.csv", "w", newline='', encoding="utf-8") as csvfile:
+    with open("media_bias.csv", "w", newline="", encoding="utf-8") as csvfile:
         fieldnames = ["Name", "Link", "Country", "Political Bias"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for entry in data:
             writer.writerow(entry)
-    
+
     logging.info("CSV file 'media_bias.csv' written successfully.")
+
 
 if __name__ == "__main__":
     main()
-    

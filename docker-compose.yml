@@ -19,6 +19,20 @@ services:
       - postgres
       - key-value
 
+  server:
+    build:
+      context: .
+      dockerfile: server.dockerfile
+    volumes:
+      - ./debias/server/config.toml:/app/config.toml
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - server.config=/app/config.toml
+    command: "uv run litestar --app debias.server:app run --host 0.0.0.0 --port 8080"
+    depends_on:
+      - postgres
+
   renderer:
     build:
       context: .
@@ -31,13 +45,15 @@ services:
       - postgres
       - key-value
 
-  # processor:
-  #   build:
-  #     context: .
-  #     dockerfile: processor.dockerfile
-  #   volumes:
-  #     - ./debias/processor/config.toml:/app/config.toml
-  #   command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+  processor:
+    build:
+      context: .
+      dockerfile: processor.dockerfile
+    volumes:
+      - ./debias/processor/config.toml:/app/config.toml
+    command: bash -c "while true; do sleep 1; done"
+    
+    # "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
 
   message-queue:
     image: nats:2.11-linux

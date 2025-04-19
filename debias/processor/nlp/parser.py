@@ -6,12 +6,12 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-from utils import clean_text, normalize_text
-from config import MAX_CONTENT_LENGTH
-from models import RawNewsData
+from debias.processor.nlp.utils import clean_text, normalize_text
+from debias.processor.nlp.config import MAX_CONTENT_LENGTH
+from debias.processor.nlp.models import RawNewsData
 
 
-def parse_news(html_content: str, url: str = None) -> RawNewsData:
+def parse_news(html_content: str, url) -> RawNewsData:
     """Parse HTML content to extract article data"""
     # Parse HTML
     soup = BeautifulSoup(html_content, "html.parser")
@@ -89,7 +89,7 @@ def extract_date(soup: BeautifulSoup) -> Optional[datetime]:
     return None
 
 
-def extract_website(soup: BeautifulSoup, url: str = None) -> str:
+def extract_website(soup: BeautifulSoup, url: str) -> str:
     """Extract website name from HTML"""
     website_name = "Unknown"
     site_meta = soup.find("meta", {"property": "og:site_name"})

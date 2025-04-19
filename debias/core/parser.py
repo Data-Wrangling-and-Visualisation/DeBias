@@ -1,10 +1,10 @@
+import hashlib
+import urllib.parse as urllib
 from typing import Literal
 
 from bs4 import BeautifulSoup
-from faststream import Logger
 
-from debias.scraper.config import TargetConfig
-from debias.scraper.utils import absolute_url, extract_domain
+from debias.core.configs import TargetConfig
 
 
 class Parser:
@@ -30,7 +30,7 @@ class Parser:
     def config(self) -> TargetConfig:
         return self._target_config
 
-    def extract_text(self, html_content: str, logger: Logger) -> str:
+    def extract_text(self, html_content: str, logger) -> str:
         soup = BeautifulSoup(html_content, "html.parser")
         elements = soup.select(self._text_selector)
         if not elements:
@@ -38,7 +38,7 @@ class Parser:
             return ""
         return " ".join([element.get_text(strip=True) for element in elements])
 
-    def extract_hrefs(self, html_content: str, logger: Logger) -> list[str]:
+    def extract_hrefs(self, html_content: str, logger) -> list[str]:
         soup = BeautifulSoup(html_content, "html.parser")
         elements = soup.select(self._href_selector)
         hrefs = []
@@ -63,3 +63,31 @@ class Parser:
             logger.warning(f"failed to extract multiple sources: {failed}")
 
         return hrefs
+
+
+def normalize_url(url: str) -> str:
+    scheme, netloc, path, _, _ = urllib.urlsplit(url)
+    path = urllib.quote(path, "/%")
+    return urllib.urlunsplit((scheme, netloc, path, "", ""))
+
+
+def hashsum(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def extract_domain(url: str) -> str:
+    scheme, netloc, path, qs, anchor = urllib.urlsplit(url)
+    return netloc
+
+
+def absolute_url(root: str, relative: str) -> str:
+    if relative.startswith(("http://", "https://")):
+        return relative
+
+    if not root.startswith(("http://", "https://")):
+        root = "https://" + root
+
+    root = root.removesuffix("/")
+    relative = "/" + relative.removeprefix("/")
+
+    return root + relative
