@@ -1,3 +1,4 @@
+from core.wordstore import Wordstore
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, RejectMessage
 from faststream.nats import NatsBroker, NatsMessage, PullSub
@@ -25,6 +26,7 @@ class DI:
         cls.config = Config()  # type: ignore
         cls.s3 = S3Client(cls.config.s3)
         cls.metastore = Metastore(cls.config.pg.connection)
+        cls.wordstore = Wordstore(cls.config.pg.connection)
 
         cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
         cls.render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")
@@ -48,6 +50,7 @@ async def app_on_startup(context: ContextRepo, config: str):
 async def app_after_startup(context: ContextRepo, logger: Logger):
     """Lifespan hook that is called after application is started"""
     await DI.metastore.init()
+    await DI.wordstore.init()
 
     logger.info("app started")
 
@@ -85,7 +88,7 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
 
     content = await DI.s3.download(data.filepath)
 
-    process_webpage(
+    result = process_webpage(
         WebpageData(
             url=data.url,
             target_id=data.target_id,
@@ -95,8 +98,9 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
             datetime=data.datetime,
         )
     )
+    if result is None:
+        logger.info("failed to process webpage, rejecting it")
+        raise RejectMessage()  # raise it to completely reject message
 
-    # todo: save results to wordstore
-
-    # raise RejectMessage()
+    await DI.wordstore.save(result)
     raise AckMessage()  # successfully completed

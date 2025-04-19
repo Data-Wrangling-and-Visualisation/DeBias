@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from core.wordstore import Keyword, ProcessingResult, Topic
 from pydantic import BaseModel
 
 
@@ -18,5 +19,25 @@ class WebpageData(BaseModel):
     """scraped at"""
 
 
-def process_webpage(input: WebpageData):
-    pass  # todo: implement
+def process_webpage(input: WebpageData) -> ProcessingResult | None:
+    html_content = input.content
+
+    ...  # todo: add processing
+    snippet = ""
+    article_datetime = None
+    keywords: list[Keyword] = []
+    topics: list[Topic] = []
+
+    if article_datetime is None:
+        return None
+
+    return ProcessingResult(
+        absolute_url=input.url,
+        url_hash=input.url,
+        target_id=input.target_id,
+        scrape_datetime=input.datetime,
+        article_datetime=article_datetime,
+        snippet=snippet,
+        keywords=keywords,
+        topics=topics,
+    )
