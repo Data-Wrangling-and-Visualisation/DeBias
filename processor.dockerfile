@@ -1,6 +1,7 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS python3
 
 RUN apt update && apt upgrade -y && apt install -y build-essential curl libpq-dev
+RUN python3 -m spacy download en_core_web_lg
 
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1

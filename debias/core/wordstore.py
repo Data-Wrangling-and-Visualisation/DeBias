@@ -28,6 +28,7 @@ class ProcessingResult:
     target_id: str
     scrape_datetime: datetime
     article_datetime: datetime
+    title: str
     snippet: str
     keywords: list[Keyword]
     topics: list[Topic]

@@ -9,8 +9,13 @@ from debias.core.models import ProcessRequest
 from debias.core.s3 import S3Client
 from debias.processor.config import Config
 
+from debias.processor.nlp.classifier import ZeroShotClassifier
+from debias.processor.nlp.extractor import SpacyKeywordExtractor
+
 broker = NatsBroker(pedantic=True)
 app = FastStream(broker)
+keyword_extractor = SpacyKeywordExtractor()
+classifier = ZeroShotClassifier()
 
 
 class DI:

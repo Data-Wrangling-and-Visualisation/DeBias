@@ -4,6 +4,7 @@ volumes
 
 # Mac OS
 **/*.DB_Store
+**/*.DS_Store
 
 # Vscode
 .vscode
