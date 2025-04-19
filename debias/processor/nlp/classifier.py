@@ -1,7 +1,7 @@
 from typing import Set
 from nltk.tokenize import word_tokenize
-from config import NEWS_CATEGORIES, TRANSFORMER_MODEL
-from utils import normalize_text
+from debias.processor.nlp.config import NEWS_CATEGORIES, TRANSFORMER_MODEL
+from debias.processor.nlp.utils import normalize_text
 from transformers import pipeline
 
 

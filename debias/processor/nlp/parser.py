@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-from utils import clean_text, normalize_text
-from config import MAX_CONTENT_LENGTH
-from models import RawNewsData
+from debias.processor.nlp.utils import clean_text, normalize_text
+from debias.processor.nlp.config import MAX_CONTENT_LENGTH
+from debias.processor.nlp.models import RawNewsData
 
 
 def parse_news(html_content: str, url) -> RawNewsData:

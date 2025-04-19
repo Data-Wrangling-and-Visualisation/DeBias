@@ -3,7 +3,7 @@ import json
 from typing import List, Any, Dict, Optional
 from datetime import datetime
 import nltk
-from config import WHITESPACE_PATTERN, SPECIAL_CHARS_PATTERN, STOP_WORDS, PUBLISHER_NAMES
+from debias.processor.nlp.config import WHITESPACE_PATTERN, SPECIAL_CHARS_PATTERN, STOP_WORDS, PUBLISHER_NAMES
 
 
 def initialize_nltk():

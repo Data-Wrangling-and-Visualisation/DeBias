@@ -4,12 +4,12 @@ import argparse
 from typing import List, Dict
 import traceback
 
-from config import SNIPPET_LENGTH
-from utils import initialize_nltk, get_all_html_files, DateTimeEncoder
-from models import RawNewsData, FormattedNewsData, Topic
-from parser import parse_news
-from extractor import SpacyKeywordExtractor
-from classifier import ZeroShotClassifier
+from debias.processor.nlp.config import SNIPPET_LENGTH
+from debias.processor.nlp.utils import initialize_nltk, get_all_html_files, DateTimeEncoder
+from debias.processor.nlp.models import RawNewsData, FormattedNewsData, Topic
+from debias.processor.nlp.parser import parse_news
+from debias.processor.nlp.extractor import SpacyKeywordExtractor
+from debias.processor.nlp.classifier import ZeroShotClassifier
 
 
 def process_html_content(
