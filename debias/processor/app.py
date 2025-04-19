@@ -11,11 +11,14 @@ from debias.processor.config import Config
 
 from debias.processor.nlp.classifier import ZeroShotClassifier
 from debias.processor.nlp.extractor import SpacyKeywordExtractor
+from debias.processor.nlp.utils import initialize_nltk
 
 broker = NatsBroker(pedantic=True)
 app = FastStream(broker)
 keyword_extractor = SpacyKeywordExtractor()
 classifier = ZeroShotClassifier()
+
+initialize_nltk()
 
 
 class DI:
