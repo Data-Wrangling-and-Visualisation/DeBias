@@ -1,19 +1,7 @@
 import os
 import json
-from typing import List, Any, Dict, Optional
 from datetime import datetime
-import nltk
 from debias.processor.nlp.config import WHITESPACE_PATTERN, SPECIAL_CHARS_PATTERN, STOP_WORDS, PUBLISHER_NAMES
-
-
-def initialize_nltk():
-    """Initialize NLTK resources"""
-    nltk.download("stopwords", quiet=True)
-    nltk.download("wordnet", quiet=True)
-    nltk.download("punkt", quiet=True)
-
-    # Add standard stopwords to our custom set
-    STOP_WORDS.update(set(nltk.corpus.stopwords.words("english")))
 
 
 def clean_text(text: str) -> str:
@@ -32,7 +20,7 @@ def normalize_text(text: str) -> str:
     return clean_text(text.lower())
 
 
-def get_all_html_files(root_dir: str) -> List[str]:
+def get_all_html_files(root_dir: str) -> list[str]:
     """Get all HTML files recursively"""
     html_files = []
     for root, dirs, files in os.walk(root_dir):

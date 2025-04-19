@@ -31,13 +31,15 @@ services:
       - postgres
       - key-value
 
-  # processor:
-  #   build:
-  #     context: .
-  #     dockerfile: processor.dockerfile
-  #   volumes:
-  #     - ./debias/processor/config.toml:/app/config.toml
-  #   command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+  processor:
+    build:
+      context: .
+      dockerfile: processor.dockerfile
+    volumes:
+      - ./debias/processor/config.toml:/app/config.toml
+    command: bash -c "while true; do sleep 1; done"
+    
+    # "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
 
   message-queue:
     image: nats:2.11-linux

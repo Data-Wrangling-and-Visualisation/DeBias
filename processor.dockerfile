@@ -1,16 +1,20 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS python3
 
 RUN apt update && apt upgrade -y && apt install -y build-essential curl libpq-dev
-RUN python3 -m spacy download en_core_web_lg
 
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-group dev --group processor
+--mount=type=bind,source=uv.lock,target=uv.lock \
+--mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+uv sync --frozen --no-install-project --no-group dev --group processor
+
+RUN uv run spacy download en_core_web_lg
+RUN uv run python3 -c "import nltk; nltk.download('stopwords')"
+RUN uv run python3 -c "import nltk; nltk.download('wordnet')"
+RUN uv run python3 -c "import nltk; nltk.download('punkt')"
 
 ADD . /app
 RUN --mount=type=cache,target=/root/.cache/uv \

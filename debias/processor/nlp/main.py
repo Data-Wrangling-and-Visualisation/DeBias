@@ -5,7 +5,7 @@ from typing import List, Dict
 import traceback
 
 from debias.processor.nlp.config import SNIPPET_LENGTH
-from debias.processor.nlp.utils import initialize_nltk, get_all_html_files, DateTimeEncoder
+from debias.processor.nlp.utils import get_all_html_files, DateTimeEncoder
 from debias.processor.nlp.models import RawNewsData, FormattedNewsData, Topic
 from debias.processor.nlp.parser import parse_news
 from debias.processor.nlp.extractor import SpacyKeywordExtractor
@@ -92,8 +92,6 @@ def main():
     parser.add_argument("--quiet", "-q", help="Reduce output verbosity", action="store_true")
 
     args = parser.parse_args()
-
-    initialize_nltk()
 
     try:
         data = process_input(
