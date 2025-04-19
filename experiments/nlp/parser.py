@@ -18,8 +18,8 @@ def parse_news(path: str) -> RawNewsData:
     # Extract title
     title = extract_title(soup)
     
-    # Extract date and datetime
-    date, datetime_obj = extract_date(soup)
+    # Extract datetime
+    datetime_obj = extract_date(soup)
     
     # Extract website name
     website_name = extract_website(soup, path)
@@ -30,7 +30,6 @@ def parse_news(path: str) -> RawNewsData:
     return RawNewsData(
         title=title,
         title_normalized=normalize_text(title),
-        date=date,
         datetime_obj=datetime_obj,
         website=website_name,
         content=content,
@@ -52,7 +51,7 @@ def extract_title(soup: BeautifulSoup) -> str:
     # Clean title
     return clean_text(title)
 
-def extract_date(soup: BeautifulSoup) -> tuple[Optional[str], Optional[datetime]]:
+def extract_date(soup: BeautifulSoup) -> Optional[datetime]:
     """Extract article date from HTML"""
     date = None
     datetime_obj = None
@@ -91,7 +90,7 @@ def extract_date(soup: BeautifulSoup) -> tuple[Optional[str], Optional[datetime]
             except:
                 continue
     
-    return date, datetime_obj
+    return datetime_obj
 
 def extract_website(soup: BeautifulSoup, path: str) -> str:
     """Extract website name from HTML"""

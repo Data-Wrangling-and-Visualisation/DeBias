@@ -20,7 +20,6 @@ class RawNewsData:
     """Model for the raw parsed news data"""
     title: str
     title_normalized: str
-    date: Optional[str] = None
     datetime_obj: Optional[datetime] = None
     website: str = "Unknown"
     content: str = ""
