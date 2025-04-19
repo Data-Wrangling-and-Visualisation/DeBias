@@ -52,8 +52,8 @@ def format_output(news_data: RawNewsData) -> FormattedNewsData:
     content_len = min(len(news_data.content), SNIPPET_LENGTH)
     snippet = news_data.content[:content_len] + "..." if news_data.content else ""
 
-    keywords = [Keyword(k.text, k.type) for k in news_data.keywords_data]
-    topics = [Topic(news_data.category, "CATEGORY")]
+    keywords = [Keyword(text=k.text, type=k.type) for k in news_data.keywords_data] if news_data.keywords_data else []
+    topics = [Topic(text=news_data.category or "", type="CATEGORY")]
 
     return FormattedNewsData(
         article_datetime=news_data.datetime_obj,

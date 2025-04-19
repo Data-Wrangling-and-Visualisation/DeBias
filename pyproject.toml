@@ -22,8 +22,15 @@ scraper = [
 ]
 renderer = [
     "faststream[cli,nats]>=0.5.37",
- "playwright>=1.51.0",
- "redis[hiredis]>=5.2.1",
+    "playwright>=1.51.0",
+    "redis[hiredis]>=5.2.1",
+]
+server = [
+    "connectorx>=0.4.3",
+    "litestar[standard]>=2.15.2",
+    "msgspec>=0.19.0",
+    "polars>=1.27.1",
+    "pyarrow>=19.0.1",
 ]
 processor = [
     "bs4>=0.0.2",
@@ -44,13 +51,15 @@ skip-excluded-dirs = true
 
 [tool.hatch.build.targets.wheel]
 only-packages = true
-packages = ["debias/scraper", "debias/core", "debias/processor"]
+packages = [
+    "debias/scraper",
+    "debias/core",
+    "debias/processor",
+    "debias/server",
+]
 
 [tool.uv]
 package = true
-
-[tool.uv.workspace]
-members = ["experiments/nlp"]
 
 
 [tool.pyright]
