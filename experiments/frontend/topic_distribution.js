@@ -25,12 +25,16 @@ function draw_hist(path, elem, tooltipobj) {
             "#32936F", // Green
             "#66BFBF", // Cyan
             "#2E294E", // Dark Blue
-            "#7F78D2"  // Lavender
-            // Add more colors if needed
+            "#7F78D2" // Lavender
         ]
     };
 
-    var margin = {top: 40, right: 160, bottom: 100, left: 80}; // Increased bottom/right margin for labels/legend
+    var margin = {
+        top: 40,
+        right: 160,
+        bottom: 100,
+        left: 80
+    }; // Increased bottom/right margin for labels/legend
 
     // Select the container and clear previous contents
     var container = d3.select(elem);
@@ -45,22 +49,24 @@ function draw_hist(path, elem, tooltipobj) {
     // Parse the Data
     d3.json(path).then(function(data) {
 
-    // Transform data to group by keyword
+        // Transform data to group by keyword
         function prepareHistogramData(data) {
-                // First, get all unique dates
+            // First, get all unique dates
             const allDates = [...new Set(data.flatMap(topic =>
-                    topic.buckets.map(bucket => bucket.date)
-                ))].sort();
+                topic.buckets.map(bucket => bucket.date)
+            ))].sort();
 
-                // Then create an array of objects with date and topic counts
+            // Then create an array of objects with date and topic counts
             return allDates.map(date => {
-                    const dateData = {date};
+                const dateData = {
+                    date
+                };
 
-                    data.forEach(topic => {
-                        const bucket = topic.buckets.find(b => b.date === date);
-                        dateData[topic.topic.text] = bucket ? bucket.count : 0;
-                    });
-                    return dateData;
+                data.forEach(topic => {
+                    const bucket = topic.buckets.find(b => b.date === date);
+                    dateData[topic.topic.text] = bucket ? bucket.count : 0;
+                });
+                return dateData;
             });
         }
 
@@ -118,15 +124,15 @@ function draw_hist(path, elem, tooltipobj) {
         const uniqueTopics = Array.from(allTopics);
 
         if (transformedData.length === 0 || uniqueTopics.length === 0) {
-             console.warn(`No processable data after filtering/aggregation for ${elem}.`);
-             svg.append("text")
-               .attr("x", width / 2)
-               .attr("y", height / 2)
-               .attr("text-anchor", "middle")
-               .style("font-size", "16px")
-               .style("fill", "#777")
-               .text("No topics found in the selected data.");
-             return;
+            console.warn(`No processable data after filtering/aggregation for ${elem}.`);
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height / 2)
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .style("fill", "#777")
+                .text("No topics found in the selected data.");
+            return;
         }
 
 
@@ -146,9 +152,11 @@ function draw_hist(path, elem, tooltipobj) {
 
         // Calculate stack data - handle potential missing topics on certain dates
         const stackedData = stack(transformedData.map(d => {
-            const entry = { date: d.date };
+            const entry = {
+                date: d.date
+            };
             uniqueTopics.forEach(topic => {
-                if (topic != "date"){
+                if (topic != "date") {
                     entry[topic] = d[topic] || 0; // Ensure 0 count if topic missing for this date
                 }
             });
@@ -189,7 +197,7 @@ function draw_hist(path, elem, tooltipobj) {
             .call(d3.axisBottom(x)
                 .tickSize(0)
                 .tickPadding(10)
-                 // Show fewer ticks if too many dates
+                // Show fewer ticks if too many dates
                 .tickValues(x.domain().filter((d, i) => !(i % Math.ceil(x.domain().length / 10))))
             )
             .selectAll("text")
@@ -242,50 +250,39 @@ function draw_hist(path, elem, tooltipobj) {
             .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
             .text("Article Mention Frequency");
 
-        // Add chart title (commented out as title is in HTML header)
-        // svg.append("text")
-        //     .attr("x", width / 2)
-        //     .attr("y", -margin.top/2 - 5)
-        //     .attr("text-anchor", "middle")
-        //     .style("font-family", "'Inter', sans-serif")
-        //     .style("font-size", "16px")
-        //     .style("font-weight", "bold")
-        //     .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
-        //     .text(isLeftChart ? "Topic Coverage in Left-leaning Media" : "Topic Coverage in Right-leaning Media");
-
         // --- Draw Bars ---
         const bars = svg.append("g")
             .selectAll("g")
             .data(stackedData)
             .join("g")
-              .attr("fill", d => color(d.key)) // Use the topic name (d.key) to get color
-              .attr("class", d => `topic-group topic-${d.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`); // Class based on topic key
+            .attr("fill", d => color(d.key)) // Use the topic name (d.key) to get color
+            .attr("class", d => `topic-group topic-${d.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`); // Class based on topic key
 
         bars.selectAll("rect")
             .data(d => d) // Bind the inner array (data for each date for this topic)
             .join("rect")
-              .attr("x", d => x(d.data.date)) // Use date from d.data
-              .attr("y", height) // Start from bottom for animation
-              .attr("height", 0) // Start with height 0 for animation
-              .attr("width", x.bandwidth())
-              .attr("rx", 2) // Slightly rounded corners
-              .attr("ry", 2)
-              .attr("stroke", function() {
-                  const parentData = d3.select(this.parentNode).datum();
-                  const barColor = color(parentData.key);
-                  return d3.color(barColor).darker(0.3); // Slightly darker stroke
-              })
-              .attr("stroke-width", 0.5)
-              .attr("class", function() {
-                  const parentData = d3.select(this.parentNode).datum();
-                  return `bar bar-${parentData.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`; // Bar class
-              })
-              // Animate bars on load
-              .transition()
-              .duration(700)
-              .delay((d, i) => i * 50) // Stagger animation slightly
-              .attr("y", d => y(d[1])) // Final Y position
-              .attr("height", d => Math.max(0, y(d[0]) - y(d[1]))); // Final height, ensure non-negative
+            .attr("x", d => x(d.data.date)) // Use date from d.data
+            .attr("y", height) // Start from bottom for animation
+            .attr("height", 0) // Start with height 0 for animation
+            .attr("width", x.bandwidth())
+            .attr("rx", 2) // Slightly rounded corners
+            .attr("ry", 2)
+            .attr("stroke", function() {
+                const parentData = d3.select(this.parentNode).datum();
+                const barColor = color(parentData.key);
+                return d3.color(barColor).darker(0.3); // Slightly darker stroke
+            })
+            .attr("stroke-width", 0.5)
+            .attr("class", function() {
+                const parentData = d3.select(this.parentNode).datum();
+                return `bar bar-${parentData.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`; // Bar class
+            })
+            // Animate bars on load
+            .transition()
+            .duration(700)
+            .delay((d, i) => i * 50) // Stagger animation slightly
+            .attr("y", d => y(d[1])) // Final Y position
+            .attr("height", d => Math.max(0, y(d[0]) - y(d[1]))); // Final height, ensure non-negative
 
 
         // --- Tooltip and Interactivity ---
@@ -309,10 +306,10 @@ function draw_hist(path, elem, tooltipobj) {
                     .duration(150)
                     .style("opacity", 0.7); // Highlight bars of the same topic slightly
                 d3.select(this) // Highlight the specific hovered bar strongly
-                   .transition()
-                   .duration(150)
-                   .style("opacity", 1)
-                   .style("filter", "brightness(1.1)");
+                    .transition()
+                    .duration(150)
+                    .style("opacity", 1)
+                    .style("filter", "brightness(1.1)");
 
                 // Show tooltip
                 tooltip.transition()
@@ -339,7 +336,6 @@ function draw_hist(path, elem, tooltipobj) {
                         <span style="font-weight: 600;">Mentions:</span>
                         <span style="color: ${topicColor}; font-weight: 600;"> ${count}</span>
                     </div>`;
-                // Note: Linking back to specific articles is complex due to aggregation. Removed for now.
 
                 tooltip.html(html)
                     .style("left", (event.pageX + 15) + "px")
@@ -381,16 +377,16 @@ function draw_hist(path, elem, tooltipobj) {
         uniqueTopics.forEach((topic, i) => {
             // Only show a subset initially if too many topics, add note
             if (i >= legendScrollThreshold && uniqueTopics.length > legendScrollThreshold + 2) {
-                 if (i === legendScrollThreshold) { // Add note only once
+                if (i === legendScrollThreshold) { // Add note only once
                     legendContainer.append("text")
-                       .attr("x", legendWidth / 2)
-                       .attr("y", legendPadding + (i * legendItemHeight) + 10)
-                       .attr("text-anchor", "middle")
-                       .style("font-family", "'Inter', sans-serif")
-                       .style("font-size", "10px")
-                       .style("font-style", "italic")
-                       .style("fill", "#777")
-                       .text(`... and ${uniqueTopics.length - i} more topics`);
+                        .attr("x", legendWidth / 2)
+                        .attr("y", legendPadding + (i * legendItemHeight) + 10)
+                        .attr("text-anchor", "middle")
+                        .style("font-family", "'Inter', sans-serif")
+                        .style("font-size", "10px")
+                        .style("font-style", "italic")
+                        .style("fill", "#777")
+                        .text(`... and ${uniqueTopics.length - i} more topics`);
                 }
                 return; // Don't draw more items than threshold allows
             }
@@ -400,7 +396,7 @@ function draw_hist(path, elem, tooltipobj) {
                 .attr("transform", `translate(0, ${i * legendItemHeight})`)
                 .style("cursor", "pointer")
                 .on("mouseover", function() {
-                     // Highlight corresponding bars & legend item
+                    // Highlight corresponding bars & legend item
                     const itemTopic = topic; // Capture topic in this scope
                     d3.select(this).select("text").style("font-weight", "bold");
                     svg.selectAll(".bar")
@@ -433,7 +429,7 @@ function draw_hist(path, elem, tooltipobj) {
                 .attr("x", 24)
                 .attr("y", 8) // Center text vertically with the rect
                 .attr("dy", "0.35em")
-                 // Truncate long topic names in legend
+                // Truncate long topic names in legend
                 .text(topic.length > 15 ? topic.substring(0, 14) + "…" : topic)
                 .style("font-family", "'Inter', sans-serif")
                 .style("font-size", "12px")
@@ -446,12 +442,12 @@ function draw_hist(path, elem, tooltipobj) {
     }).catch(function(error) {
         console.error("Error loading or processing data:", error);
         // Display error message in the chart area
-         svg.append("text")
-               .attr("x", width / 2)
-               .attr("y", height / 2)
-               .attr("text-anchor", "middle")
-               .style("font-size", "16px")
-               .style("fill", "red")
-               .text("Error loading data. Check console.");
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", height / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("fill", "red")
+            .text("Error loading data. Check console.");
     });
 }

@@ -1,8 +1,3 @@
-
-
-// (Optional: Define NER types if needed for a fixed scale, but dynamic is generally better)
-// const NER_TYPES = [...].sort();
-
 function createSandboxNetwork(options) {
     const {
         containerSelector,
@@ -31,7 +26,7 @@ function createSandboxNetwork(options) {
             .attr('class', 'tooltip')
             .style('opacity', 0).style('position', 'absolute').style('pointer-events', 'none');
     } else {
-         tooltip.style("opacity", 0); // Ensure it's hidden initially
+        tooltip.style("opacity", 0); // Ensure it's hidden initially
     }
 
     // --- Modal Setup ---
@@ -40,15 +35,20 @@ function createSandboxNetwork(options) {
     const publicationList = d3.select("#publication-list");
     const modalFooter = d3.select("#modal-footer");
     const closeButton = d3.select(".close-button");
-     if (modal.empty()) {
-         console.warn("Publication modal element not found. Article list on click will be disabled.");
-     }
+    if (modal.empty()) {
+        console.warn("Publication modal element not found. Article list on click will be disabled.");
+    }
 
     // --- 1. Setup SVG ---
     const aspectRatio = 16 / 9;
     const baseWidth = 800;
     const baseHeight = baseWidth / aspectRatio;
-    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    const margin = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20
+    };
     const width = baseWidth - margin.left - margin.right;
     const height = baseHeight - margin.top - margin.bottom;
 
@@ -64,14 +64,16 @@ function createSandboxNetwork(options) {
     // --- 2. Load and Process Data ---
     d3.json(dataUrl).then(rawData => {
         if (!rawData || rawData.length === 0) {
-            displayMessage("No data loaded."); return;
+            displayMessage("No data loaded.");
+            return;
         }
 
         // --- 2a. Filter Data (Articles) ---
         const filteredArticles = rawData;
 
         if (filteredArticles.length === 0) {
-            displayMessage("No articles match the selected filters."); return;
+            displayMessage("No articles match the selected filters.");
+            return;
         }
 
         // --- 2b. Extract Nodes with NER Type AND Topic Distributions & Links ---
@@ -85,40 +87,39 @@ function createSandboxNetwork(options) {
 
             // Update nodesMap with NER types AND topics for each keyword mention
 
-                if (!nodesMap.has(keyword)) {
-                    nodesMap.set(keyword, {
-                        id: keyword,
-                        nerTypes: new Map(), // For NER type distribution (node color)
-                        topics: new Map(),   // For news topic distribution (tooltip info)
-                        totalFreq: 0,
-                        articles: new Set()
-                    });
-                }
-                const nodeEntry = nodesMap.get(keyword);
-                nodeEntry.totalFreq += mention;
-                article.mentioned_in.forEach(ment =>
-                    {
-                        nodeEntry.articles.add(ment.title);
-                    })
-
-                // Increment count for the specific NER type of this mention
-                nodeEntry.nerTypes.set(article.keyword.keyword.type, (nodeEntry.nerTypes.get(article.keyword.keyword.type) || 0) + mention);
-
-                // Increment count for each valid NEWS TOPIC of the article this keyword appeared in
-                article.topics.forEach(topic => {
-                    nodeEntry.topics.set(topic.text, (nodeEntry.topics.get(topic.text) || 0) + 1);
+            if (!nodesMap.has(keyword)) {
+                nodesMap.set(keyword, {
+                    id: keyword,
+                    nerTypes: new Map(), // For NER type distribution (node color)
+                    topics: new Map(), // For news topic distribution (tooltip info)
+                    totalFreq: 0,
+                    articles: new Set()
                 });
+            }
+            const nodeEntry = nodesMap.get(keyword);
+            nodeEntry.totalFreq += mention;
+            article.mentioned_in.forEach(ment => {
+                nodeEntry.articles.add(ment.title);
+            })
 
-                 // Ensure original ID uses first encountered casing
-                 if (nodeEntry.id !== keyword && nodeEntry.totalFreq === mention) {
-                     nodeEntry.id = keyword;
-                 }
+            // Increment count for the specific NER type of this mention
+            nodeEntry.nerTypes.set(article.keyword.keyword.type, (nodeEntry.nerTypes.get(article.keyword.keyword.type) || 0) + mention);
 
-                 article.keyword.related.forEach(pair => {
-                     const [id1, id2] = [keyword, pair.keyword.text].sort();
-                        if (!linksCount.has(id1)) linksCount.set(id1, new Map());
-                        linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + pair.cooccurrence_count);
-                 })
+            // Increment count for each valid NEWS TOPIC of the article this keyword appeared in
+            article.topics.forEach(topic => {
+                nodeEntry.topics.set(topic.text, (nodeEntry.topics.get(topic.text) || 0) + 1);
+            });
+
+            // Ensure original ID uses first encountered casing
+            if (nodeEntry.id !== keyword && nodeEntry.totalFreq === mention) {
+                nodeEntry.id = keyword;
+            }
+
+            article.keyword.related.forEach(pair => {
+                const [id1, id2] = [keyword, pair.keyword.text].sort();
+                if (!linksCount.has(id1)) linksCount.set(id1, new Map());
+                linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + pair.cooccurrence_count);
+            })
         });
 
         // --- Convert maps to arrays ---
@@ -130,16 +131,26 @@ function createSandboxNetwork(options) {
                     const sourceNode = nodesMap.get(sourceLowerId);
                     const targetNode = nodesMap.get(targetLowerId);
                     if (sourceNode && targetNode) {
-                       links.push({ source: sourceNode.id, target: targetNode.id, value: count });
+                        links.push({
+                            source: sourceNode.id,
+                            target: targetNode.id,
+                            value: count
+                        });
                     } else {
-                         console.warn(`Node not found for link processing: ${sourceLowerId} or ${targetLowerId}`);
+                        console.warn(`Node not found for link processing: ${sourceLowerId} or ${targetLowerId}`);
                     }
                 }
             });
         });
 
-        if (nodes.length === 0) { displayMessage("No keywords found after processing."); return; }
-        if (links.length === 0) { displayMessage("No keyword connections found with current filters/threshold."); return; }
+        if (nodes.length === 0) {
+            displayMessage("No keywords found after processing.");
+            return;
+        }
+        if (links.length === 0) {
+            displayMessage("No keyword connections found with current filters/threshold.");
+            return;
+        }
 
         // --- 2c. Prune Nodes ---
         const connectedNodeIds = new Set(links.flatMap(l => [l.source, l.target]));
@@ -150,7 +161,10 @@ function createSandboxNetwork(options) {
         let finalLinks = links.filter(link => finalNodeIds.has(link.source) && finalNodeIds.has(link.target));
         let finalNodes = filteredNodes;
 
-        if (finalNodes.length === 0 || finalLinks.length === 0) { displayMessage("No nodes/links remain after pruning."); return; }
+        if (finalNodes.length === 0 || finalLinks.length === 0) {
+            displayMessage("No nodes/links remain after pruning.");
+            return;
+        }
 
         // --- Define Scales and Helpers BEFORE Simulation ---
         // NER Type Color Scale (for node rendering)
@@ -163,12 +177,15 @@ function createSandboxNetwork(options) {
         // Radius scale
         const maxFreq = d3.max(finalNodes, d => d.totalFreq) || 1;
         const radiusScale = d3.scaleSqrt().domain([1, maxFreq]).range([6, 24]).clamp(true);
-        function calculateNodeRadius(nodeData) { return radiusScale(nodeData.totalFreq || 1); }
+
+        function calculateNodeRadius(nodeData) {
+            return radiusScale(nodeData.totalFreq || 1);
+        }
 
         // --- 3. D3 Force Simulation ---
         const simulation = d3.forceSimulation(finalNodes)
             .force("link", d3.forceLink(finalLinks).id(d => d.id)
-                .distance(d => Math.max(45, 130 - d.value * 3 - (calculateNodeRadius(d.source) + calculateNodeRadius(d.target))/2))
+                .distance(d => Math.max(45, 130 - d.value * 3 - (calculateNodeRadius(d.source) + calculateNodeRadius(d.target)) / 2))
                 .strength(d => 0.03 + Math.min(0.3, d.value / 40)))
             .force("charge", d3.forceManyBody().strength(-90 - (finalNodes.length * 1.8)))
             .force("center", d3.forceCenter(width / 2, height / 2))
@@ -216,31 +233,31 @@ function createSandboxNetwork(options) {
                 tooltip.transition().duration(200).style("opacity", .95);
 
                 // --- Tooltip showing NER Type(s) AND Topic Distribution ---
-                 let typeHtml = ''; // For NER Types
-                 if (d.nerTypes.size === 0) typeHtml = 'Type: N/A';
-                 else if (d.nerTypes.size === 1) {
-                     const nerType = d.nerTypes.keys().next().value;
-                     typeHtml = `Type: <span style="font-weight: 500; color: ${nerColorScale(nerType)};">${nerType}</span>`;
-                 } else {
-                     typeHtml = 'Types:<ul style="margin: 3px 0 0 15px; padding: 0; font-size: 0.9em; list-style-type: none;">';
-                     const sortedTypes = Array.from(d.nerTypes.entries()).sort(([, countA], [, countB]) => countB - countA);
-                     sortedTypes.forEach(([type, count]) => {
-                         typeHtml += `<li style="margin-bottom: 2px;"><span style="display: inline-block; width: 10px; height: 10px; background-color: ${nerColorScale(type)}; border-radius: 2px; margin-right: 5px;"></span>${type}: ${count}</li>`;
-                     });
-                     typeHtml += '</ul>';
-                 }
+                let typeHtml = ''; // For NER Types
+                if (d.nerTypes.size === 0) typeHtml = 'Type: N/A';
+                else if (d.nerTypes.size === 1) {
+                    const nerType = d.nerTypes.keys().next().value;
+                    typeHtml = `Type: <span style="font-weight: 500; color: ${nerColorScale(nerType)};">${nerType}</span>`;
+                } else {
+                    typeHtml = 'Types:<ul style="margin: 3px 0 0 15px; padding: 0; font-size: 0.9em; list-style-type: none;">';
+                    const sortedTypes = Array.from(d.nerTypes.entries()).sort(([, countA], [, countB]) => countB - countA);
+                    sortedTypes.forEach(([type, count]) => {
+                        typeHtml += `<li style="margin-bottom: 2px;"><span style="display: inline-block; width: 10px; height: 10px; background-color: ${nerColorScale(type)}; border-radius: 2px; margin-right: 5px;"></span>${type}: ${count}</li>`;
+                    });
+                    typeHtml += '</ul>';
+                }
 
-                 let topicHtml = ''; // For News Topics
-                 if (d.topics.size > 0) {
-                     topicHtml = '<div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee; font-size: 0.9em;">Topic Distribution:<ul>';
-                     const sortedTopics = Array.from(d.topics.entries()).sort(([, countA], [, countB]) => countB - countA);
-                     sortedTopics.forEach(([topic, count]) => {
-                         topicHtml += `<li style="margin-bottom: 2px; list-style-type: none;"><span style="display: inline-block; width: 10px; height: 10px; background-color: ${topicColorScale(topic)}; border-radius: 50%; margin-right: 5px;"></span>${topic}: ${count}</li>`;
-                     });
-                     topicHtml += '</ul></div>';
-                 } else {
-                     topicHtml = '<div style="margin-top: 5px; font-size: 0.9em; color: #888;">No topic data</div>';
-                 }
+                let topicHtml = ''; // For News Topics
+                if (d.topics.size > 0) {
+                    topicHtml = '<div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee; font-size: 0.9em;">Topic Distribution:<ul>';
+                    const sortedTopics = Array.from(d.topics.entries()).sort(([, countA], [, countB]) => countB - countA);
+                    sortedTopics.forEach(([topic, count]) => {
+                        topicHtml += `<li style="margin-bottom: 2px; list-style-type: none;"><span style="display: inline-block; width: 10px; height: 10px; background-color: ${topicColorScale(topic)}; border-radius: 50%; margin-right: 5px;"></span>${topic}: ${count}</li>`;
+                    });
+                    topicHtml += '</ul></div>';
+                } else {
+                    topicHtml = '<div style="margin-top: 5px; font-size: 0.9em; color: #888;">No topic data</div>';
+                }
 
 
                 tooltip.html(`
@@ -258,25 +275,27 @@ function createSandboxNetwork(options) {
                     .attr('stroke', l => (l.source.id === d.id || l.target.id === d.id) ? '#777' : '#eee');
             })
             .on("mouseout", function(event, d) {
-                 const group = d3.select(this);
-                 group.select('circle, g.pie-node').transition().duration(150).attr('transform', 'scale(1)');
-                 group.select('text').style('font-weight', 'normal').style('font-size', '9px');
-                 tooltip.transition().duration(400).style("opacity", 0);
-                 link.attr('stroke-opacity', 0.5).attr('stroke', '#ccc');
+                const group = d3.select(this);
+                group.select('circle, g.pie-node').transition().duration(150).attr('transform', 'scale(1)');
+                group.select('text').style('font-weight', 'normal').style('font-size', '9px');
+                tooltip.transition().duration(400).style("opacity", 0);
+                link.attr('stroke-opacity', 0.5).attr('stroke', '#ccc');
             })
             .on("click", function(event, d) {
                 if (modal.empty()) {
                     console.log("Modal not found, cannot show articles.");
                     return;
                 }
-                 event.stopPropagation();
-                 showPublicationModal(d);
+                event.stopPropagation();
+                showPublicationModal(d);
             });
 
         // Modal close functionality
         if (!modal.empty()) {
             closeButton.on("click", () => modal.style("display", "none"));
-            modal.on("click", function(event) { if (event.target === this) modal.style("display", "none"); });
+            modal.on("click", function(event) {
+                if (event.target === this) modal.style("display", "none");
+            });
         }
 
         // --- 6. Simulation Tick ---
@@ -291,8 +310,8 @@ function createSandboxNetwork(options) {
             svg.attr("transform", event.transform);
             const scale = event.transform.k;
             svg.selectAll('.node-label')
-               .style('display', scale < 0.3 ? 'none' : 'block')
-               .style('font-size', `${Math.min(12, Math.max(6, 9 / Math.sqrt(scale)))}px`);
+                .style('display', scale < 0.3 ? 'none' : 'block')
+                .style('font-size', `${Math.min(12, Math.max(6, 9 / Math.sqrt(scale)))}px`);
         });
         d3.select(containerSelector).select('svg').call(zoom);
 
@@ -310,10 +329,23 @@ function createSandboxNetwork(options) {
             .style("padding", "20px").style("text-align", "center").style("font-style", "italic")
             .text(message);
     }
+
     function applyDragHandlers(selection) {
-        function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; d3.select(this).raise(); }
-        function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-        function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); /* Keep fixed: d.fx = null; d.fy = null; */ }
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+            d3.select(this).raise();
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0); /* Keep fixed: d.fx = null; d.fy = null; */
+        }
         selection.call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
     }
 
@@ -321,8 +353,11 @@ function createSandboxNetwork(options) {
     // Takes the data map (e.g., nerTypes or topics), radius, color scale, and the key name for data access
     function drawPieChartNode(nodeG, dataMap, radius, colorScale, dataKey) {
         const pieData = Array.from(dataMap.entries())
-                              .map(([key, count]) => ({ [dataKey]: key, count })) // Use dynamic key
-                              .sort((a,b) => b.count - a.count);
+            .map(([key, count]) => ({
+                [dataKey]: key,
+                count
+            })) // Use dynamic key
+            .sort((a, b) => b.count - a.count);
 
         const pie = d3.pie().value(d => d.count).sort(null);
         const arc = d3.arc().innerRadius(radius * 0.35).outerRadius(radius);
@@ -340,12 +375,14 @@ function createSandboxNetwork(options) {
     }
 
     function showPublicationModal(nodeData) {
-         if (modal.empty()) return; // Extra safety check
+        if (modal.empty()) return; // Extra safety check
         modalTitle.text(`Articles mentioning "${nodeData.id}"`);
         publicationList.html("");
         const articlesToShow = Array.from(nodeData.articles).sort();
         const maxShown = 100;
-        articlesToShow.slice(0, maxShown).forEach(title => { publicationList.append("li").text(title); });
+        articlesToShow.slice(0, maxShown).forEach(title => {
+            publicationList.append("li").text(title);
+        });
         if (articlesToShow.length > maxShown) modalFooter.text(`Showing first ${maxShown} of ${articlesToShow.length} articles (alphabetical).`);
         else modalFooter.text(`${articlesToShow.length} article(s) found.`);
         modal.style("display", "block");
@@ -362,10 +399,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getSandboxSettings() {
         return {
-            containerSelector: "#left_network", dataUrl: "https://debias.api.dartt0n.ru/api/keywords/graph/?alignment=Lean%20Left;Left",
-            startDate: null, endDate: null,
+            containerSelector: "#left_network",
+            dataUrl: "https://debias.api.dartt0n.ru/api/keywords/graph/?alignment=Lean%20Left;Left",
+            startDate: null,
+            endDate: null,
             selectedTopics: [],
-            maxNodes: 10, edgeThreshold: 2,
+            maxNodes: 10,
+            edgeThreshold: 2,
             tooltipSelector: "#sandbox-tooltip"
         };
     }

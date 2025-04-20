@@ -104,7 +104,7 @@ body {
 .tab-button {
     padding: 0.75rem 1.5rem;
     background: white;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 50px;
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
@@ -179,7 +179,7 @@ body {
     display: flex;
     align-items: center;
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .left-header {
@@ -190,17 +190,20 @@ body {
     background: linear-gradient(to right, var(--right-light), white);
 }
 
-.spectrum-header h2, .network-header h3 {
+.spectrum-header h2,
+.network-header h3 {
     font-size: 1.4rem;
     font-weight: 600;
     margin-left: 1rem;
 }
 
-.left-header h2, .left-header h3 {
+.left-header h2,
+.left-header h3 {
     color: var(--left-primary);
 }
 
-.right-header h2, .right-header h3 {
+.right-header h2,
+.right-header h3 {
     color: var(--right-primary);
 }
 
@@ -264,7 +267,7 @@ body {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1;
 }
 
@@ -325,7 +328,7 @@ body {
     display: flex;
     align-items: center;
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .combined-header {
@@ -360,7 +363,7 @@ body {
 
 .control-panel {
     width: 350px;
-    border-right: 1px solid rgba(0,0,0,0.06);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
     padding-right: 2rem;
 }
 
@@ -378,10 +381,13 @@ body {
     margin-bottom: 1rem;
     color: var(--neutral-dark);
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.date-controls, .source-controls, .topic-controls, .viz-controls {
+.date-controls,
+.source-controls,
+.topic-controls,
+.viz-controls {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -404,9 +410,10 @@ body {
     gap: 0.5rem;
 }
 
-input[type="date"], select {
+input[type="date"],
+select {
     padding: 0.6rem;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     font-family: 'Inter', sans-serif;
 }
@@ -439,19 +446,25 @@ input[type="range"] {
 
 .primary-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .preview-area {
-    min-height: 400px;  /* Keep a minimum */
-    height: 100vh;     /* Example: 70% of the viewport height */
-    border: 1px dashed rgba(0,0,0,0.1);
+    min-height: 400px;
+    /* Keep a minimum */
+    height: 100vh;
+    /* Example: 70% of the viewport height */
+    border: 1px dashed rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    display: flex; /* Keeps placeholder text centered */
-    align-items: center; /* Keeps placeholder text centered */
-    justify-content: center; /* Keeps placeholder text centered */
+    display: flex;
+    /* Keeps placeholder text centered */
+    align-items: center;
+    /* Keeps placeholder text centered */
+    justify-content: center;
+    /* Keeps placeholder text centered */
     color: var(--neutral-medium);
-    overflow: hidden; /* Ensure SVG doesn't overflow its container visually */
+    overflow: hidden;
+    /* Ensure SVG doesn't overflow its container visually */
 }
 
 /* Footer styling */
@@ -460,7 +473,7 @@ input[type="range"] {
     padding: 2rem 0;
     color: var(--neutral-medium);
     font-size: 0.9rem;
-    border-top: 1px solid rgba(0,0,0,0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     margin-top: 2rem;
 }
 
@@ -474,7 +487,7 @@ input[type="range"] {
     pointer-events: none;
     font-size: 0.875rem;
     font-family: 'Inter', sans-serif;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 100;
     max-width: 250px;
     line-height: 1.4;
@@ -485,11 +498,11 @@ input[type="range"] {
     .sandbox-container {
         flex-direction: column;
     }
-    
+
     .control-panel {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid rgba(0,0,0,0.06);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         padding-right: 0;
         padding-bottom: 1.5rem;
         margin-bottom: 1.5rem;
@@ -500,22 +513,23 @@ input[type="range"] {
     .network-row {
         flex-direction: column;
     }
-    
+
     .spectrum-container {
         flex-direction: column;
         height: auto;
     }
-    
-    .spectrum-box, .network-box {
+
+    .spectrum-box,
+    .network-box {
         height: auto;
         min-height: 400px;
     }
-    
+
     .divider {
         width: 100%;
         height: 60px;
     }
-    
+
     .divider::after {
         height: 1px;
         width: 80%;
@@ -528,11 +542,11 @@ input[type="range"] {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .logo {
         font-size: 2.5rem;
     }
-    
+
     .page-container {
         padding: 1rem;
     }
@@ -540,27 +554,35 @@ input[type="range"] {
 
 /* Modal Styling */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1000;
+    /* Sit on top */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-    padding-top: 60px; /* Location of the box */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Black w/ opacity */
+    padding-top: 60px;
+    /* Location of the box */
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* 5% from the top and centered */
+    margin: 5% auto;
+    /* 5% from the top and centered */
     padding: 25px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 80%;
+    /* Could be more or less, depending on screen size */
     max-width: 600px;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     position: relative;
 }
 
@@ -592,7 +614,8 @@ input[type="range"] {
 #publication-list {
     list-style: none;
     padding: 0;
-    max-height: 300px; /* Limit height and make scrollable */
+    max-height: 300px;
+    /* Limit height and make scrollable */
     overflow-y: auto;
 }
 
@@ -601,22 +624,26 @@ input[type="range"] {
     border-bottom: 1px dashed #eee;
     font-size: 0.9em;
 }
+
 #publication-list li:last-child {
     border-bottom: none;
 }
 
 /* Style for node text labels */
 .node-label {
-    font-size: 9px; /* Adjust as needed */
+    font-size: 9px;
+    /* Adjust as needed */
     font-family: 'Inter', sans-serif;
     fill: #333;
-    pointer-events: none; /* Labels don't block interaction */
-    text-anchor: middle; /* Center label below node */
+    pointer-events: none;
+    /* Labels don't block interaction */
+    text-anchor: middle;
+    /* Center label below node */
     dominant-baseline: hanging;
 }
 
 /* Style for pie chart arcs */
 .arc path {
-  stroke: #fff;
-  stroke-width: 0.5px;
+    stroke: #fff;
+    stroke-width: 0.5px;
 }
