@@ -13,7 +13,7 @@ services:
       dockerfile: scraper.dockerfile
     volumes:
       - ./debias/scraper/config.toml:/app/config.toml
-    command: "uv run faststream run debias.scraper:app --config=/app/config.toml --workers 1"
+    command: "uv run faststream run --log-level debug debias.scraper:app --config=/app/config.toml --workers 1"
     depends_on:
       - message-queue
       - postgres
@@ -29,7 +29,7 @@ services:
       - "127.0.0.1:8080:8080"
     environment:
       - CONFIG=/app/config.toml
-    command: "uv run litestar --app debias.server:app run --host 0.0.0.0 --port 8080"
+    command: "uv run litestar --app --log-level debug debias.server:app run --host 0.0.0.0 --port 8080"
     depends_on:
       - postgres
 
@@ -39,7 +39,7 @@ services:
       dockerfile: renderer.dockerfile
     volumes:
       - ./debias/renderer/config.toml:/app/config.toml
-    command: "uv run faststream run debias.renderer:app --config=/app/config.toml --workers 1"
+    command: "uv run faststream run --log-level debug debias.renderer:app --config=/app/config.toml --workers 1"
     depends_on:
       - message-queue
       - postgres
@@ -54,7 +54,7 @@ services:
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
       - ./models:/models:ro
-    command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+    command: "uv run faststream run --log-level debug debias.processor:app --config=/app/config.toml --workers 1"
     depends_on:
       - postgres
       - key-value
@@ -65,7 +65,7 @@ services:
     ports:
       - "127.0.0.1:4222:4222"
       - "127.0.0.1:8222:8222"
-    command: "--jetstream -D -T true --store_dir /data"
+    command: "--jetstream -D --store_dir /data"
     volumes:
       - message_queue_volume:/data
 
