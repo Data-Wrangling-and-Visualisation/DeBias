@@ -74,29 +74,7 @@ function createSandboxNetwork(options) {
         }
 
         // --- 2a. Filter Data (Articles) ---
-        const filteredArticles = rawData.filter(article => {
-            // Basic validity checks
-            if (!article.article_datetime || !article.keywords || article.keywords.length < 1 || !article.title) return false;
-
-            // Date Filtering
-            const articleDate = new Date(article.article_datetime);
-            const start = startDate ? new Date(startDate + "T00:00:00Z") : null;
-            const end = endDate ? new Date(endDate + "T23:59:59Z") : null;
-            if (start && articleDate < start) return false;
-            if (end && articleDate > end) return false;
-
-            // Article Topic Filtering (based on sandbox multi-select)
-            const isTopicFilterActive = selectedArticleTopicsFilter && selectedArticleTopicsFilter.length > 0 && !selectedArticleTopicsFilter.includes("all");
-            if (isTopicFilterActive) {
-                if (!article.topics || article.topics.length === 0) return false; // Article must have topics if filtering
-                const currentArticleTopics = article.topics.map(t => t.text.toLowerCase());
-                // Check if AT LEAST ONE of the article's topics matches ANY selected filter topic
-                const hasMatch = selectedArticleTopicsFilter.some(selTopic => currentArticleTopics.includes(selTopic.toLowerCase()));
-                if (!hasMatch) return false; // Exclude if no match
-            }
-            // Include if filter not active or if a match was found
-            return true;
-        });
+        const filteredArticles = rawData;
 
         if (filteredArticles.length === 0) {
             displayMessage("No articles match the selected filters."); return;
@@ -108,54 +86,45 @@ function createSandboxNetwork(options) {
         let linksCount = new Map(); // { lowerCaseId1 -> { lowerCaseId2 -> count } }
 
         filteredArticles.forEach(article => {
-            // Get valid news topics for this article
-            const articleTopics = (article.topics || []).map(t => t.text.toLowerCase()).filter(t => NEWS_CATEGORIES.includes(t));
-            const validArticleTopics = articleTopics.length > 0 ? articleTopics : ['other'];
-
-            // Get relevant keywords for nodes
-            const relevantKeywords = article.keywords.filter(kw => kw.text.length > 2 && !/^\d+$/.test(kw.text));
-            const keywordMentions = relevantKeywords.map(kw => ({
-                lowerText: kw.text.toLowerCase(), originalText: kw.text, type: kw.type || 'UNKNOWN'
-            }));
+            const keyword = article.keyword.keyword.text;
+            const mention = article.keyword.keyword.total_count;
 
             // Update nodesMap with NER types AND topics for each keyword mention
-            keywordMentions.forEach(mention => {
-                if (!nodesMap.has(mention.lowerText)) {
-                    nodesMap.set(mention.lowerText, {
-                        id: mention.originalText,
+
+                if (!nodesMap.has(keyword)) {
+                    nodesMap.set(keyword, {
+                        id: keyword,
                         nerTypes: new Map(), // For NER type distribution (node color)
                         topics: new Map(),   // For news topic distribution (tooltip info)
                         totalFreq: 0,
                         articles: new Set()
                     });
                 }
-                const nodeEntry = nodesMap.get(mention.lowerText);
-                nodeEntry.totalFreq += 1;
-                nodeEntry.articles.add(article.title);
+                const nodeEntry = nodesMap.get(keyword);
+                nodeEntry.totalFreq += mention;
+                article.mentioned_in.forEach(ment =>
+                    {
+                        nodeEntry.articles.add(ment.title);
+                    })
 
                 // Increment count for the specific NER type of this mention
-                nodeEntry.nerTypes.set(mention.type, (nodeEntry.nerTypes.get(mention.type) || 0) + 1);
+                nodeEntry.nerTypes.set(article.keyword.keyword.type, (nodeEntry.nerTypes.get(article.keyword.keyword.type) || 0) + mention);
 
                 // Increment count for each valid NEWS TOPIC of the article this keyword appeared in
-                validArticleTopics.forEach(topic => {
-                    nodeEntry.topics.set(topic, (nodeEntry.topics.get(topic) || 0) + 1);
-                });
+                //validArticleTopics.forEach(topic => {
+                //    nodeEntry.topics.set(topic, (nodeEntry.topics.get(topic) || 0) + 1);
+                //});
 
                  // Ensure original ID uses first encountered casing
-                 if (nodeEntry.id !== mention.originalText && nodeEntry.totalFreq === 1) {
-                     nodeEntry.id = mention.originalText;
+                 if (nodeEntry.id !== keyword && nodeEntry.totalFreq === mention) {
+                     nodeEntry.id = keyword;
                  }
-            });
 
-            // Create/update links based on co-occurrence in this article
-            const uniqueLowerKeywords = [...new Set(keywordMentions.map(m => m.lowerText))];
-            for (let i = 0; i < uniqueLowerKeywords.length; i++) {
-                for (let j = i + 1; j < uniqueLowerKeywords.length; j++) {
-                    const [id1, id2] = [uniqueLowerKeywords[i], uniqueLowerKeywords[j]].sort();
-                    if (!linksCount.has(id1)) linksCount.set(id1, new Map());
-                    linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + 1);
-                }
-            }
+                 article.keyword.related.forEach(pair => {
+                     const [id1, id2] = [keyword, pair.keyword.text].sort();
+                        if (!linksCount.has(id1)) linksCount.set(id1, new Map());
+                        linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + 1);
+                 })
         });
 
         // --- Convert maps to arrays ---
@@ -400,6 +369,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const nodeCountValueSpan = document.getElementById('node-count-value');
     const edgeThresholdSlider = document.getElementById('edge-threshold');
     const edgeThresholdValueSpan = document.getElementById('edge-threshold-value');
+    const RightCheck = document.getElementById('right');
+    const LeanRightCheck = document.getElementById('lean-right');
+    const CenterCheck = document.getElementById('center');
+    const LeanLeftCheck = document.getElementById('lean-left');
+    const LeftCheck = document.getElementById('left');
 
     function getSandboxSettings() {
         const selectedTopicOptions = Array.from(topicSelector.selectedOptions).map(opt => opt.value);
@@ -416,8 +390,64 @@ document.addEventListener('DOMContentLoaded', function() {
              if(allOption) allOption.selected = true;
         }
 
+        let input_link = "https://debias.api.dartt0n.ru/api/keywords/graph"
+        let first = true
+        if (startDateInput.value) {
+            if (first) {
+                input_link = input_link + "?date_from=" + startDateInput.value;
+                first = false;
+            }
+            else {
+                input_link = input_link + "&date_from=" + startDateInput.value;
+            }
+        }
+
+        if (endDateInput.value) {
+            if (first) {
+                input_link = input_link + "?date_to=" + endDateInput.value;
+                first = false;
+            }
+            else {
+                input_link = input_link + "&date_to=" + endDateInput.value;
+            }
+        }
+
+        checks = []
+
+        if (RightCheck.value === "on") {
+            checks.push("Right");
+        }
+
+        if (LeanRightCheck.value === "on") {
+            checks.push("Lean%20Right")
+        }
+
+        if (CenterCheck.value === "on") {
+            checks.push("Center")
+        }
+
+        if (LeanLeftCheck.value === "on") {
+            checks.push("Lean%20Left")
+        }
+
+        if (LeftCheck.value === "on") {
+            checks.push("Left")
+        }
+
+        if (checks.length > 0) {
+            if (first) {
+                input_link = input_link + "?alignment=" + checks.join("%3B");
+                first = false;
+            }
+            else {
+                input_link = input_link + "&alignment=" + checks.join("%3B");
+            }
+        }
+
+        console.log(input_link);
+
         return {
-            containerSelector: "#sandbox-preview", dataUrl: "parsed_news.json",
+            containerSelector: "#sandbox-preview", dataUrl: input_link,
             startDate: startDateInput.value || null, endDate: endDateInput.value || null,
             selectedTopics: topicsToFilter, // Pass the cleaned filter array
             maxNodes: parseInt(nodeCountSlider.value, 10), edgeThreshold: parseInt(edgeThresholdSlider.value, 10),

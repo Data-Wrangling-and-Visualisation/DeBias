@@ -149,7 +149,6 @@ function draw_hist(path, elem, tooltipobj) {
             const entry = { date: d.date };
             uniqueTopics.forEach(topic => {
                 if (topic != "date"){
-                    console.log(topic);
                     entry[topic] = d[topic] || 0; // Ensure 0 count if topic missing for this date
                 }
             });
