@@ -29,6 +29,7 @@ class ProcessingResult:
     scrape_datetime: datetime
     article_datetime: datetime
     snippet: str
+    title: str
     keywords: list[Keyword]
     topics: list[Topic]
 
@@ -66,6 +67,7 @@ class Wordstore:
         await conn.execute("""
             create table if not exists documents (
                 id serial primary key,
+                title text not null,
                 absolute_url text not null,
                 url_hash text not null,
                 target_id text not null references targets(id),

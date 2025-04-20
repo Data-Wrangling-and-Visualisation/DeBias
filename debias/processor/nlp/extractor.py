@@ -3,9 +3,9 @@ import spacy
 from nltk.tokenize import word_tokenize
 from collections import defaultdict
 
-from config import SPACY_MODEL, MAX_KEYWORDS
-from utils import clean_text, is_valid_keyword, normalize_text
-from models import Keyword
+from debias.processor.nlp.config import SPACY_MODEL, MAX_KEYWORDS
+from debias.processor.nlp.utils import clean_text, is_valid_keyword, normalize_text
+from debias.processor.nlp.models import Keyword
 
 
 class SpacyKeywordExtractor:

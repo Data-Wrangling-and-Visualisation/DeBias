@@ -1,12 +1,12 @@
 import re
-from typing import Dict, Set
+import nltk
 
 # Regex patterns
 WHITESPACE_PATTERN = re.compile(r"\s+")
 SPECIAL_CHARS_PATTERN = re.compile(r"[^\w\s]")
 
 # Enhanced stopwords for news context
-STOP_WORDS: Set[str] = {
+STOP_WORDS: set[str] = set(nltk.corpus.stopwords.words("english")).union({
     "said",
     "says",
     "told",
@@ -29,7 +29,7 @@ STOP_WORDS: Set[str] = {
     "week",
     "month",
     "year",
-}
+})
 
 PUBLISHER_NAMES = {
     "skynews",
