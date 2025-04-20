@@ -1,5 +1,4 @@
 spacy_path = "somevalue"
-transformers_path = "somevalue"
 spacy_model = "somevalue"
 transformers_model = "somevalue"
 

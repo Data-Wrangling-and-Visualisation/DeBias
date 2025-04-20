@@ -1,6 +1,10 @@
+import os
+
+os.environ["HF_HOME"] = "./models/cache"
+
 import spacy
 import spacy.cli
-from transformers import AutoModel, AutoTokenizer
+from transformers import pipeline
 
 spacy_model = "en_core_web_lg"
 
@@ -15,12 +19,4 @@ finally:
 
 tf_model = "facebook/bart-large-mnli"
 
-AutoModel.from_pretrained(
-    pretrained_model_name_or_path=tf_model,
-    cache_dir="./models/cache/model",
-)
-
-AutoTokenizer.from_pretrained(
-    pretrained_model_name_or_path=tf_model,
-    cache_dir="./models/cache/tokenizer",
-)
+pipeline("zero-shot-classification", model=tf_model)

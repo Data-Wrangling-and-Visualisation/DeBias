@@ -1,6 +1,4 @@
-import os
-
-from transformers import AutoModel, AutoTokenizer, pipeline
+from transformers import pipeline
 
 from debias.processor.nlp.config import NEWS_CATEGORIES
 from debias.processor.nlp.utils import normalize_text
@@ -9,18 +7,11 @@ from debias.processor.nlp.utils import normalize_text
 class ZeroShotClassifier:
     """Classify news articles with zero-shot classification"""
 
-    def __init__(self, path: str, model: str):
+    def __init__(self, model: str):
         super().__init__()
         self.classifier = pipeline(
             "zero-shot-classification",
-            model=AutoModel.from_pretrained(
-                pretrained_model_name_or_path=model,
-                cache_dir=os.path.join(path, "model"),
-            ),
-            tokenizer=AutoTokenizer.from_pretrained(
-                pretrained_model_name_or_path=model,
-                cache_dir=os.path.join(path, "tokenizer"),
-            ),
+            model,
             device=-1,  # Use CPU
         )
 

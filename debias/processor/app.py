@@ -30,7 +30,7 @@ class DI:
         cls.metastore = Metastore(cls.config.pg.connection)
         cls.wordstore = Wordstore(cls.config.pg.connection)
         cls.keyword_extractor = SpacyKeywordExtractor(cls.config.spacy_path, cls.config.spacy_model)
-        cls.classifier = ZeroShotClassifier(cls.config.transformers_path, cls.config.transformers_model)
+        cls.classifier = ZeroShotClassifier(cls.config.transformers_model)
 
         cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
         cls.render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")

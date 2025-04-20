@@ -49,6 +49,8 @@ services:
     build:
       context: .
       dockerfile: processor.dockerfile
+    environment:
+      - HF_HOME=/models/cache
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
       - ./models:/models:ro
