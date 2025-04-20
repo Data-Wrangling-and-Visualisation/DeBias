@@ -62,3 +62,35 @@ body {
     align-content: center;
     height: 100%;
 }
+
+.bar {
+    transition: opacity 0.3s;
+}
+.bar:hover {
+    opacity: 0.8;
+}
+.axis text {
+    font-size: 12px;
+}
+.axis-label {
+    font-size: 14px;
+    font-weight: bold;
+}
+.tooltip {
+    position: absolute;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+}
+.legend {
+    margin-top: 20px;
+}
+.legend-item {
+    cursor: pointer;
+}
+.legend-item:hover {
+    opacity: 0.8;
+}

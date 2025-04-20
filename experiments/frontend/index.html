@@ -7,7 +7,7 @@
     <!-- Link to the external CSS file -->
     <link rel="stylesheet" href="style.css">
     <!-- Include D3.js library -->
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="topic_dist.js"></script>
 </head>
@@ -18,7 +18,7 @@
             <p style="color: red; font-weight: bold; margin:0;">‎ ‎ De<span style="color: blue; font-weight: 1; font-style: italic;">Bias</span></p>
         </div>
         <div class="text">
-            <p style="margin: 10px">Difference in keywords connections and topics coverage between on left-right political spectrum.</p>
+            <p style="margin: 10px">Difference in keywords connections and topics coverage on left-right political spectrum.</p>
         </div>
         <div class="container">
             <div class="box">
@@ -35,9 +35,11 @@
         <div class="container">
             <div class="box">
                 <div id="left_hist" class="hist"></div>
+                <div id="left_hist_tooltip" class="tooltip" style="opacity: 0;"></div>
             </div>
             <div class="box">
                 <div id="right_hist" class="hist"></div>
+                <div id="right_hist_tooltip" class="tooltip" style="opacity: 0;"></div>
             </div>
         </div>
     </div>
@@ -52,8 +54,8 @@
         </div>
     </div>
 </div>
-<script> draw_hist("parsed_news.json", "#left_hist") </script>
-<script> draw_hist("parsed_news.json", "#right_hist") </script>
+<script> draw_hist("parsed_news.json", "#left_hist", "#left_hist_tooltip") </script>
+<script> draw_hist("parsed_news.json", "#right_hist", "#right_hist_tooltip") </script>
 
 <script src="dynamic_graph.js"></script>
 </body>
