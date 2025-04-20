@@ -25,7 +25,7 @@ class Target(ms.Struct):
     alignment: str
 
 
-@lt.get("/targets", sync_to_thread=False)
+@lt.get("/api/targets", sync_to_thread=False)
 def get_targets(
     country: str | None = None,
     alignment: str | None = None,
@@ -44,7 +44,7 @@ def get_targets(
     return [ms.json.decode(x, type=Target) for x in df.collect().to_dicts()]  # type: ignore
 
 
-@lt.get("/keywords", sync_to_thread=False)
+@lt.get("/api/keywords", sync_to_thread=False)
 def get_keywords(
     date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
 ) -> list[dict]:
@@ -108,7 +108,7 @@ def get_keywords(
     return result
 
 
-@lt.get("/topics", sync_to_thread=False)
+@lt.get("/api/topics", sync_to_thread=False)
 def get_topics(
     date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
 ) -> list[dict]:
@@ -172,7 +172,7 @@ def get_topics(
     return result
 
 
-@lt.get("/topics/graph", sync_to_thread=False)
+@lt.get("/api/topics/graph", sync_to_thread=False)
 def get_topics_graph(
     date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
 ) -> list[dict]:
@@ -257,7 +257,7 @@ def get_topics_graph(
     return result
 
 
-@lt.get("/keywords/graph", sync_to_thread=False)
+@lt.get("/api/keywords/graph", sync_to_thread=False)
 def get_keywords_graph(
     date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
 ) -> list[dict]:
