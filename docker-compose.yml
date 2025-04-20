@@ -29,7 +29,7 @@ services:
       - "127.0.0.1:8080:8080"
     environment:
       - CONFIG=/app/config.toml
-    command: "uv run litestar --app --log-level debug debias.server:app run --host 0.0.0.0 --port 8080"
+    command: "uv run litestar --app debias.server:app run --host 0.0.0.0 --port 8080"
     depends_on:
       - postgres
 
