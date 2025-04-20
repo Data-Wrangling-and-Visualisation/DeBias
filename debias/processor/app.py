@@ -2,8 +2,8 @@ import logging
 
 from core.wordstore import Wordstore
 from faststream import ContextRepo, FastStream, Logger
-from faststream.exceptions import AckMessage, RejectMessage
-from faststream.nats import NatsBroker, NatsMessage, PullSub
+from faststream.exceptions import RejectMessage
+from faststream.nats import NatsBroker, NatsMessage
 from processor.processor import WebpageData, process_webpage
 
 from debias.core.metastore import Metadata, Metastore
@@ -66,7 +66,7 @@ async def app_on_shutdown(context: ContextRepo, logger: Logger):
     logger.info("app shutdown")
 
 
-@broker.subscriber(subject="process-queue", stream="debias", pull_sub=PullSub(batch_size=1))
+@broker.subscriber(subject="process-queue", stream="debias")
 async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logger: Logger, context: ContextRepo):
     """Handler which process each message from the queue.
     It subscribes to subject "process-queue", so all messages published exactly to "process-queue" subject
@@ -74,13 +74,10 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
     It subscribes to stream "debias" with retention policy "work_queue".
     This allows multiple subscribers to connect to the same stream and receive unqiue messages
     i.e. each message is received only once by only one subscriber).
-    It utilizes pull subscription (other option is push subscription) which reduces load on the server
-    by forcing each client to pull messages by its own.
 
     Read more about JetStream & Pulling Consumer here:
     - https://docs.nats.io/nats-concepts/jetstream
     - https://docs.nats.io/nats-concepts/jetstream/consumers
-    - https://faststream.airt.ai/latest/nats/jetstream/pull
     """
     logger.info(f"received message {msg.message_id} (corrid: {msg.correlation_id}) to process {data.filepath}")
 
@@ -110,4 +107,3 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
 
     await DI.wordstore.save(result)
     logger.info(f"message successfully saved {result}")
-    raise AckMessage()  # successfully completed
