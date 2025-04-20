@@ -1,5 +1,5 @@
 function draw_hist(path, elem, tooltipobj) {
-    var margin = {top: 10, right: 30, bottom: 20, left: 70};
+    var margin = {top: 10, right: 30, bottom: 60, left: 70};
 
     // append the svg object to the body of the pag
     // Parse the Data
@@ -127,7 +127,7 @@ function draw_hist(path, elem, tooltipobj) {
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x))
             .selectAll("text")
-            .attr("transform", "rotate(-45)")
+            .attr("transform", "rotate(-30)")
             .style("text-anchor", "end");
 
         svg.append("g")
@@ -138,7 +138,7 @@ function draw_hist(path, elem, tooltipobj) {
         svg.append("text")
             .attr("class", "axis-label")
             .attr("x", width / 2)
-            .attr("y", height + margin.bottom - 10)
+            .attr("y", height + margin.bottom - 20)
             .style("text-anchor", "middle")
             .text("Date");
 
