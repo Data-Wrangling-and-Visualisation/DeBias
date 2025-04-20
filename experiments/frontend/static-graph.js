@@ -359,9 +359,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return {
             containerSelector: "#combined_network", dataUrl: "https://debias.api.dartt0n.ru/api/keywords/graph/",
-            startDate: startDateInput.value || null, endDate: endDateInput.value || null,
-            selectedTopics: [], // Pass the cleaned filter array
-            maxNodes: parseInt(nodeCountSlider.value, 10), edgeThreshold: parseInt(edgeThresholdSlider.value, 10),
+            startDate: null, endDate: null,
+            selectedTopics: [],
+            maxNodes: 10, edgeThreshold: 2,
             tooltipSelector: "#sandbox-tooltip"
         };
     }
