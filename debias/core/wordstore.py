@@ -182,17 +182,18 @@ class Wordstore:
                 logger.debug("committing transaction")
 
     async def save(self, result: ProcessingResult):
-        async with self.with_transaction() as t:
+        async with self.with_transaction():
             async with (await self._get_connection()).cursor() as c:
                 insert_document = psycopg.sql.SQL("""
-                    insert into documents (absolute_url, url_hash, target_id, scrape_datetime, article_datetime, snippet)
-                    values (%s, %s, %s, %s, %s, %s)
+                    insert into documents (title, absolute_url, url_hash, target_id, scrape_datetime, article_datetime, snippet)
+                    values (%s, %s, %s, %s, %s, %s, %s)
                     returning id;
                 """)
                 r = await (
                     await c.execute(
                         insert_document,
                         (
+                            result.title,
                             result.absolute_url,
                             result.url_hash,
                             result.target_id,
