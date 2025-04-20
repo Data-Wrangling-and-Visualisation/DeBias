@@ -1,235 +1,64 @@
-/* General body and layout */
 body {
-    font-family: Arial, sans-serif;
+    background: linear-gradient(90deg, #d3effb 0%, #d4eaf8 40%, #e4bdc0 60%, #f18c90 100%);
+}
+
+.all_container{
+    display: flex;
+    width: 100%;
+    height: 200vh;
+    flex-direction: column;
+}
+
+.top_container{
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0;
-    display: flex; /* Use flexbox for layout */
+    width: 100%;
     height: 100vh;
-    overflow: hidden;
-}
-
-#controls {
-    width: 250px; /* Width of the control panel */
-    padding: 15px;
-    background-color: #f4f4f4;
-    border-right: 1px solid #ccc;
-    overflow-y: auto; /* Allow scrolling if controls overflow */
-    height: 100%;
-    box-sizing: border-box;
-    z-index: 200; /* Ensure controls are above graph */
-}
-
-#controls h3 {
-    margin-top: 15px;
-    margin-bottom: 5px;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 3px;
-}
-
-#controls h3:first-child {
-    margin-top: 0;
-}
-
-#controls label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 12px;
-}
-
-#controls select,
-#controls input[type="range"],
-#controls input[type="number"] {
-    width: 100%;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-}
-
-#category-filters div {
-    margin-bottom: 3px;
-    font-size: 12px;
-}
-#category-filters div label {
-    display: inline-block; /* Keep label and checkbox together */
-    margin-bottom: 0;
-}
-
-#category-filters input[type="checkbox"] {
-    margin-right: 5px;
-    vertical-align: middle; /* Align checkbox nicely */
-}
-#category-filters button {
-    font-size: 10px;
-    padding: 2px 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-}
-
-
-#graph-container {
-    flex-grow: 1; /* Graph takes remaining space */
-    position: relative; /* Needed for absolute positioning of tooltip/legend */
-    height: 100%;
-}
-
-#graph {
-    width: 100%;
-    height: 100%;
-}
-
-/* --- Node, Link, Tooltip, Legend styles --- */
-.node {
-    cursor: pointer;
-}
-
-.link {
-    stroke: #999;
-    stroke-opacity: 0.6;
-    /* transition: stroke 0.2s ease-out, stroke-opacity 0.2s ease-out; Optional: smooth transition for highlight */
-}
-
-.tooltip {
+    content: "";
     position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    max-width: 300px;
-    font-size: 12px;
-    pointer-events: none; /* Important so it doesn't block mouse events on graph */
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 100;
-}
-
-.tooltip h3 {
-    margin-top: 0;
-    margin-bottom: 5px;
-    font-size: 14px; /* Slightly larger heading */
-}
-
-.tooltip p {
-    margin: 5px 0;
-}
-
-.tooltip ul {
-    margin: 5px 0;
-    padding-left: 20px;
-    max-height: 150px; /* Limit list height */
-    overflow-y: auto; /* Add scroll if list is long */
-}
-.tooltip li {
-    margin-bottom: 3px;
-}
-
-.legend {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.85); /* Slightly less transparent */
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    font-size: 12px;
-    z-index: 90; /* Below controls but above graph elements */
-    max-height: calc(100vh - 40px); /* Prevent legend from becoming too tall */
-    overflow-y: auto;
-    max-width: 200px; /* Prevent legend from becoming too wide */
-}
-.legend h3 {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-size: 13px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 3px;
-}
-.legend h3:first-child {
-    margin-top: 0;
-}
-.legend p {
-    margin-top: 0;
-    margin-bottom: 8px;
-}
-
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-}
-
-.legend-color {
-    width: 15px;
-    height: 15px;
-    margin-right: 8px;
-    border-radius: 50%;
-    border: 1px solid #ccc; /* Add slight border */
-    flex-shrink: 0; /* Prevent color box from shrinking */
-}
-
-.legend span {
-    word-break: break-word; /* Wrap long category names */
-}
-
-
-.badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: bold;
-    color: white;
-    background-color: #666;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-right: 5px;
-    margin-bottom: 3px; /* Spacing if they wrap */
-}
-
-.edge-info {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px 8px;
-    font-size: 12px;
-    pointer-events: none;
-    display: none;
-    z-index: 100;
-    white-space: nowrap; /* Prevent wrapping */
-}
-
-.pie-slice {
-    stroke: #fff;
-    stroke-width: 0.5px; /* Thinner stroke for pies */
-}
-
-/* Loading Indicator */
-.loading {
-    position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Highest */
-    font-size: 24px;
-    font-weight: bold;
-    color: #555;
+    left: 50%;
+    background: url('split.png');
+    background-size: 500px 100vh;
+    transform: translateX(-50%);
+    background-repeat: no-repeat;
+    background-position: top;
 }
 
-/* No Data Message */
-#no-data-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 18px;
-    color: #888;
-    display: none; /* Hidden by default */
-    z-index: 50;
+.container{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.box{
+    width: 100%;
+    height: 100%;
+}
+
+.header{
+    font-family: monospace, ui-monospace;
+    font-size: 50px;
     text-align: center;
-    padding: 20px;
+}
+
+.subheader{
+    font-family: monospace, ui-monospace;
+    font-size: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.text{
+    font-family: monospace, ui-monospace;
+    font-size: 20px;
+    text-align: center;
+}
+
+.hist{
+    align-content: center;
+    height: 100%;
 }

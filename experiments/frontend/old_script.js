@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLegend(); // Setup static legend parts
 
     // --- Load Data ---
-    fetch('parsed_news.json') // Make sure this path is correct relative to index.html
+    fetch('parsed_news.json') // Make sure this path is correct relative to old_index.html
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
