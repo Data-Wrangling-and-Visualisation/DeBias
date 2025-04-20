@@ -11,6 +11,7 @@ services:
     build:
       context: .
       dockerfile: scraper.dockerfile
+    restart: always
     volumes:
       - ./debias/scraper/config.toml:/app/config.toml
     command: "uv run faststream run --log-level debug debias.scraper:app --config=/app/config.toml --workers 1"
@@ -23,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: server.dockerfile
+    restart: always
     volumes:
       - ./debias/server/config.toml:/app/config.toml
     ports:
@@ -37,6 +39,7 @@ services:
     build:
       context: .
       dockerfile: renderer.dockerfile
+    restart: always
     volumes:
       - ./debias/renderer/config.toml:/app/config.toml
     command: "uv run faststream run --log-level debug debias.renderer:app --config=/app/config.toml --workers 1"
@@ -51,6 +54,7 @@ services:
       dockerfile: processor.dockerfile
     environment:
       - HF_HOME=/models/cache
+    restart: always
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
       - ./models:/models:ro
@@ -65,6 +69,7 @@ services:
     ports:
       - "127.0.0.1:4222:4222"
       - "127.0.0.1:8222:8222"
+    restart: always
     command: "--jetstream -D --store_dir /data"
     volumes:
       - message_queue_volume:/data
@@ -75,6 +80,7 @@ services:
       - "127.0.0.1:6379:6379"
     environment:
       - VALKEY_DB=0
+    restart: always
     volumes:
       - key_value_volume:/data
     command: ["--appendonly", "yes"]
@@ -83,6 +89,7 @@ services:
     image: postgres:16
     ports:
       - "127.0.0.1:5432:5432"
+    restart: always
     environment:
       - POSTGRES_USER=${PG_USERNAME}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
