@@ -210,7 +210,7 @@ class Wordstore:
                 # create new keywords if not exists, update count if exists
                 insert_keywords = psycopg.sql.SQL("""
                     insert into keywords (type, keyword, count) values (%s, %s, 1)
-                    on conflict (type, keyword) do update set count = count + 1
+                    on conflict (type, keyword) do update set count = keywords.count + 1
                     returning id;
                 """)
                 keyword_ids = []
@@ -223,7 +223,7 @@ class Wordstore:
                 # create new topics if not exists, update count if exists
                 insert_topics = psycopg.sql.SQL("""
                     insert into topics (type, topic, count) values (%s, %s, 1)
-                    on conflict (type, topic) do update set count = count + 1
+                    on conflict (type, topic) do update set count = topics.count + 1
                     returning id;
                 """)
                 topic_ids = []
@@ -236,7 +236,7 @@ class Wordstore:
                 insert_keyword_appearances = psycopg.sql.SQL("""
                     insert into keyword_appearances (keyword_id, document_id, count)
                     values (%s, %s, 1)
-                    on conflict (keyword_id, document_id) do update set count = count + 1;
+                    on conflict (keyword_id, document_id) do update set count = keyword_appearances.count + 1;
                 """)
                 for keyword_id in keyword_ids:
                     await c.execute(insert_keyword_appearances, (keyword_id, document_id))
@@ -244,7 +244,7 @@ class Wordstore:
                 insert_topic_appearances = psycopg.sql.SQL("""
                     insert into topic_appearances (topic_id, document_id, count)
                     values (%s, %s, 1)
-                    on conflict (topic_id, document_id) do update set count = count + 1;
+                    on conflict (topic_id, document_id) do update set count = topic_appearances.count + 1;
                 """)
                 for topic_id in topic_ids:
                     await c.execute(insert_topic_appearances, (topic_id, document_id))
