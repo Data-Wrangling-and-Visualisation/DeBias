@@ -172,4 +172,176 @@ def get_topics(
     return result
 
 
-app = Litestar(route_handlers=[get_targets, get_keywords, get_topics])
+@lt.get("/topics/graph", sync_to_thread=False)
+def get_topics_graph(
+    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+) -> list[dict]:
+    df = pl.read_database_uri(
+        query="""select
+            t.id as topic_id,
+            t.type as topic_type,
+            t.topic,
+            t.count as topic_count,
+            d.id as document_id,
+            d.absolute_url as document_url,
+            d.title as document_title,
+            d.snippet as document_snippet,
+            d.article_datetime as document_datetime,
+            tg.id as target_id,
+            tg.name as target_name,
+            tg.main_page as target_main_page,
+            tg.country as target_country,
+            tg.alignment as target_alignment
+        from topic_appearances as ta
+        join topics as t on t.id = ta.topic_id
+        join documents as d on d.id = ta.document_id
+        join targets as tg on tg.id = d.target_id
+        """,
+        uri=config.pg.connection,
+    ).lazy()
+
+    if date is not None:
+        df = df.filter(pl.col("document_datetime").dt.date() == date)
+
+    if country is not None:
+        df = df.filter(pl.col("target_country") == country)
+
+    if alignment is not None:
+        df = df.filter(pl.col("target_alignment") == alignment)
+
+    topics_df = df.select(pl.col("topic_id"), pl.col("topic_type"), pl.col("topic"), pl.col("topic_count")).unique()
+
+    doc_topic_df = df.select(pl.col("document_id"), pl.col("topic_id"), pl.col("topic_type"), pl.col("topic"))
+
+    cooccurrences_df = (
+        doc_topic_df.join(
+            doc_topic_df.select(
+                pl.col("document_id"),
+                pl.col("topic_id").alias("topic_id_related"),
+                pl.col("topic_type").alias("topic_type_related"),
+                pl.col("topic").alias("topic_related"),
+            ),
+            on="document_id",
+        )
+        .filter(pl.col("topic_id") != pl.col("topic_id_related"))
+        .group_by("topic_id", "topic_id_related", "topic_type_related", "topic_related")
+        .agg(pl.count().alias("cooccurrence_count"))
+    )
+
+    related_topics_df = cooccurrences_df.group_by("topic_id").agg(
+        pl.struct(
+            pl.struct(
+                pl.col("topic_type_related").alias("type"),
+                pl.col("topic_related").alias("text"),
+            ).alias("topic"),
+            pl.col("cooccurrence_count"),
+        ).alias("related")
+    )
+
+    result = (
+        topics_df.join(related_topics_df, on="topic_id", how="left")
+        .select(
+            pl.struct(
+                pl.struct(
+                    pl.col("topic_type").alias("type"),
+                    pl.col("topic").alias("text"),
+                    pl.col("topic_count").alias("total_count"),
+                ).alias("topic"),
+                pl.col("related").fill_null([]),
+            )
+        )
+        .collect()
+        .to_dicts()
+    )
+
+    return result
+
+
+@lt.get("/keywords/graph", sync_to_thread=False)
+def get_keywords_graph(
+    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+) -> list[dict]:
+    df = pl.read_database_uri(
+        query="""select
+            k.id as keyword_id,
+            k.type as keyword_type,
+            k.keyword,
+            k.count as keyword_count,
+            d.id as document_id,
+            d.absolute_url as document_url,
+            d.title as document_title,
+            d.snippet as document_snippet,
+            d.article_datetime as document_datetime,
+            t.id as target_id,
+            t.name as target_name,
+            t.main_page as target_main_page,
+            t.country as target_country,
+            t.alignment as target_alignment
+        from keyword_appearances as ka
+        join keywords as k on k.id = ka.keyword_id
+        join documents as d on d.id = ka.document_id
+        join targets as t on t.id = d.target_id
+        """,
+        uri=config.pg.connection,
+    ).lazy()
+
+    if date is not None:
+        df = df.filter(pl.col("document_datetime").dt.date() == date)
+
+    if country is not None:
+        df = df.filter(pl.col("target_country") == country)
+
+    if alignment is not None:
+        df = df.filter(pl.col("target_alignment") == alignment)
+
+    keywords_df = df.select(
+        pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"), pl.col("keyword_count")
+    ).unique()
+
+    doc_keyword_df = df.select(pl.col("document_id"), pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"))
+
+    cooccurrences_df = (
+        doc_keyword_df.join(
+            doc_keyword_df.select(
+                pl.col("document_id"),
+                pl.col("keyword_id").alias("keyword_id_related"),
+                pl.col("keyword_type").alias("keyword_type_related"),
+                pl.col("keyword").alias("keyword_related"),
+            ),
+            on="document_id",
+        )
+        .filter(pl.col("keyword_id") != pl.col("keyword_id_related"))
+        .group_by("keyword_id", "keyword_id_related", "keyword_type_related", "keyword_related")
+        .agg(pl.count().alias("cooccurrence_count"))
+    )
+
+    related_keywords_df = cooccurrences_df.group_by("keyword_id").agg(
+        pl.struct(
+            pl.struct(
+                pl.col("keyword_type_related").alias("type"),
+                pl.col("keyword_related").alias("text"),
+            ).alias("keyword"),
+            pl.col("cooccurrence_count"),
+        ).alias("related")
+    )
+
+    result = (
+        keywords_df.join(related_keywords_df, on="keyword_id", how="left")
+        .select(
+            pl.struct(
+                pl.struct(
+                    pl.col("keyword_type").alias("type"),
+                    pl.col("keyword").alias("text"),
+                    pl.col("keyword_count").alias("total_count"),
+                ).alias("keyword"),
+                pl.col("related").fill_null([]),
+            )
+        )
+        .collect()
+        .to_dicts()
+    )
+
+    return result
+
+
+app = Litestar(route_handlers=[get_targets, get_keywords, get_topics, get_topics_graph, get_keywords_graph])
