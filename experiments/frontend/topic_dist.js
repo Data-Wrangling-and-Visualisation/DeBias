@@ -46,22 +46,21 @@ function draw_hist(path, elem, tooltipobj) {
     d3.json(path).then(function(data) {
 
     // Transform data to group by keyword
-    function prepareHistogramData(data) {
-            // First, get all unique dates
+        function prepareHistogramData(data) {
+                // First, get all unique dates
             const allDates = [...new Set(data.flatMap(topic =>
-                topic.buckets.map(bucket => bucket.date)
-            ))].sort();
+                    topic.buckets.map(bucket => bucket.date)
+                ))].sort();
 
-            // Then create an array of objects with date and topic counts
-        return allDates.map(date => {
-                const dateData = {};
+                // Then create an array of objects with date and topic counts
+            return allDates.map(date => {
+                    const dateData = {date};
 
-                data.forEach(topic => {
-                    const bucket = topic.buckets.find(b => b.date === date);
-                    dateData[topic.topic.text] = bucket ? bucket.count : 0;
-                });
-
-                return dateData;
+                    data.forEach(topic => {
+                        const bucket = topic.buckets.find(b => b.date === date);
+                        dateData[topic.topic.text] = bucket ? bucket.count : 0;
+                    });
+                    return dateData;
             });
         }
 
@@ -105,7 +104,11 @@ function draw_hist(path, elem, tooltipobj) {
         // And get a list of all unique topics found
         const allTopics = new Set();
         transformedData = Object.entries(transformedData).map(([date, topics]) => {
-            Object.keys(topics).forEach(topic => allTopics.add(topic));
+            Object.keys(topics).forEach(topic => {
+                if (topic != "date") {
+                    allTopics.add(topic)
+                }
+            });
             return {
                 date,
                 ...topics // Spread topic counts into the object
@@ -145,7 +148,10 @@ function draw_hist(path, elem, tooltipobj) {
         const stackedData = stack(transformedData.map(d => {
             const entry = { date: d.date };
             uniqueTopics.forEach(topic => {
-                entry[topic] = d[topic] || 0; // Ensure 0 count if topic missing for this date
+                if (topic != "date"){
+                    console.log(topic);
+                    entry[topic] = d[topic] || 0; // Ensure 0 count if topic missing for this date
+                }
             });
             return entry;
         }));
