@@ -6,6 +6,14 @@ import msgspec as ms
 import polars as pl
 from litestar import Litestar
 from litestar.config.cors import CORSConfig
+from litestar.openapi.config import OpenAPIConfig
+from litestar.openapi.plugins import (
+    RapidocRenderPlugin,
+    RedocRenderPlugin,
+    ScalarRenderPlugin,
+    StoplightRenderPlugin,
+    SwaggerRenderPlugin,
+)
 
 from debias.server.config import Config
 
@@ -415,4 +423,16 @@ def get_keywords_graph(
 app = Litestar(
     route_handlers=[get_targets, get_keywords, get_topics, get_topics_graph, get_keywords_graph],
     cors_config=CORSConfig(),
+    openapi_config=OpenAPIConfig(
+        title="DeBias API",
+        description="API for DeBias visualizations",
+        version="0.0.1",
+        render_plugins=[
+            ScalarRenderPlugin(path="/api/scalar"),
+            RapidocRenderPlugin(path="/api/rapidoc"),
+            RedocRenderPlugin(path="/api/redoc"),
+            StoplightRenderPlugin(path="/api/stoplight"),
+            SwaggerRenderPlugin(path="/api/swagger"),
+        ],
+    ),
 )
