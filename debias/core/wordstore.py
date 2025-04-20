@@ -115,7 +115,7 @@ class Wordstore:
                 target_id text not null references targets(id),
                 scrape_datetime timestamp not null,
                 article_datetime timestamp,
-                snippet text not null,
+                snippet text not null
             );                
         """)
         await conn.execute("""
@@ -127,7 +127,7 @@ class Wordstore:
             );
         """)
         await conn.execute("""
-            create unique index if not exist keywords_type_keyword
+            create unique index if not exists keywords_type_keyword
                 on keywords(type, keyword);
         """)
         await conn.execute("""
@@ -138,18 +138,26 @@ class Wordstore:
                 count int not null
             );
         """)
+        await conn.execute(
+            """
+            create unique index if not exists topics_type_topic
+                on topics(type, topic);
+        """
+        )
         await conn.execute("""
             create table if not exists keyword_appearances (
-                keyword_id int primary key references keywords(id),
-                document_id int primary key references documents(id),
-                count int
+                keyword_id int references keywords(id),
+                document_id int references documents(id),
+                count int,
+                primary key (keyword_id, document_id)
             );
         """)
         await conn.execute("""
             create table if not exists topic_appearances (
-                topic_id int primary key references topics(id),
-                document_id int primary key references documents(id),
-                count int
+                topic_id int references topics(id),
+                document_id int references documents(id),
+                count int,
+                primary key (topic_id, document_id)
             );
         """)
 

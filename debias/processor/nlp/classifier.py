@@ -1,3 +1,5 @@
+import os
+
 from transformers import AutoModel, AutoTokenizer, pipeline
 
 from debias.processor.nlp.config import NEWS_CATEGORIES
@@ -11,8 +13,14 @@ class ZeroShotClassifier:
         super().__init__()
         self.classifier = pipeline(
             "zero-shot-classification",
-            model=AutoModel.from_pretrained(pretrained_model_name_or_path=model, cache_dir=path),
-            tokenizer=AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model, cache_dir=path),
+            model=AutoModel.from_pretrained(
+                pretrained_model_name_or_path=model,
+                cache_dir=os.path.join(path, "model"),
+            ),
+            tokenizer=AutoTokenizer.from_pretrained(
+                pretrained_model_name_or_path=model,
+                cache_dir=os.path.join(path, "tokenizer"),
+            ),
             device=-1,  # Use CPU
         )
 
