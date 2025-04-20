@@ -16,6 +16,8 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="topic_dist.js"></script>
+    <!-- Network graph scripts -->
+    <script src="dynamic_graph.js"></script>
 </head>
 <body>
 <div class="page-container">
@@ -156,14 +158,22 @@
                 <div class="control-group">
                     <h3>Topic Filters</h3>
                     <div class="topic-controls">
-                        <select id="topic-selector" multiple>
-                            <option value="all" selected>All Topics</option>
+                        <!-- Add the 'multiple' attribute -->
+                        <select id="topic-selector" multiple size="6"> <!-- Optional: 'size' shows more options -->
+                            <option value="all" selected>All Topics (Default)</option>
                             <option value="politics">Politics</option>
-                            <option value="economy">Economy</option>
+                            <option value="business">Business</option>
+                            <option value="technology">Technology</option>
+                            <option value="health">Health</option>
+                            <option value="science">Science</option>
+                            <option value="sports">Sports</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="world">World</option>
                             <option value="environment">Environment</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="education">Education</option>
+                            <!-- Add 'other' if you want it filterable, maybe not needed -->
+                            <!-- <option value="other">Other</option> -->
                         </select>
+                         <small style="color: #777; font-size: 0.8em;">Hold Ctrl/Cmd to select multiple. Select 'All Topics' to clear filter.</small>
                     </div>
                 </div>
                 
@@ -191,6 +201,17 @@
                 <div id="sandbox-preview" class="preview-area"></div>
             </div>
         </div>
+        <!-- Publication List Modal -->
+        <div id="publication-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">×</span>
+                <h3 id="modal-title">Publications</h3>
+                <ul id="publication-list">
+                    <!-- List items will be added here -->
+                </ul>
+                <p id="modal-footer" style="font-size: 0.8em; color: #666; margin-top: 15px;"></p>
+            </div>
+        </div>
     </section>
     
     <footer class="main-footer">
@@ -208,7 +229,7 @@
 <script> draw_hist("parsed_news.json", "#right_hist", "#right_hist_tooltip") </script>
 
 <!-- Network graph scripts -->
-<script src="network_graph.js"></script>
+<!-- <script src="network_graph.js"></script> -->
 
 <!-- Tab switching functionality -->
 <script>

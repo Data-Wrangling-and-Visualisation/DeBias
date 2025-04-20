@@ -1,9 +1,10 @@
-const topicColorMap = {};
+// Global topicColorMap declared in index.html should be accessible here
+// const topicColorMap = {}; // Already defined in index.html
 
 function draw_hist(path, elem, tooltipobj) {
     // Determine if this is left or right histogram based on the element ID
     const isLeftChart = elem.includes("left");
-    
+
     // Set theme-specific colors
     const themeColors = {
         left: {
@@ -28,142 +29,155 @@ function draw_hist(path, elem, tooltipobj) {
             "#66BFBF", // Cyan
             "#2E294E", // Dark Blue
             "#7F78D2"  // Lavender
+            // Add more colors if needed
         ]
     };
-    
-    var margin = {top: 30, right: 30, bottom: 80, left: 80};
 
-    // Parse the Data
-    const data = [{
-            keyword: { text: "Climate Change", type: "Environment" },
-            buckets: [{
-                date: "2023-01-01",
-                alignment: [{
-                    value: "Outlet A",
-                    count: 5,
-                    mentioned_in: [{ id: 1, title: "Article 1" }, { id: 2, title: "Article 2" }]
-                }, {
-                    value: "Outlet B",
-                    count: 3,
-                    mentioned_in: [{ id: 3, title: "Article 3" }]
-                }]
-            }, {
-                date: "2023-01-02",
-                alignment: [{
-                    value: "Outlet A",
-                    count: 7,
-                    mentioned_in: [{ id: 4, title: "Article 4" }, { id: 5, title: "Article 5" }]
-                }, {
-                    value: "Outlet C",
-                    count: 2,
-                    mentioned_in: [{ id: 6, title: "Article 6" }]
-                }]
-            }]
-        }, {
-            keyword: { text: "Economic Policy", type: "Politics" },
-            buckets: [{
-                date: "2023-01-01",
-                alignment: [{
-                    value: "Outlet B",
-                    count: 4,
-                    mentioned_in: [{ id: 7, title: "Article 7" }]
-                }]
-            }, {
-                date: "2023-01-02",
-                alignment: [{
-                    value: "Outlet A",
-                    count: 6,
-                    mentioned_in: [{ id: 8, title: "Article 8" }, { id: 9, title: "Article 9" }]
-                }, {
-                    value: "Outlet C",
-                    count: 3,
-                    mentioned_in: [{ id: 10, title: "Article 10" }]
-                }]
-            }]
-        }];
+    var margin = {top: 40, right: 160, bottom: 100, left: 80}; // Increased bottom/right margin for labels/legend
 
-        // Transform data to group by keyword
-        function transformData(data) {
-            const result = {};
+    // Select the container and clear previous contents
+    var container = d3.select(elem);
+    container.selectAll("*").remove(); // Clear previous SVG if any
 
-            // First organize by date
-            data.forEach(keywordData => {
-                const keyword = keywordData.keyword.text;
+    // Create SVG with proper responsive sizing
+    var svg = container
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("viewBox", "0 0 800 500") // Define a base viewBox
+        .attr("preserveAspectRatio", "xMidYMid meet")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                keywordData.buckets.forEach(bucket => {
-                    const date = bucket.date;
+    // Calculate dimensions based on viewBox, adjusted for margins
+    var width = 800 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-                    if (!result[date]) {
-                        result[date] = {};
-                    }
+    // --- Data Loading and Processing ---
+    d3.json(path).then(function(rawData) {
 
-                    // Sum all counts for this keyword on this date
-                    const totalCount = bucket.alignment.reduce((sum, a) => sum + a.count, 0);
-
-                    result[date][keyword] = totalCount;
-                });
-            });
-
-            // Convert to array format for D3
-            return Object.entries(result).map(([date, keywords]) => {
-                return {
-                    date,
-                    ...keywords
-                };
-            });
+        if (!rawData || rawData.length === 0) {
+            console.warn(`No data loaded from ${path} for ${elem}.`);
+            svg.append("text")
+               .attr("x", width / 2)
+               .attr("y", height / 2)
+               .attr("text-anchor", "middle")
+               .style("font-size", "16px")
+               .style("fill", "#777")
+               .text("No data available for this selection.");
+            return; // Stop execution if no data
         }
 
-        const transformedData = transformData(data);
+        // --- IMPORTANT LIMITATION ---
+        // The provided JSON format *does not* contain information about the media source's
+        // political leaning. Therefore, both the "left" and "right" charts will currently
+        // display the *same* data aggregated from the *entire* parsed_news.json file.
+        // To show different data, you would need to:
+        // 1. Add a 'leaning' field (e.g., "left", "right", "center") to each article object in parsed_news.json.
+        // 2. Filter the rawData here based on the 'isLeftChart' flag.
+        // Example filtering (if 'leaning' field existed):
+        // const filteredData = rawData.filter(article => {
+        //     if (isLeftChart) {
+        //         return article.leaning === 'left';
+        //     } else {
+        //         return article.leaning === 'right';
+        //     }
+        // });
+        const filteredData = rawData; // Using all data for now
 
-        // Get all unique keywords
-        const keywords = [...new Set(data.map(d => d.keyword.text))];
+        // --- Data Transformation ---
+        // Group data by date and aggregate topic counts
+        const aggregatedData = {}; // { "YYYY-MM-DD": { "topic1": count, "topic2": count }, ... }
+
+        filteredData.forEach(article => {
+            if (!article.article_datetime || !article.topics || article.topics.length === 0) {
+                return; // Skip articles without date or topics
+            }
+
+            // Extract date part (YYYY-MM-DD)
+            const dateStr = article.article_datetime.substring(0, 10);
+
+            // Initialize date entry if it doesn't exist
+            if (!aggregatedData[dateStr]) {
+                aggregatedData[dateStr] = {};
+            }
+
+            // Increment count for each topic mentioned in the article
+            article.topics.forEach(topicObj => {
+                const topicText = topicObj.text; // Assuming 'text' field holds the topic name
+                if (topicText) {
+                    aggregatedData[dateStr][topicText] = (aggregatedData[dateStr][topicText] || 0) + 1;
+                }
+            });
+        });
+
+        // Convert aggregated data to array format suitable for d3.stack
+        // And get a list of all unique topics found
+        const allTopics = new Set();
+        const transformedData = Object.entries(aggregatedData).map(([date, topics]) => {
+            Object.keys(topics).forEach(topic => allTopics.add(topic));
+            return {
+                date,
+                ...topics // Spread topic counts into the object
+            };
+        }).sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort chronologically
+
+        const uniqueTopics = Array.from(allTopics);
+
+        if (transformedData.length === 0 || uniqueTopics.length === 0) {
+             console.warn(`No processable data after filtering/aggregation for ${elem}.`);
+             svg.append("text")
+               .attr("x", width / 2)
+               .attr("y", height / 2)
+               .attr("text-anchor", "middle")
+               .style("font-size", "16px")
+               .style("fill", "#777")
+               .text("No topics found in the selected data.");
+             return;
+        }
+
 
         // Assign consistent colors to topics if they don't already have colors
-        keywords.forEach((keyword, index) => {
-            if (!topicColorMap[keyword]) {
-                // Assign a color from our topic palette
-                topicColorMap[keyword] = themeColors.topics[index % themeColors.topics.length];
+        uniqueTopics.forEach((topic, index) => {
+            if (!topicColorMap[topic]) {
+                // Assign a color from our topic palette, cycling through if needed
+                topicColorMap[topic] = themeColors.topics[index % themeColors.topics.length];
             }
         });
 
         // Set up color scale using our consistent color mapping
         const color = d3.scaleOrdinal()
-            .domain(keywords)
-            .range(keywords.map(keyword => topicColorMap[keyword]));
+            .domain(uniqueTopics)
+            .range(uniqueTopics.map(topic => topicColorMap[topic]));
 
-        // Create SVG with proper responsive sizing
-        var container = d3.select(elem);
-        var svg = container
-            .append("svg")
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .attr("viewBox", "0 0 800 500")
-            .attr("preserveAspectRatio", "xMidYMid meet")
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            
-        // Calculate dimensions
-        var width = 800 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-
-        // Prepare data for stacked bars
+        // --- D3 Stack Layout ---
         const stack = d3.stack()
-            .keys(keywords)
+            .keys(uniqueTopics)
             .order(d3.stackOrderNone)
             .offset(d3.stackOffsetNone);
 
-        const stackedData = stack(transformedData);
+        // Calculate stack data - handle potential missing topics on certain dates
+        const stackedData = stack(transformedData.map(d => {
+            const entry = { date: d.date };
+            uniqueTopics.forEach(topic => {
+                entry[topic] = d[topic] || 0; // Ensure 0 count if topic missing for this date
+            });
+            return entry;
+        }));
 
-        // Scales
+
+        // --- Scales ---
         const x = d3.scaleBand()
             .domain(transformedData.map(d => d.date))
             .range([0, width])
             .padding(0.3);
 
+        const maxY = d3.max(stackedData[stackedData.length - 1] || [], d => d[1]); // Find max Y value across all stacks
         const y = d3.scaleLinear()
-            .domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1]) * 1.1]) // Add 10% padding
+            .domain([0, (maxY || 10) * 1.1]) // Add 10% padding, ensure domain > 0
             .range([height, 0]);
 
+        // --- Axes and Grid ---
         // Add clean grid lines
         svg.append("g")
             .attr("class", "grid-lines")
@@ -178,45 +192,47 @@ function draw_hist(path, elem, tooltipobj) {
             .attr("stroke", "rgba(0,0,0,0.07)")
             .attr("stroke-dasharray", "3,3");
 
-        // Add axes with styled appearance
+        // Add X axis
         svg.append("g")
             .attr("class", "axis x-axis")
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x)
                 .tickSize(0)
+                .tickPadding(10)
+                 // Show fewer ticks if too many dates
+                .tickValues(x.domain().filter((d, i) => !(i % Math.ceil(x.domain().length / 10))))
             )
             .selectAll("text")
-            .attr("transform", "rotate(-30)")
+            .attr("transform", "rotate(-45)")
             .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
             .style("font-family", "'Inter', sans-serif")
-            .style("font-size", "12px")
+            .style("font-size", "11px") // Slightly smaller for potentially many dates
             .style("fill", "#777777");
-            
-        // Remove domain lines
-        svg.selectAll(".axis path")
-            .style("stroke", "rgba(0,0,0,0.1)");
-            
-        svg.selectAll(".axis line")
-            .style("stroke", "rgba(0,0,0,0.1)");
 
+        // Add Y axis
         svg.append("g")
             .attr("class", "axis y-axis")
             .call(d3.axisLeft(y)
                 .ticks(5)
                 .tickSize(0)
+                .tickPadding(10)
             )
             .selectAll("text")
             .style("font-family", "'Inter', sans-serif")
             .style("font-size", "12px")
             .style("fill", "#777777");
 
-        // Add axis labels with styled appearance
+        // Remove domain lines for cleaner look
+        svg.selectAll(".axis path")
+            .style("display", "none"); // Hide domain lines
+        svg.selectAll(".axis line")
+            .style("stroke", "rgba(0,0,0,0.1)");
+
+        // Add axis labels
         svg.append("text")
             .attr("class", "axis-label")
             .attr("x", width / 2)
-            .attr("y", height + margin.bottom - 15)
+            .attr("y", height + margin.bottom - 25) // Adjust position
             .style("text-anchor", "middle")
             .style("font-family", "'Inter', sans-serif")
             .style("font-size", "14px")
@@ -228,323 +244,225 @@ function draw_hist(path, elem, tooltipobj) {
             .attr("class", "axis-label")
             .attr("transform", "rotate(-90)")
             .attr("x", -height / 2)
-            .attr("y", -margin.left + 25)
+            .attr("y", -margin.left + 20) // Adjust position
             .style("text-anchor", "middle")
             .style("font-family", "'Inter', sans-serif")
             .style("font-size", "14px")
             .style("font-weight", "600")
             .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
-            .text("Mention Frequency");
+            .text("Article Mention Frequency");
 
-        // Add chart title
-        svg.append("text")
-            .attr("x", width / 2)
-            .attr("y", -margin.top/2)
-            .attr("text-anchor", "middle")
-            .style("font-family", "'Inter', sans-serif")
-            .style("font-size", "16px")
-            .style("font-weight", "bold")
-            .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
-            .text(isLeftChart ? "Topic Coverage in Left-leaning Media" : "Topic Coverage in Right-leaning Media");
+        // Add chart title (commented out as title is in HTML header)
+        // svg.append("text")
+        //     .attr("x", width / 2)
+        //     .attr("y", -margin.top/2 - 5)
+        //     .attr("text-anchor", "middle")
+        //     .style("font-family", "'Inter', sans-serif")
+        //     .style("font-size", "16px")
+        //     .style("font-weight", "bold")
+        //     .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
+        //     .text(isLeftChart ? "Topic Coverage in Left-leaning Media" : "Topic Coverage in Right-leaning Media");
 
-        // Create bars with proper styling
+        // --- Draw Bars ---
         const bars = svg.append("g")
             .selectAll("g")
             .data(stackedData)
             .join("g")
-            .attr("class", d => `keyword-group keyword-${d.key.replace(/\s+/g, '-')}`);
+              .attr("fill", d => color(d.key)) // Use the topic name (d.key) to get color
+              .attr("class", d => `topic-group topic-${d.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`); // Class based on topic key
 
-        // Add styled bars with animations
         bars.selectAll("rect")
-            .data(d => d)
+            .data(d => d) // Bind the inner array (data for each date for this topic)
             .join("rect")
-            .attr("x", d => x(d.data.date))
-            .attr("y", height) // Start from bottom for animation
-            .attr("height", 0) // Start with height 0 for animation
-            .attr("width", x.bandwidth())
-            .attr("rx", 3) // Rounded corners
-            .attr("ry", 3) // Rounded corners
-            .attr("fill", function() {
-                const parentData = d3.select(this.parentNode).datum();
-                return color(parentData.key);
-            })
-            .attr("stroke", function() {
-                const parentData = d3.select(this.parentNode).datum();
-                const barColor = color(parentData.key);
-                // Create slightly darker stroke for definition
-                return d3.color(barColor).darker(0.2);
-            })
-            .attr("stroke-width", 0.5)
-            .attr("class", function() {
-                const parentData = d3.select(this.parentNode).datum();
-                return `bar bar-${parentData.key.replace(/\s+/g, '-')}`;
-            })
-            // Animate bars on load
-            .transition()
-            .duration(800)
-            .delay((d, i) => i * 100)
-            .attr("y", d => y(d[1]))
-            .attr("height", d => y(d[0]) - y(d[1]));
+              .attr("x", d => x(d.data.date)) // Use date from d.data
+              .attr("y", height) // Start from bottom for animation
+              .attr("height", 0) // Start with height 0 for animation
+              .attr("width", x.bandwidth())
+              .attr("rx", 2) // Slightly rounded corners
+              .attr("ry", 2)
+              .attr("stroke", function() {
+                  const parentData = d3.select(this.parentNode).datum();
+                  const barColor = color(parentData.key);
+                  return d3.color(barColor).darker(0.3); // Slightly darker stroke
+              })
+              .attr("stroke-width", 0.5)
+              .attr("class", function() {
+                  const parentData = d3.select(this.parentNode).datum();
+                  return `bar bar-${parentData.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`; // Bar class
+              })
+              // Animate bars on load
+              .transition()
+              .duration(700)
+              .delay((d, i) => i * 50) // Stagger animation slightly
+              .attr("y", d => y(d[1])) // Final Y position
+              .attr("height", d => Math.max(0, y(d[0]) - y(d[1]))); // Final height, ensure non-negative
 
-        // Enhanced interactivity
+
+        // --- Tooltip and Interactivity ---
+        const tooltip = d3.select(tooltipobj);
+
         bars.selectAll("rect")
             .on("mouseover", function(event, d) {
-                const [y0, y1] = d;
-                const parentData = d3.select(this.parentNode).datum();
-                const keyword = parentData.key;
-                const date = d.data.date;
-                const count = y1 - y0;
+                const [y0, y1] = d; // Bar's start and end y values in the stack
+                const parentData = d3.select(this.parentNode).datum(); // Data for the whole topic group
+                const topic = parentData.key; // The topic name
+                const date = d.data.date; // The date for this specific bar segment
+                const count = y1 - y0; // The count for this topic on this date
 
                 // Highlight current bar and fade others
                 svg.selectAll(".bar")
                     .transition()
-                    .duration(200)
-                    .style("opacity", function() {
-                        const thisParentData = d3.select(this.parentNode).datum();
-                        return thisParentData.key === keyword ? 1 : 0.3;
-                    })
-                    .style("filter", function() {
-                        const thisParentData = d3.select(this.parentNode).datum();
-                        return thisParentData.key === keyword ? "brightness(1.1)" : "none";
-                    });
+                    .duration(150)
+                    .style("opacity", 0.3); // Fade all bars initially
+                svg.selectAll(`.bar-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`) // Select bars of the same topic
+                    .transition()
+                    .duration(150)
+                    .style("opacity", 0.7); // Highlight bars of the same topic slightly
+                d3.select(this) // Highlight the specific hovered bar strongly
+                   .transition()
+                   .duration(150)
+                   .style("opacity", 1)
+                   .style("filter", "brightness(1.1)");
 
-                // Find all articles for this keyword/date combination
-                const articles = [];
-                data.forEach(keywordData => {
-                    if (keywordData.keyword.text === keyword) {
-                        keywordData.buckets.forEach(bucket => {
-                            if (bucket.date === date) {
-                                bucket.alignment.forEach(a => {
-                                    articles.push(...a.mentioned_in);
-                                });
-                            }
-                        });
-                    }
-                });
-
-                // Stylized tooltip
-                const tooltip = d3.select(tooltipobj);
+                // Show tooltip
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", 1);
 
                 // Format the date nicely
-                const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                const formattedDate = new Date(date + "T00:00:00Z").toLocaleDateString('en-US', { // Add T00:00:00Z for UTC interpretation
                     year: 'numeric',
                     month: 'short',
-                    day: 'numeric'
+                    day: 'numeric',
+                    timeZone: 'UTC' // Specify UTC timezone
                 });
 
                 // Use topic color in the tooltip header
-                const topicColor = color(keyword);
+                const topicColor = color(topic);
 
                 let html = `
-                    <div class="tooltip-header" style="background: ${topicColor}; padding: 8px 12px; border-radius: 4px 4px 0 0; margin: -8px -12px 8px -12px;">
-                        <span style="color: white; font-weight: 600; font-size: 14px;">${keyword}</span>
+                    <div class="tooltip-header" style="background: ${topicColor}; padding: 8px 12px; border-radius: 4px 4px 0 0; margin: -10px -12px 8px -12px;">
+                        <span style="color: white; font-weight: 600; font-size: 14px;">${topic}</span>
                     </div>
-                    <div style="margin-bottom: 8px;">
+                    <div style="margin-bottom: 4px;">
                         <span style="font-weight: 600;">Date:</span> ${formattedDate}<br>
-                        <span style="font-weight: 600;">Mentions:</span> 
-                        <span style="color: ${topicColor}; font-weight: 600;">${count}</span>
+                        <span style="font-weight: 600;">Mentions:</span>
+                        <span style="color: ${topicColor}; font-weight: 600;"> ${count}</span>
                     </div>`;
-                
-                if (articles.length > 0) {
-                    html += `<div style="font-weight: 600; margin-bottom: 4px; padding-top: 4px; border-top: 1px solid rgba(0,0,0,0.1);">Articles:</div>
-                    <ul style="margin: 0; padding-left: 16px; font-size: 12px;">`;
-                    
-                    articles.slice(0, 3).forEach(article => {
-                        html += `<li style="margin-bottom: 3px;">${article.title}</li>`;
-                    });
-                    
-                    if (articles.length > 3) {
-                        html += `<li style="color: #777;">...and ${articles.length - 3} more</li>`;
-                    }
-                    
-                    html += `</ul>`;
-                }
+                // Note: Linking back to specific articles is complex due to aggregation. Removed for now.
 
                 tooltip.html(html)
                     .style("left", (event.pageX + 15) + "px")
                     .style("top", (event.pageY - 28) + "px")
-                    .style("box-shadow", "0 4px 15px rgba(0,0,0,0.15)")
-                    .style("border-radius", "4px")
-                    .style("border", "none");
+                    .style("border", "none") // Remove border for cleaner look with header
+                    .style("border-radius", "4px"); // Consistent radius
             })
             .on("mouseout", function() {
-                // Reset all bars to full opacity
+                // Reset all bars to full opacity and remove filter
                 svg.selectAll(".bar")
                     .transition()
                     .duration(200)
                     .style("opacity", 1)
                     .style("filter", "none");
 
-                d3.select(tooltipobj)
-                    .transition()
+                // Hide tooltip
+                tooltip.transition()
                     .duration(500)
                     .style("opacity", 0);
             });
 
-        // Add styled legend with dynamic sizing
+
+        // --- Legend ---
         const legendContainer = svg.append("g")
-        .attr("class", "legend-container")
-        .attr("transform", `translate(${width - 140}, 10)`);
+            .attr("class", "legend-container")
+            // Position legend to the right of the chart
+            .attr("transform", `translate(${width + 20}, 0)`);
 
-        // Calculate legend dimensions based on number of topics
-        const legendItemHeight = 28;
-        const legendPadding = 15;
-        const legendHeaderHeight = 30;
-        const maxLegendHeight = height * 0.75; // Cap at 75% of chart height
-        const totalItemsHeight = keywords.length * legendItemHeight;
-        const legendHeight = Math.min(totalItemsHeight + legendHeaderHeight + legendPadding, maxLegendHeight);
-        const shouldScroll = totalItemsHeight > (maxLegendHeight - legendHeaderHeight - legendPadding);
+        const legendItemHeight = 25; // Space between legend items
+        const legendPadding = 10;
+        const legendWidth = 140; // Fixed width for the legend box
+        const maxLegendHeight = height; // Max height allowed for legend items area
+        const legendScrollThreshold = Math.floor(maxLegendHeight / legendItemHeight);
 
-        // Create legend background with dynamic height
-        legendContainer.append("rect")
-        .attr("width", 130)
-        .attr("height", legendHeight)
-        .attr("fill", "white")
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr("stroke", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
-        .attr("stroke-width", 1)
-        .attr("stroke-opacity", 0.3)
-        .attr("fill-opacity", 0.9);
-
-        // Add legend title
-        legendContainer.append("text")
-        .attr("x", 65)
-        .attr("y", 20)
-        .attr("text-anchor", "middle")
-        .style("font-family", "'Inter', sans-serif")
-        .style("font-size", "12px")
-        .style("font-weight", "600")
-        .style("fill", isLeftChart ? themeColors.left.primary : themeColors.right.primary)
-        .text("Topics");
-
-        // Create clipping path for scrollable area if needed
-        if (shouldScroll) {
-        legendContainer.append("defs")
-            .append("clipPath")
-            .attr("id", `legend-clip-${isLeftChart ? "left" : "right"}`)
-            .append("rect")
-            .attr("width", 110)
-            .attr("height", legendHeight - legendHeaderHeight - 10)
-            .attr("x", 10)
-            .attr("y", legendHeaderHeight);
-        }
-
-        // Create legend group with potential scrolling
         const legend = legendContainer.append("g")
-        .attr("class", "legend-items")
-        .attr("transform", `translate(10, ${legendHeaderHeight})`)
-        .style("overflow-y", shouldScroll ? "scroll" : "visible");
+            .attr("class", "legend-items")
+            .attr("transform", `translate(0, ${legendPadding})`);
 
-        if (shouldScroll) {
-        legend.attr("clip-path", `url(#legend-clip-${isLeftChart ? "left" : "right"})`);
-        }
+        // Add legend items
+        uniqueTopics.forEach((topic, i) => {
+            // Only show a subset initially if too many topics, add note
+            if (i >= legendScrollThreshold && uniqueTopics.length > legendScrollThreshold + 2) {
+                 if (i === legendScrollThreshold) { // Add note only once
+                    legendContainer.append("text")
+                       .attr("x", legendWidth / 2)
+                       .attr("y", legendPadding + (i * legendItemHeight) + 10)
+                       .attr("text-anchor", "middle")
+                       .style("font-family", "'Inter', sans-serif")
+                       .style("font-size", "10px")
+                       .style("font-style", "italic")
+                       .style("fill", "#777")
+                       .text(`... and ${uniqueTopics.length - i} more topics`);
+                }
+                return; // Don't draw more items than threshold allows
+            }
 
-        // Add topic count if there are many
-        if (keywords.length > 10) {
-        legendContainer.append("text")
-            .attr("x", 65)
-            .attr("y", legendHeight - 8)
-            .attr("text-anchor", "middle")
-            .style("font-family", "'Inter', sans-serif")
-            .style("font-size", "10px")
-            .style("font-style", "italic")
-            .style("fill", "#777")
-            .text(`${keywords.length} topics total`);
-        }
+            const legendItem = legend.append("g")
+                .attr("class", "legend-item")
+                .attr("transform", `translate(0, ${i * legendItemHeight})`)
+                .style("cursor", "pointer")
+                .on("mouseover", function() {
+                     // Highlight corresponding bars & legend item
+                    const itemTopic = topic; // Capture topic in this scope
+                    d3.select(this).select("text").style("font-weight", "bold");
+                    svg.selectAll(".bar")
+                        .transition().duration(150)
+                        .style("opacity", 0.2);
+                    svg.selectAll(`.bar-${itemTopic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}`)
+                        .transition().duration(150)
+                        .style("opacity", 1)
+                        .style("filter", "brightness(1.1)");
+                })
+                .on("mouseout", function() {
+                    // Reset styles
+                    d3.select(this).select("text").style("font-weight", "normal");
+                    svg.selectAll(".bar")
+                        .transition().duration(150)
+                        .style("opacity", 1)
+                        .style("filter", "none");
+                });
 
-        // Add scroll hint if needed
-        if (shouldScroll) {
-        legendContainer.append("text")
-            .attr("x", 120)
-            .attr("y", legendHeight / 2)
-            .attr("text-anchor", "end")
-            .style("font-family", "'Inter', sans-serif")
-            .style("font-size", "14px")
-            .style("fill", "#999")
-            .text("↕");
-        }
+            legendItem.append("rect")
+                .attr("width", 16)
+                .attr("height", 16)
+                .attr("rx", 3)
+                .attr("ry", 3)
+                .attr("fill", color(topic))
+                .attr("stroke", d3.color(color(topic)).darker(0.2))
+                .attr("stroke-width", 1);
 
-        // Create legend items
-        keywords.forEach((keyword, i) => {
-        const legendItem = legend.append("g")
-            .attr("class", "legend-item")
-            .attr("transform", `translate(0, ${i * legendItemHeight})`)
-            .style("cursor", "pointer")
-            .on("mouseover", function() {
-                // Highlight corresponding bars
-                d3.select(this).select("rect")
-                    .transition()
-                    .duration(200)
-                    .attr("stroke-width", 2);
-                    
-                d3.select(this).select("text")
-                    .transition()
-                    .duration(200)
-                    .style("font-weight", "600");
-                    
-                // Highlight all bars with this keyword
-                svg.selectAll(".bar")
-                    .transition()
-                    .duration(200)
-                    .style("opacity", function() {
-                        const parentData = d3.select(this.parentNode).datum();
-                        return parentData.key === keyword ? 1 : 0.3;
-                    })
-                    .style("filter", function() {
-                        const parentData = d3.select(this.parentNode).datum();
-                        return parentData.key === keyword ? "brightness(1.1)" : "none";
-                    });
-            })
-            .on("mouseout", function() {
-                // Reset style
-                d3.select(this).select("rect")
-                    .transition()
-                    .duration(200)
-                    .attr("stroke-width", 1);
-                    
-                d3.select(this).select("text")
-                    .transition()
-                    .duration(200)
-                    .style("font-weight", "normal");
-                    
-                // Reset all bars to full opacity
-                svg.selectAll(".bar")
-                    .transition()
-                    .duration(200)
-                    .style("opacity", 1)
-                    .style("filter", "none");
-            });
-
-        // Add styled legend items using consistent color mapping
-        legendItem.append("rect")
-            .attr("width", 16)
-            .attr("height", 16)
-            .attr("rx", 3)
-            .attr("ry", 3)
-            .attr("fill", color(keyword))
-            .attr("stroke", d3.color(color(keyword)).darker(0.2))
-            .attr("stroke-width", 1);
-
-        legendItem.append("text")
-            .attr("x", 24)
-            .attr("y", 8)
-            .attr("dy", "0.35em")
-            .text(keyword.length > 14 ? keyword.substring(0, 13) + "..." : keyword)
-            .style("font-family", "'Inter', sans-serif")
-            .style("font-size", "12px")
-            .style("fill", "#333")
-            .append("title")
-            .text(keyword); // Show full text on hover
+            legendItem.append("text")
+                .attr("x", 24)
+                .attr("y", 8) // Center text vertically with the rect
+                .attr("dy", "0.35em")
+                 // Truncate long topic names in legend
+                .text(topic.length > 15 ? topic.substring(0, 14) + "…" : topic)
+                .style("font-family", "'Inter', sans-serif")
+                .style("font-size", "12px")
+                .style("fill", "#333")
+                .append("title") // Add full topic name as hover tooltip
+                .text(topic);
         });
 
-        // If scrollable, add mouse wheel event for scrolling
-        if (shouldScroll) {
-        // This is handled with CSS since D3 can't easily create true scrollable areas
-        // We'll add a class to enable custom scrolling behavior
-        legend.classed("scrollable-legend", true);
-        }
+
+    }).catch(function(error) {
+        console.error("Error loading or processing data:", error);
+        // Display error message in the chart area
+         svg.append("text")
+               .attr("x", width / 2)
+               .attr("y", height / 2)
+               .attr("text-anchor", "middle")
+               .style("font-size", "16px")
+               .style("fill", "red")
+               .text("Error loading data. Check console.");
+    });
 }
