@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Article Keyword Network by Date</title>
+    <title>DeBias - Political Spectrum Analysis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Link to the external CSS file -->
     <link rel="stylesheet" href="style.css">
     <!-- Include D3.js library -->
@@ -12,50 +18,219 @@
     <script src="topic_dist.js"></script>
 </head>
 <body>
-<div class="all_container">
-    <div class="top_container">
-        <div class="header">
-            <p style="color: red; font-weight: bold; margin:0;">‎ ‎ De<span style="color: blue; font-weight: 1; font-style: italic;">Bias</span></p>
+<div class="page-container">
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="logo-container">
+            <h1 class="logo">De<span>Bias</span></h1>
+            <p class="tagline">Analyzing media polarization through data</p>
         </div>
-        <div class="text">
-            <p style="margin: 10px">Difference in keywords connections and topics coverage on left-right political spectrum.</p>
+    </header>
+    
+    <!-- Introduction Section -->
+    <section class="intro-section">
+        <div class="description">
+            <p>Explore how keywords connect and topics differ across the political spectrum, visualized through histograms and network graphs.</p>
         </div>
-        <div class="container">
-            <div class="box">
-                <div class="subheader">
-                    <p style="margin: 0">Left-leaning</p>
+        
+        <div class="section-tabs">
+            <button class="tab-button active" data-section="histogram-section">Keyword Distribution</button>
+            <button class="tab-button" data-section="network-section">Network Analysis</button>
+            <button class="tab-button" data-section="sandbox-section">Sandbox</button>
+        </div>
+    </section>
+    
+    <!-- Histogram Section -->
+    <section id="histogram-section" class="content-section active">
+        <h2 class="section-title">Topic Distribution Comparison</h2>
+        
+        <div class="spectrum-container">
+            <div class="spectrum-box left-box">
+                <div class="spectrum-header left-header">
+                    <div class="ideology-icon left-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <h2>Left-leaning Media</h2>
                 </div>
-            </div>
-            <div class="box">
-                <div class="subheader">
-                    <p style="margin: 0">Right-leaning</p>
-                </div>
-            </div>
-        </div>
-        <div class="container">
-            <div class="box">
                 <div id="left_hist" class="hist"></div>
                 <div id="left_hist_tooltip" class="tooltip" style="opacity: 0;"></div>
             </div>
-            <div class="box">
+            
+            <div class="divider">
+                <div class="vs-badge">VS</div>
+            </div>
+            
+            <div class="spectrum-box right-box">
+                <div class="spectrum-header right-header">
+                    <div class="ideology-icon right-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h2>Right-leaning Media</h2>
+                </div>
                 <div id="right_hist" class="hist"></div>
                 <div id="right_hist_tooltip" class="tooltip" style="opacity: 0;"></div>
             </div>
         </div>
-    </div>
-    <div class="container" style="height: 100vh; margin-top: 100vh">
-        <div class="box">
-            <div class="subheader">
-                <p>Sandbox</p>
+    </section>
+    
+    <!-- Network Graph Section -->
+    <section id="network-section" class="content-section">
+        <h2 class="section-title">Network Analysis</h2>
+        
+        <div class="network-container">
+            <div class="network-row">
+                <div class="network-box left-network">
+                    <div class="network-header left-header">
+                        <div class="ideology-icon left-icon">
+                            <i class="fas fa-dove"></i>
+                        </div>
+                        <h3>Left-leaning Network</h3>
+                    </div>
+                    <div id="left_network" class="network-graph"></div>
+                </div>
+                
+                <div class="network-box right-network">
+                    <div class="network-header right-header">
+                        <div class="ideology-icon right-icon">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <h3>Right-leaning Network</h3>
+                    </div>
+                    <div id="right_network" class="network-graph"></div>
+                </div>
             </div>
-            <div class="text">
-                <p>Play with settings: change date, media outlets, topics and number of nodes.</p>
+            
+            <div class="network-row full-width">
+                <div class="network-box combined-network">
+                    <div class="network-header combined-header">
+                        <div class="ideology-icon combined-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <h3>Complete Political Spectrum Network</h3>
+                    </div>
+                    <div id="combined_network" class="network-graph large-graph"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
+    
+    <!-- Sandbox Section -->
+    <section id="sandbox-section" class="content-section">
+        <h2 class="section-title">Analysis Sandbox</h2>
+        
+        <div class="sandbox-container">
+            <div class="control-panel">
+                <div class="control-group">
+                    <h3>Date Range</h3>
+                    <div class="date-controls">
+                        <div class="input-group">
+                            <label for="start-date">Start Date</label>
+                            <input type="date" id="start-date" name="start-date">
+                        </div>
+                        <div class="input-group">
+                            <label for="end-date">End Date</label>
+                            <input type="date" id="end-date" name="end-date">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Media Sources</h3>
+                    <div class="source-controls">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="left-all" checked>
+                            <label for="left-all">All Left Sources</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="right-all" checked>
+                            <label for="right-all">All Right Sources</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="center-all">
+                            <label for="center-all">All Center Sources</label>
+                        </div>
+                        <button class="control-button" id="customize-sources">Customize Sources</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Topic Filters</h3>
+                    <div class="topic-controls">
+                        <select id="topic-selector" multiple>
+                            <option value="all" selected>All Topics</option>
+                            <option value="politics">Politics</option>
+                            <option value="economy">Economy</option>
+                            <option value="environment">Environment</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="education">Education</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Visualization Settings</h3>
+                    <div class="viz-controls">
+                        <div class="input-group">
+                            <label for="node-count">Max Nodes</label>
+                            <input type="range" id="node-count" min="10" max="100" value="50">
+                            <span id="node-count-value">50</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="edge-threshold">Edge Threshold</label>
+                            <input type="range" id="edge-threshold" min="1" max="10" value="2">
+                            <span id="edge-threshold-value">2</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="apply-settings" class="primary-button">Apply Settings</button>
+            </div>
+            
+            <div class="results-preview">
+                <h3>Preview</h3>
+                <div id="sandbox-preview" class="preview-area"></div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="main-footer">
+        <p>DeBias - Understanding Media Polarization Through Data Visualization</p>
+    </footer>
 </div>
+
+<!-- First, define the shared color mapping -->
+<script>
+    const topicColorMap = {};
+</script>
+
+<!-- Histogram scripts -->
 <script> draw_hist("parsed_news.json", "#left_hist", "#left_hist_tooltip") </script>
 <script> draw_hist("parsed_news.json", "#right_hist", "#right_hist_tooltip") </script>
 
-<script src="dynamic_graph.js"></script>
+<!-- Network graph scripts -->
+<script src="network_graph.js"></script>
+
+<!-- Tab switching functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons and sections
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                contentSections.forEach(section => section.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+    });
+</script>
 </body>
+</html>
