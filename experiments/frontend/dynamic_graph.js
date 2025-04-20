@@ -111,9 +111,9 @@ function createSandboxNetwork(options) {
                 nodeEntry.nerTypes.set(article.keyword.keyword.type, (nodeEntry.nerTypes.get(article.keyword.keyword.type) || 0) + mention);
 
                 // Increment count for each valid NEWS TOPIC of the article this keyword appeared in
-                //validArticleTopics.forEach(topic => {
-                //    nodeEntry.topics.set(topic, (nodeEntry.topics.get(topic) || 0) + 1);
-                //});
+                article.topics.forEach(topic => {
+                    nodeEntry.topics.set(topic.text, (nodeEntry.topics.get(topic.text) || 0) + 1);
+                });
 
                  // Ensure original ID uses first encountered casing
                  if (nodeEntry.id !== keyword && nodeEntry.totalFreq === mention) {
@@ -444,7 +444,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        console.log(input_link);
+        if (topicsToFilter.length > 0) {
+            if (first) {
+                input_link = input_link + "?topics=" + topicsToFilter.join("%3B");
+                first = false;
+            }
+            else {
+                input_link = input_link + "&topics=" + topicsToFilter.join("%3B");
+            }
+        }
 
         return {
             containerSelector: "#sandbox-preview", dataUrl: input_link,
