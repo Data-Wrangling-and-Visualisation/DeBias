@@ -428,11 +428,12 @@ app = Litestar(
         description="API for DeBias visualizations",
         version="0.0.1",
         render_plugins=[
-            ScalarRenderPlugin(path="/api/scalar"),
-            RapidocRenderPlugin(path="/api/rapidoc"),
-            RedocRenderPlugin(path="/api/redoc"),
-            StoplightRenderPlugin(path="/api/stoplight"),
-            SwaggerRenderPlugin(path="/api/swagger"),
+            ScalarRenderPlugin(path="/scalar"),
+            RapidocRenderPlugin(path="/rapidoc"),
+            RedocRenderPlugin(path="/redoc"),
+            StoplightRenderPlugin(path="/stoplight"),
+            SwaggerRenderPlugin(path="/swagger"),
         ],
+        path="/api/schema",
     ),
 )
