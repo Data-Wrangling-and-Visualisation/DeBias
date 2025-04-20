@@ -5,6 +5,7 @@ import litestar as lt
 import msgspec as ms
 import polars as pl
 from litestar import Litestar
+from litestar.config.cors import CORSConfig
 
 from debias.server.config import Config
 
@@ -344,4 +345,7 @@ def get_keywords_graph(
     return result
 
 
-app = Litestar(route_handlers=[get_targets, get_keywords, get_topics, get_topics_graph, get_keywords_graph])
+app = Litestar(
+    route_handlers=[get_targets, get_keywords, get_topics, get_topics_graph, get_keywords_graph],
+    cors_config=CORSConfig(),
+)
