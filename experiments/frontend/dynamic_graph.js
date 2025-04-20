@@ -123,7 +123,7 @@ function createSandboxNetwork(options) {
                  article.keyword.related.forEach(pair => {
                      const [id1, id2] = [keyword, pair.keyword.text].sort();
                         if (!linksCount.has(id1)) linksCount.set(id1, new Map());
-                        linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + 1);
+                        linksCount.get(id1).set(id2, (linksCount.get(id1).get(id2) || 0) + pair.cooccurrence_count);
                  })
         });
 
