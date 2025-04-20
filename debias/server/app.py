@@ -230,6 +230,16 @@ def get_topics_graph(
 
     topics_df = df.select(pl.col("topic_id"), pl.col("topic_type"), pl.col("topic"), pl.col("topic_count")).unique()
 
+    mentioned_in_df = df.group_by("topic_id").agg(
+        pl.struct(
+            pl.col("document_id").alias("id"),
+            pl.col("document_title").alias("title"),
+            pl.col("document_snippet").alias("snippet"),
+            pl.col("target_alignment").alias("alignment"),
+            pl.col("target_country").alias("country"),
+        ).alias("mentioned_in"),
+    )
+
     doc_topic_df = df.select(pl.col("document_id"), pl.col("topic_id"), pl.col("topic_type"), pl.col("topic"))
 
     cooccurrences_df = (
@@ -259,6 +269,7 @@ def get_topics_graph(
 
     result = (
         topics_df.join(related_topics_df, on="topic_id", how="left")
+        .join(mentioned_in_df, on="topic_id", how="left")
         .select(
             pl.struct(
                 pl.struct(
@@ -267,7 +278,8 @@ def get_topics_graph(
                     pl.col("topic_count").alias("total_count"),
                 ).alias("topic"),
                 pl.col("related").fill_null([]),
-            )
+            ),
+            pl.col("mentioned_in"),
         )
         .collect()
         .to_dicts()
@@ -323,6 +335,16 @@ def get_keywords_graph(
         pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"), pl.col("keyword_count")
     ).unique()
 
+    mentioned_in_df = df.group_by("keyword_id").agg(
+        pl.struct(
+            pl.col("document_id").alias("id"),
+            pl.col("document_title").alias("title"),
+            pl.col("document_snippet").alias("snippet"),
+            pl.col("target_alignment").alias("alignment"),
+            pl.col("target_country").alias("country"),
+        ).alias("mentioned_in"),
+    )
+
     doc_keyword_df = df.select(pl.col("document_id"), pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"))
 
     cooccurrences_df = (
@@ -352,6 +374,7 @@ def get_keywords_graph(
 
     result = (
         keywords_df.join(related_keywords_df, on="keyword_id", how="left")
+        .join(mentioned_in_df, on="keyword_id", how="left")
         .select(
             pl.struct(
                 pl.struct(
@@ -360,7 +383,8 @@ def get_keywords_graph(
                     pl.col("keyword_count").alias("total_count"),
                 ).alias("keyword"),
                 pl.col("related").fill_null([]),
-            )
+            ),
+            pl.col("mentioned_in"),
         )
         .collect()
         .to_dicts()
