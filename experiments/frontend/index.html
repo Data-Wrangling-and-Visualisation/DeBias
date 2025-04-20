@@ -15,12 +15,12 @@
     <!-- Include D3.js library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="topic_dist.js"></script>
+    <script src="topic_distribution.js"></script>
     <!-- Network graph scripts -->
     <script src="dynamic_graph.js"></script>
     <script src="static_graph_left.js"></script>
-    <script src="static-graph-right.js"></script>
-    <script src="static-graph.js"></script>
+    <script src="static_graph_right.js"></script>
+    <script src="static_graph.js"></script>
 </head>
 <body>
 <div class="page-container">
@@ -169,7 +169,7 @@
                     <h3>Topic Filters</h3>
                     <div class="topic-controls">
                         <!-- Add the 'multiple' attribute -->
-                        <select id="topic-selector" multiple size="6"> <!-- Optional: 'size' shows more options -->
+                        <select id="topic-selector" multiple size="6">
                             <option value="all" selected>All Topics (Default)</option>
                             <option value="politics">Politics</option>
                             <option value="business">Business</option>
@@ -238,28 +238,26 @@
 <script> draw_hist("https://debias.api.dartt0n.ru/api/topics/?alignment=Lean%20Left;Left", "#left_hist", "#left_hist_tooltip") </script>
 <script> draw_hist("https://debias.api.dartt0n.ru/api/topics/?alignment=Lean%20Right;Right", "#right_hist", "#right_hist_tooltip") </script>
 
-<!-- Network graph scripts -->
-<!-- <script src="network_graph.js"></script> -->
-
 <!-- Tab switching functionality -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContainer = document.querySelector('.section-tabs');
         const contentSections = document.querySelectorAll('.content-section');
 
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Remove active class from all buttons and sections
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                contentSections.forEach(section => section.classList.remove('active'));
+        tabContainer.addEventListener('click', function(event) {
+            const button = event.target.closest('.tab-button');
+            if (!button) return;
 
-                // Add active class to clicked button
-                this.classList.add('active');
+            // Remove active class from all buttons and sections
+            tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            contentSections.forEach(section => section.classList.remove('active'));
 
-                // Show corresponding section
-                const sectionId = this.getAttribute('data-section');
-                document.getElementById(sectionId).classList.add('active');
-            });
+            // Add active class to clicked button
+            button.classList.add('active');
+
+            // Show corresponding section
+            const sectionId = button.getAttribute('data-section');
+            document.getElementById(sectionId).classList.add('active');
         });
     });
 </script>
