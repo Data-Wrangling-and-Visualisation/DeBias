@@ -54,7 +54,7 @@ function draw_hist(path, elem, tooltipobj) {
 
             // Then create an array of objects with date and topic counts
         return allDates.map(date => {
-                const dateData = {date};
+                const dateData = {};
 
                 data.forEach(topic => {
                     const bucket = topic.buckets.find(b => b.date === date);
