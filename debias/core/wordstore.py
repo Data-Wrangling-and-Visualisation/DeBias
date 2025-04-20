@@ -210,7 +210,7 @@ class Wordstore:
                 # create new keywords if not exists, update count if exists
                 insert_keywords = psycopg.sql.SQL("""
                     insert into keywords (type, keyword, count) values (%s, %s, 1)
-                    on conflict (type, keyword) do update set count = count + 1;
+                    on conflict (type, keyword) do update set count = count + 1
                     returning id;
                 """)
                 keyword_ids = []
@@ -223,7 +223,7 @@ class Wordstore:
                 # create new topics if not exists, update count if exists
                 insert_topics = psycopg.sql.SQL("""
                     insert into topics (type, topic, count) values (%s, %s, 1)
-                    on conflict (type, topic) do update set count = count + 1;
+                    on conflict (type, topic) do update set count = count + 1
                     returning id;
                 """)
                 topic_ids = []
