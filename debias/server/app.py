@@ -294,6 +294,7 @@ def get_keywords_graph(
     date_till: datetime.date | None = None,
     country: str | None = None,
     alignment: str | None = None,
+    topic: str | None = None,
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
@@ -310,11 +311,15 @@ def get_keywords_graph(
             t.name as target_name,
             t.main_page as target_main_page,
             t.country as target_country,
-            t.alignment as target_alignment
+            t.alignment as target_alignment,
+            tp.topic as topic,
+            tp.type as topic_type
         from keyword_appearances as ka
         join keywords as k on k.id = ka.keyword_id
         join documents as d on d.id = ka.document_id
         join targets as t on t.id = d.target_id
+        join topic_appearances as ta on ta.document_id = d.id
+        join topics as tp on tp.id = ta.topic_id
         """,
         uri=config.pg.connection,
     ).lazy()
@@ -331,9 +336,21 @@ def get_keywords_graph(
     if alignment is not None:
         df = df.filter(pl.col("target_alignment").is_in(alignment.split(";")))
 
+    if topic is not None:
+        df = df.filter(pl.col("topic").is_in(topic.split(";")))
+
     keywords_df = df.select(
         pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"), pl.col("keyword_count")
     ).unique()
+
+    topics_df = df.group_by("keyword_id").agg(
+        pl.struct(
+            pl.col("topic").alias("text"),
+            pl.col("topic_type").alias("type"),
+        )
+        .alias("topics")
+        .unique(),
+    )
 
     mentioned_in_df = df.group_by("keyword_id").agg(
         pl.struct(
@@ -375,6 +392,7 @@ def get_keywords_graph(
     result = (
         keywords_df.join(related_keywords_df, on="keyword_id", how="left")
         .join(mentioned_in_df, on="keyword_id", how="left")
+        .join(topics_df, on="keyword_id", how="left")
         .select(
             pl.struct(
                 pl.struct(
@@ -385,6 +403,7 @@ def get_keywords_graph(
                 pl.col("related").fill_null([]),
             ),
             pl.col("mentioned_in"),
+            pl.col("topics"),
         )
         .collect()
         .to_dicts()
