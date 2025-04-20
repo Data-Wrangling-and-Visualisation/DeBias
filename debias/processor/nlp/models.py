@@ -1,6 +1,6 @@
-from typing import List, Dict, Optional, Union, Any
 from dataclasses import dataclass
 from datetime import datetime
+
 from debias.core.wordstore import Keyword, Topic
 
 
@@ -10,12 +10,12 @@ class RawNewsData:
 
     title: str
     title_normalized: str
-    datetime_obj: Optional[datetime]
+    datetime_obj: datetime | None
     website: str
     content: str
     content_normalized: str
     source_file: str | None = None
-    keywords_data: List[Keyword] | None = None
+    keywords_data: list[Keyword] | None = None
     category: str | None = None
 
     def __post_init__(self):
@@ -27,8 +27,8 @@ class RawNewsData:
 class FormattedNewsData:
     """Model for the final output format"""
 
-    article_datetime: Optional[datetime]
+    article_datetime: datetime | None
     snippet: str
     title: str
-    keywords: List[Keyword]
-    topics: List[Topic]
+    keywords: list[Keyword]
+    topics: list[Topic]

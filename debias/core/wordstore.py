@@ -65,7 +65,7 @@ class Wordstore:
             );
         """)
         await conn.execute("""
-            insert into targets (id,' name', main_page,' conutry', alignment) values
+            insert into targets (id, name, main_page, country, alignment) values
                 ('SKY','Sky News','https://news.sky.com/','UK','Lean Left'),
                 ('GBN','GBN','https://www.gbnews.com/','UK','Lean Right'),
                 ('ABC','ABC News','http://abcnews.go.com/','USA','Lean Left'),

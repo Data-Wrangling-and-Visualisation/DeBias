@@ -1,3 +1,8 @@
+spacy_path = "somevalue"
+transformers_path = "somevalue"
+spacy_model = "somevalue"
+transformers_model = "somevalue"
+
 [s3]
 access_key = "someaccesskey"
 secret_key = "somesecretkey"
@@ -7,3 +12,7 @@ region = "someregion"
 
 [pg]
 connection = "user=someuser password=somepassword host=postgres port=5432 dbname=postgres"
+
+
+[nats]
+dsn = "nats://message-queue:4222"

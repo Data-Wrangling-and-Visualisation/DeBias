@@ -15,7 +15,10 @@ class Config(BaseSettings):
     nats: NatsConfig = Field(default_factory=NatsConfig, description="NATS configuration")
     s3: S3Config = Field(description="S3 configuration")
     pg: PostgresConfig = Field(description="PostgreSQL configuration")
-    models: str = Field(default="models", description="Path to models directory")
+    spacy_path: str = Field(default="models", description="Path to models directory")
+    transformers_path: str = Field(default="models/cache", description="Path to models directory")
+    spacy_model: str = Field(default="en_core_web_lg", description="Spacy model name")
+    transformers_model: str = Field(default="facebook/bart-large-mnli", description="Transformers model name")
 
     @property
     def version(self) -> str:

@@ -51,8 +51,12 @@ services:
       dockerfile: processor.dockerfile
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
-      - ./models:/models
+      - ./models:/models:ro
     command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+    depends_on:
+      - postgres
+      - key-value
+      - message-queue
 
   message-queue:
     image: nats:2.11-linux

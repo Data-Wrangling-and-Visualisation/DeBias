@@ -1,4 +1,5 @@
 import re
+
 import nltk
 
 # Regex patterns
@@ -67,9 +68,6 @@ NEWS_CATEGORIES = [
     "world",
     "environment",
 ]
-
-SPACY_MODEL = "en_core_web_lg"
-TRANSFORMER_MODEL = "facebook/bart-large-mnli"
 
 # Output settings
 SNIPPET_LENGTH = 200

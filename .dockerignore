@@ -1,6 +1,18 @@
 assets
 **/config.toml
 volumes
+.github
+data
+docs
+experiments
+models
+reports
+.env
+.gitattributes
+.gitignore
+config.toml
+docker-compose.yml
+LICENSE
 
 # Mac OS
 **/*.DB_Store

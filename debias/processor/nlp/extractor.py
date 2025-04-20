@@ -2,7 +2,7 @@ import os
 
 import spacy
 
-from debias.processor.nlp.config import MAX_KEYWORDS, SPACY_MODEL
+from debias.processor.nlp.config import MAX_KEYWORDS
 from debias.processor.nlp.models import Keyword
 from debias.processor.nlp.utils import clean_text, is_valid_keyword, normalize_text
 
@@ -10,8 +10,8 @@ from debias.processor.nlp.utils import clean_text, is_valid_keyword, normalize_t
 class SpacyKeywordExtractor:
     """Base class for keyword extraction using spaCy"""
 
-    def __init__(self, model_path: str):
-        self.nlp = spacy.load(os.path.join(model_path, SPACY_MODEL))
+    def __init__(self, path: str, model: str):
+        self.nlp = spacy.load(os.path.join(path, model))
 
     def extract_unique_keywords(self, title: str, content: str = "") -> list[Keyword]:
         """Extract unique keywords using spaCy NER"""
