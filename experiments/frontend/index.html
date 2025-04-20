@@ -28,24 +28,24 @@
             <p class="tagline">Analyzing media polarization through data</p>
         </div>
     </header>
-    
+
     <!-- Introduction Section -->
     <section class="intro-section">
         <div class="description">
             <p>Explore how keywords connect and topics differ across the political spectrum, visualized through histograms and network graphs.</p>
         </div>
-        
+
         <div class="section-tabs">
             <button class="tab-button active" data-section="histogram-section">Keyword Distribution</button>
             <button class="tab-button" data-section="network-section">Network Analysis</button>
             <button class="tab-button" data-section="sandbox-section">Sandbox</button>
         </div>
     </section>
-    
+
     <!-- Histogram Section -->
     <section id="histogram-section" class="content-section active">
         <h2 class="section-title">Topic Distribution Comparison</h2>
-        
+
         <div class="spectrum-container">
             <div class="spectrum-box left-box">
                 <div class="spectrum-header left-header">
@@ -57,11 +57,11 @@
                 <div id="left_hist" class="hist"></div>
                 <div id="left_hist_tooltip" class="tooltip" style="opacity: 0;"></div>
             </div>
-            
+
             <div class="divider">
                 <div class="vs-badge">VS</div>
             </div>
-            
+
             <div class="spectrum-box right-box">
                 <div class="spectrum-header right-header">
                     <div class="ideology-icon right-icon">
@@ -74,11 +74,11 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Network Graph Section -->
     <section id="network-section" class="content-section">
         <h2 class="section-title">Network Analysis</h2>
-        
+
         <div class="network-container">
             <div class="network-row">
                 <div class="network-box left-network">
@@ -90,7 +90,7 @@
                     </div>
                     <div id="left_network" class="network-graph"></div>
                 </div>
-                
+
                 <div class="network-box right-network">
                     <div class="network-header right-header">
                         <div class="ideology-icon right-icon">
@@ -101,7 +101,7 @@
                     <div id="right_network" class="network-graph"></div>
                 </div>
             </div>
-            
+
             <div class="network-row full-width">
                 <div class="network-box combined-network">
                     <div class="network-header combined-header">
@@ -115,11 +115,11 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Sandbox Section -->
     <section id="sandbox-section" class="content-section">
         <h2 class="section-title">Analysis Sandbox</h2>
-        
+
         <div class="sandbox-container">
             <div class="control-panel">
                 <div class="control-group">
@@ -135,7 +135,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="control-group">
                     <h3>Media Sources</h3>
                     <div class="source-controls">
@@ -154,7 +154,7 @@
                         <button class="control-button" id="customize-sources">Customize Sources</button>
                     </div>
                 </div>
-                
+
                 <div class="control-group">
                     <h3>Topic Filters</h3>
                     <div class="topic-controls">
@@ -176,7 +176,7 @@
                          <small style="color: #777; font-size: 0.8em;">Hold Ctrl/Cmd to select multiple. Select 'All Topics' to clear filter.</small>
                     </div>
                 </div>
-                
+
                 <div class="control-group">
                     <h3>Visualization Settings</h3>
                     <div class="viz-controls">
@@ -192,10 +192,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <button id="apply-settings" class="primary-button">Apply Settings</button>
             </div>
-            
+
             <div class="results-preview">
                 <h3>Preview</h3>
                 <div id="sandbox-preview" class="preview-area"></div>
@@ -213,7 +213,7 @@
             </div>
         </div>
     </section>
-    
+
     <footer class="main-footer">
         <p>DeBias - Understanding Media Polarization Through Data Visualization</p>
     </footer>
@@ -225,8 +225,8 @@
 </script>
 
 <!-- Histogram scripts -->
-<script> draw_hist("parsed_news.json", "#left_hist", "#left_hist_tooltip") </script>
-<script> draw_hist("parsed_news.json", "#right_hist", "#right_hist_tooltip") </script>
+<script> draw_hist("https://debias.api.dartt0n.ru/api/topics/?alignment=Lean%20Left", "#left_hist", "#left_hist_tooltip") </script>
+<script> draw_hist("https://debias.api.dartt0n.ru/api/topics/?alignment=Lean%20Right", "#right_hist", "#right_hist_tooltip") </script>
 
 <!-- Network graph scripts -->
 <!-- <script src="network_graph.js"></script> -->
@@ -236,16 +236,16 @@
     document.addEventListener('DOMContentLoaded', function() {
         const tabButtons = document.querySelectorAll('.tab-button');
         const contentSections = document.querySelectorAll('.content-section');
-        
+
         tabButtons.forEach(button => {
             button.addEventListener('click', function() {
                 // Remove active class from all buttons and sections
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 contentSections.forEach(section => section.classList.remove('active'));
-                
+
                 // Add active class to clicked button
                 this.classList.add('active');
-                
+
                 // Show corresponding section
                 const sectionId = this.getAttribute('data-section');
                 document.getElementById(sectionId).classList.add('active');

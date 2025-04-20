@@ -1,6 +1,3 @@
-// Global topicColorMap declared in index.html should be accessible here
-// const topicColorMap = {}; // Already defined in index.html
-
 function draw_hist(path, elem, tooltipobj) {
     // Determine if this is left or right histogram based on the element ID
     const isLeftChart = elem.includes("left");
@@ -39,82 +36,75 @@ function draw_hist(path, elem, tooltipobj) {
     var container = d3.select(elem);
     container.selectAll("*").remove(); // Clear previous SVG if any
 
-    // Create SVG with proper responsive sizing
-    var svg = container
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("viewBox", "0 0 800 500") // Define a base viewBox
-        .attr("preserveAspectRatio", "xMidYMid meet")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Calculate dimensions based on viewBox, adjusted for margins
     var width = 800 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-    // --- Data Loading and Processing ---
-    d3.json(path).then(function(rawData) {
 
-        if (!rawData || rawData.length === 0) {
-            console.warn(`No data loaded from ${path} for ${elem}.`);
-            svg.append("text")
-               .attr("x", width / 2)
-               .attr("y", height / 2)
-               .attr("text-anchor", "middle")
-               .style("font-size", "16px")
-               .style("fill", "#777")
-               .text("No data available for this selection.");
-            return; // Stop execution if no data
+    // Parse the Data
+    d3.json(path).then(function(data) {
+
+    // Transform data to group by keyword
+    function prepareHistogramData(data) {
+            // First, get all unique dates
+            const allDates = [...new Set(data.flatMap(topic =>
+                topic.buckets.map(bucket => bucket.date)
+            ))].sort();
+
+            // Then create an array of objects with date and topic counts
+        return allDates.map(date => {
+                const dateData = {date};
+
+                data.forEach(topic => {
+                    const bucket = topic.buckets.find(b => b.date === date);
+                    dateData[topic.topic.text] = bucket ? bucket.count : 0;
+                });
+
+                return dateData;
+            });
         }
 
-        // --- IMPORTANT LIMITATION ---
-        // The provided JSON format *does not* contain information about the media source's
-        // political leaning. Therefore, both the "left" and "right" charts will currently
-        // display the *same* data aggregated from the *entire* parsed_news.json file.
-        // To show different data, you would need to:
-        // 1. Add a 'leaning' field (e.g., "left", "right", "center") to each article object in parsed_news.json.
-        // 2. Filter the rawData here based on the 'isLeftChart' flag.
-        // Example filtering (if 'leaning' field existed):
-        // const filteredData = rawData.filter(article => {
-        //     if (isLeftChart) {
-        //         return article.leaning === 'left';
-        //     } else {
-        //         return article.leaning === 'right';
-        //     }
-        // });
-        const filteredData = rawData; // Using all data for now
+        let transformedData = prepareHistogramData(data);
 
-        // --- Data Transformation ---
-        // Group data by date and aggregate topic counts
-        const aggregatedData = {}; // { "YYYY-MM-DD": { "topic1": count, "topic2": count }, ... }
 
-        filteredData.forEach(article => {
-            if (!article.article_datetime || !article.topics || article.topics.length === 0) {
-                return; // Skip articles without date or topics
+        // Get all unique keywords
+        keywords = [...new Set(data.map(d => d.topic.text))];
+
+        // Assign consistent colors to topics if they don't already have colors
+        keywords.forEach((keyword, index) => {
+            if (!topicColorMap[keyword]) {
+                // Assign a color from our topic palette
+                topicColorMap[keyword] = themeColors.topics[index % themeColors.topics.length];
             }
-
-            // Extract date part (YYYY-MM-DD)
-            const dateStr = article.article_datetime.substring(0, 10);
-
-            // Initialize date entry if it doesn't exist
-            if (!aggregatedData[dateStr]) {
-                aggregatedData[dateStr] = {};
-            }
-
-            // Increment count for each topic mentioned in the article
-            article.topics.forEach(topicObj => {
-                const topicText = topicObj.text; // Assuming 'text' field holds the topic name
-                if (topicText) {
-                    aggregatedData[dateStr][topicText] = (aggregatedData[dateStr][topicText] || 0) + 1;
-                }
-            });
         });
+
+        // Set up color scale using our consistent color mapping
+        const color = d3.scaleOrdinal()
+            .domain(keywords)
+            .range(keywords.map(keyword => topicColorMap[keyword]));
+
+        // Create SVG with proper responsive sizing
+        var container = d3.select(elem);
+        var svg = container
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", "0 0 800 500")
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Calculate dimensions
+        var width = 800 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+
 
         // Convert aggregated data to array format suitable for d3.stack
         // And get a list of all unique topics found
         const allTopics = new Set();
-        const transformedData = Object.entries(aggregatedData).map(([date, topics]) => {
+        transformedData = Object.entries(transformedData).map(([date, topics]) => {
             Object.keys(topics).forEach(topic => allTopics.add(topic));
             return {
                 date,
@@ -144,11 +134,6 @@ function draw_hist(path, elem, tooltipobj) {
                 topicColorMap[topic] = themeColors.topics[index % themeColors.topics.length];
             }
         });
-
-        // Set up color scale using our consistent color mapping
-        const color = d3.scaleOrdinal()
-            .domain(uniqueTopics)
-            .range(uniqueTopics.map(topic => topicColorMap[topic]));
 
         // --- D3 Stack Layout ---
         const stack = d3.stack()
@@ -381,8 +366,7 @@ function draw_hist(path, elem, tooltipobj) {
         const legendItemHeight = 25; // Space between legend items
         const legendPadding = 10;
         const legendWidth = 140; // Fixed width for the legend box
-        const maxLegendHeight = height; // Max height allowed for legend items area
-        const legendScrollThreshold = Math.floor(maxLegendHeight / legendItemHeight);
+        const legendScrollThreshold = Math.floor(height / legendItemHeight);
 
         const legend = legendContainer.append("g")
             .attr("class", "legend-items")
