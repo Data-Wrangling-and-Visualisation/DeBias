@@ -37,17 +37,20 @@ def get_targets(
     ).lazy()
 
     if country is not None:
-        df = df.filter(pl.col("country") == country)
+        df = df.filter(pl.col("country").is_in(country.split(";")))
 
     if alignment is not None:
-        df = df.filter(pl.col("alignment") == alignment)
+        df = df.filter(pl.col("alignment").is_in(alignment.split(";")))
 
     return [ms.json.decode(x, type=Target) for x in df.collect().to_dicts()]  # type: ignore
 
 
 @lt.get("/api/keywords", sync_to_thread=False)
 def get_keywords(
-    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+    country: str | None = None,
+    alignment: str | None = None,
+    date_from: datetime.date | None = None,
+    date_till: datetime.date | None = None,
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
@@ -73,14 +76,17 @@ def get_keywords(
         uri=config.pg.connection,
     ).lazy()
 
-    if date is not None:
-        df = df.filter(pl.col("document_datetime").dt.date() == date)
+    if date_from is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().ge(date_from))
+
+    if date_till is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().le(date_till))
 
     if country is not None:
-        df = df.filter(pl.col("target_country") == country)
+        df = df.filter(pl.col("target_country").is_in(country.split(";")))
 
     if alignment is not None:
-        df = df.filter(pl.col("target_alignment") == alignment)
+        df = df.filter(pl.col("target_alignment").is_in(alignment.split(";")))
 
     result = (
         df.with_columns(pl.col("document_datetime").dt.date().alias("date"))
@@ -111,7 +117,10 @@ def get_keywords(
 
 @lt.get("/api/topics", sync_to_thread=False)
 def get_topics(
-    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+    date_from: datetime.date | None = None,
+    date_till: datetime.date | None = None,
+    country: str | None = None,
+    alignment: str | None = None,
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
@@ -137,14 +146,17 @@ def get_topics(
         uri=config.pg.connection,
     ).lazy()
 
-    if date is not None:
-        df = df.filter(pl.col("document_datetime").dt.date() == date)
+    if date_from is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().ge(date_from))
+
+    if date_till is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().le(date_till))
 
     if country is not None:
-        df = df.filter(pl.col("target_country") == country)
+        df = df.filter(pl.col("target_country").is_in(country.split(";")))
 
     if alignment is not None:
-        df = df.filter(pl.col("target_alignment") == alignment)
+        df = df.filter(pl.col("target_alignment").is_in(alignment.split(";")))
 
     result = (
         df.with_columns(pl.col("document_datetime").dt.date().alias("date"))
@@ -175,7 +187,10 @@ def get_topics(
 
 @lt.get("/api/topics/graph", sync_to_thread=False)
 def get_topics_graph(
-    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+    date_from: datetime.date | None = None,
+    date_till: datetime.date | None = None,
+    country: str | None = None,
+    alignment: str | None = None,
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
@@ -201,14 +216,17 @@ def get_topics_graph(
         uri=config.pg.connection,
     ).lazy()
 
-    if date is not None:
-        df = df.filter(pl.col("document_datetime").dt.date() == date)
+    if date_from is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().ge(date_from))
+
+    if date_till is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().le(date_till))
 
     if country is not None:
-        df = df.filter(pl.col("target_country") == country)
+        df = df.filter(pl.col("target_country").is_in(country.split(";")))
 
     if alignment is not None:
-        df = df.filter(pl.col("target_alignment") == alignment)
+        df = df.filter(pl.col("target_alignment").is_in(alignment.split(";")))
 
     topics_df = df.select(pl.col("topic_id"), pl.col("topic_type"), pl.col("topic"), pl.col("topic_count")).unique()
 
@@ -260,7 +278,10 @@ def get_topics_graph(
 
 @lt.get("/api/keywords/graph", sync_to_thread=False)
 def get_keywords_graph(
-    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
+    date_from: datetime.date | None = None,
+    date_till: datetime.date | None = None,
+    country: str | None = None,
+    alignment: str | None = None,
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
@@ -286,14 +307,17 @@ def get_keywords_graph(
         uri=config.pg.connection,
     ).lazy()
 
-    if date is not None:
-        df = df.filter(pl.col("document_datetime").dt.date() == date)
+    if date_from is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().ge(date_from))
+
+    if date_till is not None:
+        df = df.filter(pl.col("document_datetime").dt.date().le(date_till))
 
     if country is not None:
-        df = df.filter(pl.col("target_country") == country)
+        df = df.filter(pl.col("target_country").is_in(country.split(";")))
 
     if alignment is not None:
-        df = df.filter(pl.col("target_alignment") == alignment)
+        df = df.filter(pl.col("target_alignment").is_in(alignment.split(";")))
 
     keywords_df = df.select(
         pl.col("keyword_id"), pl.col("keyword_type"), pl.col("keyword"), pl.col("keyword_count")
