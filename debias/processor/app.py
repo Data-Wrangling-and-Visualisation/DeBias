@@ -8,12 +8,12 @@ from debias.core.metastore import Metadata, Metastore
 from debias.core.models import ProcessRequest
 from debias.core.s3 import S3Client
 from debias.processor.config import Config
-
 from debias.processor.nlp.classifier import ZeroShotClassifier
 from debias.processor.nlp.extractor import SpacyKeywordExtractor
 
 broker = NatsBroker(pedantic=True)
 app = FastStream(broker)
+
 
 class DI:
     """Dependency Injection Container"""
@@ -29,7 +29,7 @@ class DI:
         cls.s3 = S3Client(cls.config.s3)
         cls.metastore = Metastore(cls.config.pg.connection)
         cls.wordstore = Wordstore(cls.config.pg.connection)
-        cls.keyword_extractor = SpacyKeywordExtractor()
+        cls.keyword_extractor = SpacyKeywordExtractor(cls.config.models)
         cls.classifier = ZeroShotClassifier()
 
         cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
@@ -102,7 +102,7 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
             content=content,
             metadata=data.metadata,
             datetime=data.datetime,
-        )
+        ),
     )
     if result is None:
         logger.info("failed to process webpage, rejecting it")

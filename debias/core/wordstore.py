@@ -65,6 +65,48 @@ class Wordstore:
             );
         """)
         await conn.execute("""
+            insert into targets (id,' name', main_page,' conutry', alignment) values
+                ('SKY','Sky News','https://news.sky.com/','UK','Lean Left'),
+                ('GBN','GBN','https://www.gbnews.com/','UK','Lean Right'),
+                ('ABC','ABC News','http://abcnews.go.com/','USA','Lean Left'),
+                ('DMU','Daily Mail','https://www.dailymail.co.uk/home/index.html','UK','Right'),
+                ('TIM','The Times','https://www.thetimes.com/','UK','Center'),
+                ('MIR','The Mirror','https://www.mirror.co.uk/','UK','Left'),
+                ('MET','Metro','https://metro.co.uk/','UK','Lean Left'),
+                ('STD','The Standard','https://www.standard.co.uk/','UK','Center'),
+                ('WAL','Wales Online','https://www.walesonline.co.uk/','UK','Lean Left'),
+                ('SUN','The Sun','https://www.thesun.co.uk/','UK','Center'),
+                ('GRD','The Guardian','https://www.theguardian.com/uk-news','UK','Left'),
+                ('BBC','BBC News','http://www.bbc.com/','UK','Center'),
+                ('BLB','Bloomberg','http://www.bloomberg.com/','USA','Lean Left'),
+                ('BUS','Business Insider','https://www.insider.com/','USA','Lean Left'),
+                ('BFN','BuzzFeed News','https://www.buzzfeednews.com','USA','Left'),
+                ('CBS','CBS News','https://www.cbsnews.com','USA','Lean Left'),
+                ('CNN','CNN Digital','https://cnn.com','USA','Lean Left'),
+                ('FRB','Forbes','https://www.forbes.com','USA','Center'),
+                ('FND','Fox News Digital','http://www.foxnews.com/','USA','Right'),
+                ('NRN','National Review','https://www.nationalreview.com/news/','USA','Lean Right'),
+                ('NBC','NBC News Digital','https://www.nbcnews.com','USA','Lean Left'),
+                ('NYP','New York Post (News)','https://nypost.com','USA','Lean Right'),
+                ('NYT','New York Times (News)','https://www.nytimes.com','USA','Lean Left'),
+                ('NNN','NewsNation','https://www.newsnationnow.com','USA','Center'),
+                ('SPC','The American Spectator','https://spectator.org','USA','Right'),
+                ('ATL','The Atlantic','https://www.theatlantic.com/world/','USA','Left'),
+                ('DWN','The Daily Wire','https://www.dailywire.com','USA','Right'),
+                ('ECO','The Economist','https://www.economist.com','USA','Lean Left'),
+                ('FED','The Federalist','https://thefederalist.com','USA','Right'),
+                ('NYK','The New Yorker','https://www.newyorker.com','USA','Left'),
+                ('TIM','Time Magazine','https://time.com','USA','Lean Left'),
+                ('UTN','USA TODAY','https://www.usatoday.com','USA','Lean Left'),
+                ('VOX','Vox','https://www.vox.com','USA','Left'),
+                ('WSJ','Wall Street Journal (News)','https://www.wsj.com','USA','Center'),
+                ('WEN','Washington Examiner','https://washingtonexaminer.com','USA','Lean Right'),
+                ('WFB','Washington Free Beacon','https://freebeacon.com','USA','Right'),
+                ('WPN','Washington Post','https://www.washingtonpost.com','USA','Lean Left'),
+                ('WTN','Washington Times','https://www.washingtontimes.com','USA','Lean Right')
+            on conflict (id) do nothing;
+        """)
+        await conn.execute("""
             create table if not exists documents (
                 id serial primary key,
                 title text not null,

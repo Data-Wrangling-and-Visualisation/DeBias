@@ -1,20 +1,19 @@
-from typing import List, Dict, Set
-import spacy
-from nltk.tokenize import word_tokenize
-from collections import defaultdict
+import os
 
-from debias.processor.nlp.config import SPACY_MODEL, MAX_KEYWORDS
-from debias.processor.nlp.utils import clean_text, is_valid_keyword, normalize_text
+import spacy
+
+from debias.processor.nlp.config import MAX_KEYWORDS, SPACY_MODEL
 from debias.processor.nlp.models import Keyword
+from debias.processor.nlp.utils import clean_text, is_valid_keyword, normalize_text
 
 
 class SpacyKeywordExtractor:
     """Base class for keyword extraction using spaCy"""
 
-    def __init__(self):
-        self.nlp = spacy.load(SPACY_MODEL)
+    def __init__(self, model_path: str):
+        self.nlp = spacy.load(os.path.join(model_path, SPACY_MODEL))
 
-    def extract_unique_keywords(self, title: str, content: str = "") -> List[Keyword]:
+    def extract_unique_keywords(self, title: str, content: str = "") -> list[Keyword]:
         """Extract unique keywords using spaCy NER"""
         normalized_title = normalize_text(title)
         normalized_content = normalize_text(content) if content else ""

@@ -51,9 +51,8 @@ services:
       dockerfile: processor.dockerfile
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
-    command: bash -c "while true; do sleep 1; done"
-    
-    # "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+      - ./models:/models
+    command: "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
 
   message-queue:
     image: nats:2.11-linux

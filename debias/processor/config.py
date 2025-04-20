@@ -15,6 +15,7 @@ class Config(BaseSettings):
     nats: NatsConfig = Field(default_factory=NatsConfig, description="NATS configuration")
     s3: S3Config = Field(description="S3 configuration")
     pg: PostgresConfig = Field(description="PostgreSQL configuration")
+    models: str = Field(default="models", description="Path to models directory")
 
     @property
     def version(self) -> str:

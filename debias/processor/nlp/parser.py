@@ -1,14 +1,13 @@
-import os
 import json
-import dateutil.parser
-from typing import Dict, Optional
-from urllib.parse import urlparse
-from bs4 import BeautifulSoup
 from datetime import datetime
+from urllib.parse import urlparse
 
-from debias.processor.nlp.utils import clean_text, normalize_text
+import dateutil.parser
+from bs4 import BeautifulSoup
+
 from debias.processor.nlp.config import MAX_CONTENT_LENGTH
 from debias.processor.nlp.models import RawNewsData
+from debias.processor.nlp.utils import clean_text, normalize_text
 
 
 def parse_news(html_content: str, url) -> RawNewsData:
@@ -50,7 +49,7 @@ def extract_title(soup: BeautifulSoup) -> str:
     return clean_text(title)
 
 
-def extract_date(soup: BeautifulSoup) -> Optional[datetime]:
+def extract_date(soup: BeautifulSoup) -> datetime | None:
     """Extract article date from HTML using a simple, generalized approach"""
     # Try meta tags with common date attributes
     for meta in soup.find_all("meta"):
