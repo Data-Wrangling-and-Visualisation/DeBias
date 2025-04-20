@@ -37,7 +37,6 @@ class DI:
         cls.renderer = Renderer()
 
         cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
-        cls.render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")
         cls.process_queue_publisher = broker.publisher(subject="process-queue", stream="debias")
         cls.metadata_queue_publisher = broker.publisher(subject="metadata-queue", stream="debias")
 

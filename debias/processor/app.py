@@ -36,11 +36,6 @@ class DI:
         cls.keyword_extractor = SpacyKeywordExtractor(cls.config.spacy_path, cls.config.spacy_model)
         cls.classifier = ZeroShotClassifier(cls.config.transformers_model)
 
-        cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
-        cls.render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")
-        cls.process_queue_publisher = broker.publisher(subject="process-queue", stream="debias")
-        cls.metadata_queue_publisher = broker.publisher(subject="metadata-queue", stream="debias")
-
 
 @app.on_startup
 async def app_on_startup(context: ContextRepo, config: str):
@@ -64,11 +59,11 @@ async def app_after_startup(context: ContextRepo, logger: Logger):
 
 
 @app.on_shutdown
-async def app_on_shutdown(context: ContextRepo):
+async def app_on_shutdown(context: ContextRepo, logger: Logger):
     """Lifespan hook that is called when application is shutting down
     after it stops accepting any request or declaring queues
     """
-    pass
+    logger.info("app shutdown")
 
 
 @broker.subscriber(subject="process-queue", stream="debias", pull_sub=PullSub(batch_size=1))
