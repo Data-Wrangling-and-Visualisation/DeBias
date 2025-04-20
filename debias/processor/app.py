@@ -1,3 +1,5 @@
+import logging
+
 from core.wordstore import Wordstore
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, RejectMessage
@@ -13,6 +15,8 @@ from debias.processor.nlp.extractor import SpacyKeywordExtractor
 
 broker = NatsBroker(pedantic=True)
 app = FastStream(broker)
+
+logging.basicConfig(level=logging.INFO)
 
 
 class DI:
@@ -104,9 +108,11 @@ async def broker_stream_subscriber(msg: NatsMessage, data: ProcessRequest, logge
             datetime=data.datetime,
         ),
     )
+    logger.info(f"message successfully processed {result}")
     if result is None:
         logger.info("failed to process webpage, rejecting it")
         raise RejectMessage()  # raise it to completely reject message
 
     await DI.wordstore.save(result)
+    logger.info(f"message successfully saved {result}")
     raise AckMessage()  # successfully completed

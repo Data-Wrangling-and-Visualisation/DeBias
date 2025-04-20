@@ -56,10 +56,11 @@ class Wordstore:
     async def init(self):
         logger.info("initializing wordstore")
 
-        async with (await self._get_connection()).cursor() as conn:
+        conn = await self._get_connection()
+        async with conn.cursor() as cursor:
             logger.info("creating table targets")
-            await conn.execute("""
-                create table if not exists targets (
+            await cursor.execute("""
+                create table if not exists public.targets (
                     id text not null primary key,
                     name text not null,
                     main_page text not null,
@@ -68,8 +69,8 @@ class Wordstore:
                 );
             """)
             logger.info("inserting into table targets")
-            await conn.execute("""
-                insert into targets (id, name, main_page, country, alignment) values
+            await cursor.execute("""
+                insert into public.targets (id, name, main_page, country, alignment) values
                     ('SKY','Sky News','https://news.sky.com/','UK','Lean Left'),
                     ('GBN','GBN','https://www.gbnews.com/','UK','Lean Right'),
                     ('ABC','ABC News','http://abcnews.go.com/','USA','Lean Left'),
@@ -110,9 +111,9 @@ class Wordstore:
                     ('WTN','Washington Times','https://www.washingtontimes.com','USA','Lean Right')
                 on conflict (id) do nothing;
             """)
-            logger.info("inserting into table documents")
-            await conn.execute("""
-                create table if not exists documents (
+            logger.info("creating table documents")
+            await cursor.execute("""
+                create table if not exists public.documents (
                     id serial primary key,
                     title text not null,
                     absolute_url text not null,
@@ -123,52 +124,53 @@ class Wordstore:
                     snippet text not null
                 );               
             """)
-            logger.info("inserting into table keywords")
-            await conn.execute("""
-                create table if not exists keywords (
+            logger.info("creating table keywords")
+            await cursor.execute("""
+                create table if not exists public.keywords (
                     id serial primary key,
                     type text not null,
                     keyword text not null,
                     count int not null
                 );
             """)
-            await conn.execute("""
+            await cursor.execute("""
                 create unique index if not exists keywords_type_keyword
                     on keywords(type, keyword);
             """)
-            logger.info("inserting into table topics")
-            await conn.execute("""
-                create table if not exists topics (
+            logger.info("creating table topics")
+            await cursor.execute("""
+                create table if not exists public.topics (
                     id serial primary key,
                     type text not null,
                     topic text not null,
                     count int not null
                 );
             """)
-            await conn.execute(
+            await cursor.execute(
                 """
                 create unique index if not exists topics_type_topic
                     on topics(type, topic);
             """
             )
-            logger.info("inserting into table keyword_appearances")
-            await conn.execute("""
-                create table if not exists keyword_appearances (
+            logger.info("creating table keyword_appearances")
+            await cursor.execute("""
+                create table if not exists public.keyword_appearances (
                     keyword_id int references keywords(id),
                     document_id int references documents(id),
                     count int,
                     primary key (keyword_id, document_id)
                 );
             """)
-            logger.info("inserting into table topic_appearances")
-            await conn.execute("""
-                create table if not exists topic_appearances (
+            logger.info("creating table topic_appearances")
+            await cursor.execute("""
+                create table if not exists public.topic_appearances (
                     topic_id int references topics(id),
                     document_id int references documents(id),
                     count int,
                     primary key (topic_id, document_id)
                 );
             """)
+        await conn.commit()
 
     @asynccontextmanager
     async def with_transaction(self):
@@ -182,12 +184,13 @@ class Wordstore:
                 logger.debug("committing transaction")
 
     async def save(self, result: ProcessingResult):
+        conn = await self._get_connection()
         async with self.with_transaction():
-            async with (await self._get_connection()).cursor() as c:
+            async with conn.cursor() as c:
                 insert_document = psycopg.sql.SQL("""
-                    insert into documents (title, absolute_url, url_hash, target_id, scrape_datetime, article_datetime, snippet)
-                    values (%s, %s, %s, %s, %s, %s, %s)
-                    returning id;
+                    insert into public.documents (
+                        title, absolute_url, url_hash, target_id, scrape_datetime, article_datetime, snippet
+                    ) values (%s, %s, %s, %s, %s, %s, %s) returning id;
                 """)
                 r = await (
                     await c.execute(
@@ -209,7 +212,7 @@ class Wordstore:
 
                 # create new keywords if not exists, update count if exists
                 insert_keywords = psycopg.sql.SQL("""
-                    insert into keywords (type, keyword, count) values (%s, %s, 1)
+                    insert into public.keywords (type, keyword, count) values (%s, %s, 1)
                     on conflict (type, keyword) do update set count = keywords.count + 1
                     returning id;
                 """)
@@ -222,7 +225,7 @@ class Wordstore:
 
                 # create new topics if not exists, update count if exists
                 insert_topics = psycopg.sql.SQL("""
-                    insert into topics (type, topic, count) values (%s, %s, 1)
+                    insert into public.topics (type, topic, count) values (%s, %s, 1)
                     on conflict (type, topic) do update set count = topics.count + 1
                     returning id;
                 """)
@@ -234,7 +237,7 @@ class Wordstore:
                     topic_ids.append(r[0])
 
                 insert_keyword_appearances = psycopg.sql.SQL("""
-                    insert into keyword_appearances (keyword_id, document_id, count)
+                    insert into public.keyword_appearances (keyword_id, document_id, count)
                     values (%s, %s, 1)
                     on conflict (keyword_id, document_id) do update set count = keyword_appearances.count + 1;
                 """)
@@ -242,7 +245,7 @@ class Wordstore:
                     await c.execute(insert_keyword_appearances, (keyword_id, document_id))
 
                 insert_topic_appearances = psycopg.sql.SQL("""
-                    insert into topic_appearances (topic_id, document_id, count)
+                    insert into public.topic_appearances (topic_id, document_id, count)
                     values (%s, %s, 1)
                     on conflict (topic_id, document_id) do update set count = topic_appearances.count + 1;
                 """)
