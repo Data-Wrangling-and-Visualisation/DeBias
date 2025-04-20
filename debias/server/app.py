@@ -1,6 +1,5 @@
 import datetime
 import os
-from typing import Literal
 
 import litestar as lt
 import msgspec as ms
@@ -13,7 +12,7 @@ envs = {}
 for key, value in os.environ.items():
     envs[key.lower()] = value
 
-Config.model_config["toml_file"] = os.environ["server.config"]
+Config.model_config["toml_file"] = os.environ.get("config", "config.toml")
 
 config = Config()  # type: ignore
 
@@ -47,13 +46,11 @@ def get_targets(
 
 @lt.get("/keywords", sync_to_thread=False)
 def get_keywords(
-    group: Literal["country", "alignment"] | None = None,
-    date: datetime.date | None = None,
-    country: str | None = None,
-    alignment: str | None = None,
+    date: datetime.date | None = None, country: str | None = None, alignment: str | None = None
 ) -> list[dict]:
     df = pl.read_database_uri(
         query="""select
+            k.id as keyword_id,
             k.type as keyword_type,
             k.keyword,
             k.count as keyword_count,
@@ -62,7 +59,6 @@ def get_keywords(
             d.title as document_title,
             d.snippet as document_snippet,
             d.article_datetime as document_datetime,
-            d.id as document_id,
             t.id as target_id,
             t.name as target_name,
             t.main_page as target_main_page,
@@ -71,7 +67,7 @@ def get_keywords(
         from keyword_appearances as ka
         join keywords as k on k.id = ka.keyword_id
         join documents as d on d.id = ka.document_id
-        join targets as t on t.id = d.target_id;
+        join targets as t on t.id = d.target_id
         """,
         uri=config.pg.connection,
     ).lazy()
@@ -85,28 +81,30 @@ def get_keywords(
     if alignment is not None:
         df = df.filter(pl.col("target_alignment") == alignment)
 
-    df = (
-        df.group_by(pl.col("keyword_type"), pl.col("keyword"))
+    result = (
+        df.with_columns(pl.col("document_datetime").dt.date().alias("date"))
+        .group_by(["keyword_type", "keyword", "date"])
         .agg(
-            pl.struct(pl.col("keyword").alias("text"), pl.col("keyword_type").alias("type")).alias("keyword"),
-            pl.len().alias("total_count"),
-        )
-        .group_by(pl.col("document_datetime").dt.date())
-        .agg(
-            pl.col("document_datetime").dt.date().alias("date"),
             pl.len().alias("count"),
-            pl.col("mentioned_in").list.eval(
-                pl.struct(
-                    pl.element().struct.field("document_id").alias("id"),
-                    pl.element().struct.field("document_title").alias("title"),
-                    pl.element().struct.field("target_alignment").alias("alignment"),
-                    pl.element().struct.field("target_country").alias("country"),
-                ),
-            ),
+            pl.struct(
+                pl.col("document_id").alias("id"),
+                pl.col("document_title").alias("title"),
+                pl.col("target_alignment").alias("alignment"),
+                pl.col("target_country").alias("country"),
+            ).alias("mentioned_in"),
         )
+        .group_by(["keyword_type", "keyword"])
+        .agg(
+            pl.sum("count").alias("total_count"),
+            pl.struct(pl.col("date").cast(pl.Utf8), pl.col("count"), pl.col("mentioned_in")).alias("buckets"),
+        )
+        .with_columns(pl.struct(pl.col("keyword").alias("text"), pl.col("keyword_type").alias("type")).alias("keyword"))
+        .select(["keyword", "total_count", "buckets"])
+        .collect()
+        .to_dicts()
     )
 
-    return df.collect().to_dicts()
+    return result
 
 
 app = Litestar(route_handlers=[get_targets, get_keywords])
