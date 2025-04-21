@@ -1,235 +1,649 @@
-/* General body and layout */
-body {
-    font-family: Arial, sans-serif;
+:root {
+    --left-primary: #2B5BDC;
+    --left-secondary: #5478E4;
+    --left-light: #EBF0FF;
+    --right-primary: #DC2B3C;
+    --right-secondary: #E45458;
+    --right-light: #FFEBEE;
+    --neutral-dark: #333333;
+    --neutral-medium: #777777;
+    --neutral-light: #F0F2F5;
+    --background: #FAFAFA;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --combined-primary: #7056BF;
+    --combined-secondary: #8F7ED1;
+    --combined-light: #F5F0FF;
+}
+
+* {
     margin: 0;
     padding: 0;
-    display: flex; /* Use flexbox for layout */
-    height: 100vh;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--neutral-dark);
+    line-height: 1.6;
+}
+
+.page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Header styling */
+.main-header {
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+}
+
+.logo-container {
+    display: inline-block;
+}
+
+.logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 0.25rem;
+    position: relative;
+    display: inline-block;
+}
+
+.logo::before {
+    content: "";
+    position: absolute;
+    height: 8px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--left-primary) 0%, var(--right-primary) 100%);
+    bottom: 12px;
+    left: 0;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.logo {
+    background: linear-gradient(90deg, var(--left-primary) 0%, var(--left-secondary) 40%, var(--right-secondary) 60%, var(--right-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+    font-size: 1.1rem;
+    color: var(--neutral-medium);
+    font-weight: 300;
+}
+
+/* Introduction section */
+.intro-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.description {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-size: 1.15rem;
+    color: var(--neutral-medium);
+    padding: 0 1rem;
+}
+
+.section-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--neutral-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px var(--shadow);
+}
+
+.tab-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.tab-button.active {
+    background: linear-gradient(90deg, var(--left-primary), var(--right-primary));
+    color: white;
+    border: none;
+}
+
+/* Content sections */
+.content-section {
+    display: none;
+    margin-bottom: 3rem;
+}
+
+.content-section.active {
+    display: block;
+}
+
+.section-title {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--neutral-dark);
+}
+
+/* Histogram section styling */
+.spectrum-container {
+    display: flex;
+    width: 100%;
+    gap: 1.5rem;
+    position: relative;
+    height: 500px;
+    margin-bottom: 3rem;
+}
+
+.spectrum-box {
+    flex: 1;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
     overflow: hidden;
 }
 
-#controls {
-    width: 250px; /* Width of the control panel */
-    padding: 15px;
-    background-color: #f4f4f4;
-    border-right: 1px solid #ccc;
-    overflow-y: auto; /* Allow scrolling if controls overflow */
-    height: 100%;
-    box-sizing: border-box;
-    z-index: 200; /* Ensure controls are above graph */
+.left-box {
+    border-top: 5px solid var(--left-primary);
 }
 
-#controls h3 {
-    margin-top: 15px;
-    margin-bottom: 5px;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 3px;
+.right-box {
+    border-top: 5px solid var(--right-primary);
 }
 
-#controls h3:first-child {
-    margin-top: 0;
+.spectrum-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-#controls label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 12px;
+.left-header {
+    background: linear-gradient(to right, var(--left-light), white);
 }
 
-#controls select,
-#controls input[type="range"],
-#controls input[type="number"] {
+.right-header {
+    background: linear-gradient(to right, var(--right-light), white);
+}
+
+.spectrum-header h2,
+.network-header h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-left: 1rem;
+}
+
+.left-header h2,
+.left-header h3 {
+    color: var(--left-primary);
+}
+
+.right-header h2,
+.right-header h3 {
+    color: var(--right-primary);
+}
+
+.combined-header h3 {
+    color: var(--combined-primary);
+}
+
+.ideology-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.left-icon {
+    background-color: var(--left-light);
+    border: 2px solid var(--left-primary);
+    color: var(--left-primary);
+}
+
+.right-icon {
+    background-color: var(--right-light);
+    border: 2px solid var(--right-primary);
+    color: var(--right-primary);
+}
+
+.combined-icon {
+    background-color: var(--combined-light);
+    border: 2px solid var(--combined-primary);
+    color: var(--combined-primary);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    position: relative;
+}
+
+.divider::after {
+    content: "";
+    position: absolute;
+    height: 80%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--neutral-medium), transparent);
+}
+
+.vs-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--left-primary), var(--right-primary));
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+}
+
+.hist {
+    flex: 1;
     width: 100%;
-    margin-bottom: 10px;
-    box-sizing: border-box;
+    height: auto;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 1.5rem;
 }
 
-#category-filters div {
-    margin-bottom: 3px;
-    font-size: 12px;
-}
-#category-filters div label {
-    display: inline-block; /* Keep label and checkbox together */
-    margin-bottom: 0;
+/* Network graph section styling */
+.network-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
-#category-filters input[type="checkbox"] {
-    margin-right: 5px;
-    vertical-align: middle; /* Align checkbox nicely */
-}
-#category-filters button {
-    font-size: 10px;
-    padding: 2px 5px;
-    margin-right: 5px;
-    margin-top: 5px;
+.network-row {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
 }
 
-
-#graph-container {
-    flex-grow: 1; /* Graph takes remaining space */
-    position: relative; /* Needed for absolute positioning of tooltip/legend */
-    height: 100%;
+.network-row.full-width {
+    margin-top: 1rem;
 }
 
-#graph {
+.network-box {
+    flex: 1;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 450px;
+}
+
+.left-network {
+    border-top: 5px solid var(--left-primary);
+}
+
+.right-network {
+    border-top: 5px solid var(--right-primary);
+}
+
+.combined-network {
+    border-top: 5px solid var(--combined-primary);
+    height: 500px;
+}
+
+.network-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.combined-header {
+    background: linear-gradient(to right, var(--combined-light), white);
+}
+
+.network-graph {
+    flex: 1;
+    width: 100%;
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 1.5rem;
+    background-color: white;
+}
+
+.large-graph {
+    min-height: 400px;
+}
+
+/* Sandbox section styling */
+.sandbox-container {
+    display: flex;
+    gap: 2rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow);
+    padding: 2rem;
+}
+
+.control-panel {
+    width: 350px;
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    padding-right: 2rem;
+}
+
+.results-preview {
+    flex: 1;
+}
+
+.control-group {
+    margin-bottom: 1.75rem;
+}
+
+.control-group h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--neutral-dark);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.date-controls,
+.source-controls,
+.topic-controls,
+.viz-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--neutral-medium);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+input[type="date"],
+select {
+    padding: 0.6rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+input[type="range"] {
+    width: 100%;
+}
+
+.control-button {
+    padding: 0.5rem 1rem;
+    background-color: var(--neutral-light);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.primary-button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(90deg, var(--left-primary), var(--right-primary));
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.preview-area {
+    min-height: 400px;
+    /* Keep a minimum */
+    height: 100vh;
+    /* Example: 70% of the viewport height */
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    /* Keeps placeholder text centered */
+    align-items: center;
+    /* Keeps placeholder text centered */
+    justify-content: center;
+    /* Keeps placeholder text centered */
+    color: var(--neutral-medium);
+    overflow: hidden;
+    /* Ensure SVG doesn't overflow its container visually */
+}
+
+/* Footer styling */
+.main-footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--neutral-medium);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: 2rem;
+}
+
+/* Data visualization elements */
+.tooltip {
+    position: absolute;
+    padding: 0.75rem 1rem;
+    background: rgba(33, 33, 33, 0.9);
+    color: white;
+    border-radius: 6px;
+    pointer-events: none;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    max-width: 250px;
+    line-height: 1.4;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+    .sandbox-container {
+        flex-direction: column;
+    }
+
+    .control-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .network-row {
+        flex-direction: column;
+    }
+
+    .spectrum-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .spectrum-box,
+    .network-box {
+        height: auto;
+        min-height: 400px;
+    }
+
+    .divider {
+        width: 100%;
+        height: 60px;
+    }
+
+    .divider::after {
+        height: 1px;
+        width: 80%;
+        background: linear-gradient(to right, transparent, var(--neutral-medium), transparent);
+    }
+}
+
+@media (max-width: 600px) {
+    .section-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+    }
+
+    .page-container {
+        padding: 1rem;
+    }
+}
+
+/* Modal Styling */
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1000;
+    /* Sit on top */
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Black w/ opacity */
+    padding-top: 60px;
+    /* Location of the box */
 }
 
-/* --- Node, Link, Tooltip, Legend styles --- */
-.node {
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    /* 5% from the top and centered */
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%;
+    /* Could be more or less, depending on screen size */
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.link {
-    stroke: #999;
-    stroke-opacity: 0.6;
-    /* transition: stroke 0.2s ease-out, stroke-opacity 0.2s ease-out; Optional: smooth transition for highlight */
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
 }
 
-.tooltip {
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    max-width: 300px;
-    font-size: 12px;
-    pointer-events: none; /* Important so it doesn't block mouse events on graph */
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 100;
-}
-
-.tooltip h3 {
+#modal-title {
     margin-top: 0;
-    margin-bottom: 5px;
-    font-size: 14px; /* Slightly larger heading */
-}
-
-.tooltip p {
-    margin: 5px 0;
-}
-
-.tooltip ul {
-    margin: 5px 0;
-    padding-left: 20px;
-    max-height: 150px; /* Limit list height */
-    overflow-y: auto; /* Add scroll if list is long */
-}
-.tooltip li {
-    margin-bottom: 3px;
-}
-
-.legend {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.85); /* Slightly less transparent */
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    font-size: 12px;
-    z-index: 90; /* Below controls but above graph elements */
-    max-height: calc(100vh - 40px); /* Prevent legend from becoming too tall */
-    overflow-y: auto;
-    max-width: 200px; /* Prevent legend from becoming too wide */
-}
-.legend h3 {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-size: 13px;
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--neutral-dark);
     border-bottom: 1px solid #eee;
-    padding-bottom: 3px;
-}
-.legend h3:first-child {
-    margin-top: 0;
-}
-.legend p {
-    margin-top: 0;
-    margin-bottom: 8px;
+    padding-bottom: 10px;
 }
 
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
+#publication-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    /* Limit height and make scrollable */
+    overflow-y: auto;
 }
 
-.legend-color {
-    width: 15px;
-    height: 15px;
-    margin-right: 8px;
-    border-radius: 50%;
-    border: 1px solid #ccc; /* Add slight border */
-    flex-shrink: 0; /* Prevent color box from shrinking */
+#publication-list li {
+    padding: 5px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 0.9em;
 }
 
-.legend span {
-    word-break: break-word; /* Wrap long category names */
+#publication-list li:last-child {
+    border-bottom: none;
 }
 
-
-.badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: bold;
-    color: white;
-    background-color: #666;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-right: 5px;
-    margin-bottom: 3px; /* Spacing if they wrap */
-}
-
-.edge-info {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px 8px;
-    font-size: 12px;
+/* Style for node text labels */
+.node-label {
+    font-size: 9px;
+    /* Adjust as needed */
+    font-family: 'Inter', sans-serif;
+    fill: #333;
     pointer-events: none;
-    display: none;
-    z-index: 100;
-    white-space: nowrap; /* Prevent wrapping */
+    /* Labels don't block interaction */
+    text-anchor: middle;
+    /* Center label below node */
+    dominant-baseline: hanging;
 }
 
-.pie-slice {
+/* Style for pie chart arcs */
+.arc path {
     stroke: #fff;
-    stroke-width: 0.5px; /* Thinner stroke for pies */
-}
-
-/* Loading Indicator */
-.loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Highest */
-    font-size: 24px;
-    font-weight: bold;
-    color: #555;
-}
-
-/* No Data Message */
-#no-data-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 18px;
-    color: #888;
-    display: none; /* Hidden by default */
-    z-index: 50;
-    text-align: center;
-    padding: 20px;
+    stroke-width: 0.5px;
 }
