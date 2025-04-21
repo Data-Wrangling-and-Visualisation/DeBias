@@ -654,10 +654,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (topicsToFilter.length > 0) {
       if (first) {
-        input_link = input_link + "?topics=" + topicsToFilter.join("%3B");
+        input_link = input_link + "?topic=" + topicsToFilter.join("%3B");
         first = false;
       } else {
-        input_link = input_link + "&topics=" + topicsToFilter.join("%3B");
+        input_link = input_link + "&topic=" + topicsToFilter.join("%3B");
       }
     }
 
