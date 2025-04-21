@@ -38,10 +38,10 @@ function createSandboxNetwork(options) {
   }
 
   // --- Modal Setup ---
-  const modal = d3.select("#publication-modal");
-  const modalTitle = d3.select("#modal-title");
-  const publicationList = d3.select("#publication-list");
-  const modalFooter = d3.select("#modal-footer");
+  const modal = d3.select("#static-publication-modal");
+  const modalTitle = d3.select("#static-modal-title");
+  const publicationList = d3.select("#static-publication-list");
+  const modalFooter = d3.select("#static-modal-footer");
   const closeButton = d3.select(".close-button");
   if (modal.empty()) {
     console.warn(

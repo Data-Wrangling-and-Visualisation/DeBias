@@ -38,11 +38,11 @@ function createSandboxNetwork(options) {
   }
 
   // --- Modal Setup ---
-  const modal = d3.select("#publication-modal");
-  const modalTitle = d3.select("#modal-title");
-  const publicationList = d3.select("#publication-list");
-  const modalFooter = d3.select("#modal-footer");
-  const closeButton = d3.select(".close-button");
+  const modal = d3.select("#static-publication-modal");
+  const modalTitle = d3.select("#static-modal-title");
+  const publicationList = d3.select("#static-publication-list");
+  const modalFooter = d3.select("#static-modal-footer");
+  const closeButton = d3.select("#static-close-button");
   if (modal.empty()) {
     console.warn(
       "Publication modal element not found. Article list on click will be disabled."
@@ -533,10 +533,10 @@ function createSandboxNetwork(options) {
     articlesToShow.slice(0, maxShown).forEach((title) => {
       if (!(title.id in mentioned)) {
           mentioned.add(title.id);
-          let article_info = "Title: " + title.title + "/n";
-          article_info += "Alignment: " + title.alignment + "/n";
+          let article_info = "Title: " + title.title + "<br>";
+          article_info += "Alignment: " + title.alignment + "<br>";
           article_info += "Country: " + title.country;
-          publicationList.append("li").text(article_info);
+          publicationList.append("li").html(article_info);
         }
     });
     if (articlesToShow.length > maxShown)

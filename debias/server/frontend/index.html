@@ -111,6 +111,16 @@
                         <div id="combined_network" class="network-graph large-graph"></div>
                     </div>
                 </div>
+                <div id="static-publication-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="static-close-button">×</span>
+                    <h3 id="static-modal-title">Publications</h3>
+                    <ul id="static-publication-list">
+                        <!-- List items will be added here -->
+                    </ul>
+                    <p id="static-modal-footer" style="font-size: 0.8em; color: #666; margin-top: 15px;"></p>
+                </div>
+            </div>
             </div>
         </section>
         <!-- Sandbox Section -->
@@ -203,7 +213,7 @@
             <!-- Publication List Modal -->
             <div id="publication-modal" class="modal">
                 <div class="modal-content">
-                    <span class="close-button">×</span>
+                    <span class="close-button" id="dynamic-close-button">×</span>
                     <h3 id="modal-title">Publications</h3>
                     <ul id="publication-list">
                         <!-- List items will be added here -->

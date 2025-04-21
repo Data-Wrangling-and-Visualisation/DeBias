@@ -12,7 +12,7 @@ const NEWS_CATEGORIES = [
   "other", // Added 'other' for uncategorized
 ].sort();
 
-function createSandboxNetwork(options) {
+function createSandboxNetworkDynamic(options) {
   const {
     containerSelector,
     dataUrl,
@@ -56,7 +56,7 @@ function createSandboxNetwork(options) {
   const modalTitle = d3.select("#modal-title");
   const publicationList = d3.select("#publication-list");
   const modalFooter = d3.select("#modal-footer");
-  const closeButton = d3.select(".close-button");
+  const closeButton = d3.select("#dynamic-close-button");
   if (modal.empty()) {
     console.warn(
       "Publication modal element not found. Article list on click will be disabled."
@@ -420,7 +420,7 @@ function createSandboxNetwork(options) {
             return;
           }
           event.stopPropagation();
-          showPublicationModal(d);
+          showPublicationModalDynamic(d);
         });
 
       // Modal close functionality
@@ -538,7 +538,7 @@ function createSandboxNetwork(options) {
       .text((d) => `${d.data[dataKey]}: ${d.data.count}`); // Access data using dynamic key
   }
 
-  function showPublicationModal(nodeData) {
+  function showPublicationModalDynamic(nodeData) {
     if (modal.empty()) return; // Extra safety check
     modalTitle.text(`Articles mentioning "${nodeData.id}"`);
     publicationList.html("");
@@ -548,10 +548,10 @@ function createSandboxNetwork(options) {
     articlesToShow.slice(0, maxShown).forEach((title) => {
       if (!(title.id in mentioned)) {
           mentioned.add(title.id);
-          let article_info = "Title: " + title.title + "/n";
-          article_info += "Alignment: " + title.alignment + "/n";
+          let article_info = "Title: " + title.title + "<br>";
+          article_info += "Alignment: " + title.alignment + "<br>";
           article_info += "Country: " + title.country;
-          publicationList.append("li").text(article_info);
+          publicationList.append("li").html(article_info);
         }
     });
     if (articlesToShow.length > maxShown)
@@ -601,7 +601,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (allOption) allOption.selected = true;
     }
 
-    let input_link = "/api/keywords/graph";
+    let input_link = "api/keywords/graph";
     let first = true;
     if (startDateInput.value) {
       if (first) {
@@ -652,7 +652,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    if (topicsToFilter.length > 0) {
+    if (topicsToFilter.length > 0 && topicsToFilter[0] != "all") {
       if (first) {
         input_link = input_link + "?topic=" + topicsToFilter.join("%3B");
         first = false;
@@ -680,7 +680,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Use setTimeout to allow the UI to update (opacity change) before potentially freezing
       setTimeout(() => {
         try {
-          createSandboxNetwork(settings);
+          createSandboxNetworkDynamic(settings);
         } catch (error) {
           console.error("Error creating network:", error);
           displayMessage("Failed to generate graph. Check console for errors."); // Use displayMessage helper if possible
@@ -732,5 +732,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initial graph load
   const initialSettings = getSandboxSettings();
-  createSandboxNetwork(initialSettings);
+  createSandboxNetworkDynamic(initialSettings);
 });
