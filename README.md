@@ -59,6 +59,13 @@ The final goal is to create an interactive visualization, which would show how c
 - <img src=".github/assets/nats.png" width="16" height="16"></img> NATS
 - <img src=".github/assets/postgres.svg" width="16" height="16"></img> Postgres 
 - <img src=".github/assets/playwright.svg" width="16" height="16"></img> Playwright
+- <img src=".github/assets/litestar.svg" width="16" height="16"></img> Litestar
+- <img src=".github/assets/polars.webp" width="16" height="16"></img> Polars
+- <img src=".github/assets/d3.png" width="16" height="16"></img> D3.js
+
+### NLP:
+- <img src=".github/assets/huggingface.svg" width="16" height="16"></img> Transfrormers
+- <img src=".github/assets/spacy.svg" width="16" height="16"></img> SpaCy
 
 ## Services
 
@@ -73,6 +80,13 @@ Renderer is a service which renders news pages using browser API. It is called b
 
 ### [Processor](debias/processor/readme.md)
 Processor is a service which processes news pages. It extracts human-readable text from the page, performs NLP pipelines and stores the results in the `wordstore` service.
+
+#### NLP pipeline
+- **Classifier**
+  - A *zero-shot classifier* from HuggingFace Transformers. In particular, `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` due to it's comparably low size.
+- **Extractor**
+  - A keyword exctraction algorithm with SpaCy. SpaCy is used to extract Named Entities, which are used as keywords after processing.
+
 
 ### [Server](debias/server/readme.md)
 Web server which serves the results of the `processor`. It aggregates the statistics of the words, precomputes and caches aggregations, and serves them to the client. It serves the frontend files as well.
@@ -92,9 +106,7 @@ A NATS message queue which is used for S2S communication.
 
 ## Deploy
 
-The initial version is available at https://data-wrangling-and-visualisation.github.io/DeBias/
-The EDA is available at https://data-wrangling-and-visualisation.github.io/DeBias/
-The draft Javascript visualization is available at https://debias.inno.dartt0n.ru/
+The Javascript visualization is available at https://debias.dartt0n.ru/
 
 ### Using external S3 provider
 
@@ -274,27 +286,14 @@ We have parsed several news articles using python and prepared a deployment desc
 The deployment can be found on [Github Pages](https://data-wrangling-and-visualisation.github.io/DeBias/)
 
 
-## Current state
+## Visualization
 
-We have added a draft of our frontend visualization. It can be viewed in the **frontend** directory, in the **index.html** file. 
+The visualization is divided into 3 parts:
 
-For now we have not created connection with the backend, however the file represent our vision of the final visualization: graph of connections between keywords, their corresponding themes and number of occurrence.
+1. Comparison of topics distribution for Left-Leaning and Right-Leaning media.
+2. Comparison of keywords networks for Left-Leaning and Right-Leaning media.
+3. Sandbox network with filtering functionality.
 
-The file can be opened as an html file, or py running the following script from the **frontend** directory:
+All visualizations are created using D3.js.
 
-```python
-python3 -m http.server
-```
-
-We are also incorporating NLP into data analysis. We perform the following operations on the extracted websites data:
-
-- Extract names entities from text: helps identify the most important keywords (people's names, countries, organizations). Performed with spacy.
-- Find themes in the data: identify general theme of the text (politics, economics, etc.). Performed with transformers.
-
-The collected keywords are then combined for future analysis.
-
-Example of NLP preprocessing can be found in **debias/processor directory**, in **processor.py** file.
-
-Deploy can be found at: https://debias.inno.dartt0n.ru/
-
-We have added the functionality to filter by date, category, number of keyword occurrences. The number of shown nodes can also be limited.
+You can view the visualization at https://debias.dartt0n.ru/
