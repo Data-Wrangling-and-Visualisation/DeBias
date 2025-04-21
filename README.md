@@ -6,7 +6,7 @@
 &ensp;[<kbd> <br> Technologies <br> </kbd>](#technologies)&ensp;
 &ensp;[<kbd> <br> Deploy <br> </kbd>](#deploy)&ensp;
 &ensp;[<kbd> <br> EDA <br> </kbd>](#eda)&ensp;
-&ensp;[<kbd> <br> Current state <br> </kbd>](#current-state)&ensp;
+&ensp;[<kbd> <br> Visualization <br> </kbd>](#visualization)&ensp;
 <br><br><br><br></div>
 
 ## Table of Contents
@@ -37,7 +37,7 @@
     - [Distribution of political positions in the USA](#distribution-of-political-positions-in-the-usa)
     - [Distribution of political positions in the UK](#distribution-of-political-positions-in-the-uk)
     - [Bonus: Distribution of political positions of sources which require VPN](#bonus-distribution-of-political-positions-of-sources-which-require-vpn)
-  - [Current state](#current-state)
+  - [Visualization](#visualization)
 
 
 ## Overview
@@ -297,3 +297,7 @@ The visualization is divided into 3 parts:
 All visualizations are created using D3.js.
 
 You can view the visualization at https://debias.dartt0n.ru/
+
+### Visualization example
+
+<img src=".github/assets/visualization.png"></img>
