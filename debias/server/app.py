@@ -6,6 +6,7 @@ import litestar as lt
 import msgspec as ms
 import polars as pl
 from litestar import Litestar
+from litestar.config.compression import CompressionConfig
 from litestar.config.cors import CORSConfig
 from litestar.openapi.config import OpenAPIConfig
 from litestar.openapi.plugins import (
@@ -435,6 +436,7 @@ app = Litestar(
         get_topics_graph,
         get_keywords_graph,
     ],
+    compression_config=CompressionConfig(backend="gzip", gzip_compress_level=9),
     cors_config=CORSConfig(),
     openapi_config=OpenAPIConfig(
         title="DeBias API",
