@@ -31,6 +31,7 @@
   - [Development](#development)
     - [Structure](#structure)
     - [Adding new service](#adding-new-service)
+    - [Frontend Development](#frontend-development)
   - [EDA](#eda)
     - [Distribution of political positions overall](#distribution-of-political-positions-overall)
     - [Distribution of political positions in the USA](#distribution-of-political-positions-in-the-usa)
@@ -83,7 +84,7 @@ A postgres database which stores metadata of the scraped pages.
 A S3 provider which stores the static pages. Could be a local MinIO deployment or an external S3 cloud service.
 
 ### Wordstore
-A postgres database which stores the words of the processed pages.
+A postgres database which stores the processed pages, keywords, topics, and their corresponding frequencies.
 
 ### Message queue
 A NATS message queue which is used for S2S communication.
@@ -104,12 +105,27 @@ PG_USERNAME=...
 PG_PASSWORD=...
 ```
 
-1. Create `debias/scraper/config.toml`
+1. Create configuration files
+
+- `debias/scraper/config.toml`
+- `debias/server/config.toml`
+- `debias/processor/config.toml`
+- `debias/renderer/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
+> You can find example configuration in the following files:
+> - [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
+> - [`debias/server/example.config.toml`](debias/server/example.config.toml)
+> - [`debias/processor/example.config.toml`](debias/processor/example.config.toml)
+> - [`debias/renderer/example.config.toml`](debias/renderer/example.config.toml)
 
-2. Run services
+2. Pre-download ML models
+```bash
+mkdir models
+uv run --group processor download-models.py
+```
+
+3. Run services
 
 ```bash
 docker compose -f docker-compose.yml up --build --detach
@@ -123,28 +139,40 @@ Fill in the following variables:
 MINIO_ACCESS_KEY=...
 MINIO_SECRET_KEY=...
 MINIO_BUCKET=...
+
+PG_USERNAME=...
+PG_PASSWORD=...
 ```
 
-1. Create MinIO S3 service using docker:
-```bash
-docker compose -f minio.docker-compose.yml up minio_setup
-```
+1. Create configuration files
 
-2. Create `debias/scraper/config.toml`
+- `debias/scraper/config.toml`
+- `debias/server/config.toml`
+- `debias/processor/config.toml`
+- `debias/renderer/config.toml`
 
 > [!NOTE]
-> You can find example configuration in [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
+> You can find example configuration in the following files:
+> - [`debias/scraper/example.config.toml`](debias/scraper/example.config.toml)
+> - [`debias/server/example.config.toml`](debias/server/example.config.toml)
+> - [`debias/processor/example.config.toml`](debias/processor/example.config.toml)
+> - [`debias/renderer/example.config.toml`](debias/renderer/example.config.toml)
 
-3. Run services
-
+2. Pre-download ML models
 ```bash
-docker compose -f minio.docker-compose.yml up --build --detach
+mkdir models
+uv run --group processor download-models.py
+```
+
+3. Create MinIO S3 service using docker:
+```bash
+docker compose -f minio.docker-compose.yml up minio_setup
 ```
 
 ### Scale services for better performance!
 
 The following services could be automatically scaled horizontally for better performance:
-- scaper
+- scraper
 - renderer
 - processor
 
@@ -172,9 +200,14 @@ docker compose -f docker-compose.yml down --volumes
 ### Structure
 ```
 .
-├── debias       # shared code root
-│   ├── core     # reusable components - s3, metastore, configs, etc
-│   └── scraper   # scraper related code
+├── debias          # shared code root
+│   ├── core        # reusable components - s3, metastore, configs, etc
+│   └── scraper     # scraper related code
+│   └── processor   # NLP processor related code
+│   └── renderer    # browser renderer related code
+│   └── server      # server related code
+│       └── frontend   # frontend related code
+
 ```
 
 ### Adding new service
@@ -182,7 +215,40 @@ To add new service:
 1. Create new directory in `debias` directory
 2. Create `dockerfile` prefixed with `servicename` (e.g. `scraper.dockerfile`)
 3. Add all the required dependencies to `pyproject.toml` under `--group servicename`
+4. Add new package to `tool.hatch.build.targets.wheel` config in `pyproject.toml`
 
+### Frontend Development
+
+0. Create `.env` file
+Fill in the following variables:
+```bash
+PG_USERNAME=...
+PG_PASSWORD=...
+```
+
+1. Launch database container
+Using docker-compose:
+```bash
+docker compose up -d database
+```
+
+2. Generate random data
+Set environment variable `POSTGRES_CONNECTION` to the connection string of the database (replace `USERNAME` and `PASSWORD` with your actual username and password):
+```bash
+POSTGRES_CONNECTION="postgresql://USERNAME:$PASSWORD$@localhost:5432/postgres" uv run generate-data.py
+```
+
+3. Create server configuration file `config.toml`
+Replace `USERNAME` and `PASSWORD` with your actual username and password: 
+```toml
+[pg]
+connection = "postgresql://${PG_USERNAME}:${PG_PASSWORD}$@localhost:5432/postgres"
+```
+
+4. Launch backend server with hot reload
+```bash
+CONFIG=config.toml uv run litestar --app debias.server:app run --debug --reload
+```
 
 
 ## EDA
@@ -212,7 +278,7 @@ The deployment can be found on [Github Pages](https://data-wrangling-and-visuali
 
 We have added a draft of our frontend visualization. It can be viewed in the **frontend** directory, in the **index.html** file. 
 
-For now we have not created connection with the backend, however the file respresent our vision of the final visualization: graph of connections between keywords, their corresponding themes and number of occurence.
+For now we have not created connection with the backend, however the file represent our vision of the final visualization: graph of connections between keywords, their corresponding themes and number of occurrence.
 
 The file can be opened as an html file, or py running the following script from the **frontend** directory:
 
@@ -231,4 +297,4 @@ Example of NLP preprocessing can be found in **debias/processor directory**, in 
 
 Deploy can be found at: https://debias.inno.dartt0n.ru/
 
-We have added the functionality to filter by date, category, number of keyword occurences. The number of shown nodes can also be limited.
+We have added the functionality to filter by date, category, number of keyword occurrences. The number of shown nodes can also be limited.
