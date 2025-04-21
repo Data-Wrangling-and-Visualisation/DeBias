@@ -15,8 +15,7 @@
 ```bash
 uv sync --group renderer
 ```
-
-1. Launch application:
+3. Launch application:
 ```bash
 uv run faststream run debias.renderer:app --config=debias/renderer/config.toml --workers 1
 ```
