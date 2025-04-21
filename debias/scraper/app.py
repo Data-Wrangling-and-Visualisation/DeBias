@@ -7,7 +7,7 @@ import redis.asyncio as aioredis
 from core.parser import Parser
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, NackMessage, RejectMessage
-from faststream.nats import NatsBroker, NatsMessage, PullSub
+from faststream.nats import NatsBroker, NatsMessage
 
 from debias.core.metastore import Metadata, Metastore
 from debias.core.models import FetchRequest, ProcessRequest, RenderRequest
@@ -55,6 +55,7 @@ async def app_on_startup(context: ContextRepo, config: str):
     for target_config in DI.config.app.targets:
         parser = Parser(target_config)
         DI.parsers[parser.domain] = parser
+
     await broker.connect(DI.config.nats.dsn.encoded_string())
 
 
@@ -76,7 +77,7 @@ async def app_on_shutdown(context: ContextRepo):
     await DI.http.__aexit__(None, None, None)
 
 
-@broker.subscriber(subject="fetch-queue", stream="debias", pull_sub=PullSub(batch_size=1))
+@broker.subscriber(subject="fetch-queue", stream="debias")
 async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger: Logger, context: ContextRepo):
     """Handler which process each message from the queue.
     It subscribes to subject "fetch-queue", so all messages published exactly to "fetch-queue" subject
@@ -84,13 +85,10 @@ async def broker_stream_subscriber(msg: NatsMessage, data: FetchRequest, logger:
     It subscribes to stream "debias" with retention policy "work_queue".
     This allows multiple subscribers to connect to the same stream and receive unqiue messages
     i.e. each message is received only once by only one subscriber).
-    It utilizes pull subscription (other option is push subscription) which reduces load on the server
-    by forcing each client to pull messages by its own.
 
     Read more about JetStream & Pulling Consumer here:
     - https://docs.nats.io/nats-concepts/jetstream
     - https://docs.nats.io/nats-concepts/jetstream/consumers
-    - https://faststream.airt.ai/latest/nats/jetstream/pull
     """
     url = normalize_url(data.url)
     logger.info(f"received message {msg.message_id} (corrid: {msg.correlation_id}) to process {url}")

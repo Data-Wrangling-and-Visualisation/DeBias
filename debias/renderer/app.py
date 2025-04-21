@@ -6,7 +6,7 @@ import redis.asyncio as aioredis
 from core.parser import Parser
 from faststream import ContextRepo, FastStream, Logger
 from faststream.exceptions import AckMessage, NackMessage, RejectMessage
-from faststream.nats import NatsBroker, NatsMessage, PullSub
+from faststream.nats import NatsBroker, NatsMessage
 from renderer.renderer import Renderer
 
 from debias.core.metastore import Metadata, Metastore
@@ -37,7 +37,6 @@ class DI:
         cls.renderer = Renderer()
 
         cls.fetch_queue_publisher = broker.publisher(subject="fetch-queue", stream="debias")
-        cls.render_queue_publisher = broker.publisher(subject="render-queue", stream="debias")
         cls.process_queue_publisher = broker.publisher(subject="process-queue", stream="debias")
         cls.metadata_queue_publisher = broker.publisher(subject="metadata-queue", stream="debias")
 
@@ -74,7 +73,7 @@ async def app_on_shutdown(context: ContextRepo):
     await DI.renderer.close()
 
 
-@broker.subscriber(subject="render-queue", stream="debias", pull_sub=PullSub(batch_size=1))
+@broker.subscriber(subject="render-queue", stream="debias")
 async def broker_stream_subscriber(msg: NatsMessage, data: RenderRequest, logger: Logger, context: ContextRepo):
     """Handler which process each message from the queue.
     It subscribes to subject "render-queue", so all messages published exactly to "render-queue" subject
@@ -82,13 +81,10 @@ async def broker_stream_subscriber(msg: NatsMessage, data: RenderRequest, logger
     It subscribes to stream "debias" with retention policy "work_queue".
     This allows multiple subscribers to connect to the same stream and receive unqiue messages
     i.e. each message is received only once by only one subscriber).
-    It utilizes pull subscription (other option is push subscription) which reduces load on the server
-    by forcing each client to pull messages by its own.
 
     Read more about JetStream & Pulling Consumer here:
     - https://docs.nats.io/nats-concepts/jetstream
     - https://docs.nats.io/nats-concepts/jetstream/consumers
-    - https://faststream.airt.ai/latest/nats/jetstream/pull
     """
     url = normalize_url(data.url)
     logger.info(f"received message {msg.message_id} (corrid: {msg.correlation_id}) to process {url}")

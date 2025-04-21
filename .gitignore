@@ -1,6 +1,7 @@
 # Project Sensitive
 **/config.toml
 volumes
+models
 
 # Mac OS
 **/*.DB_Store

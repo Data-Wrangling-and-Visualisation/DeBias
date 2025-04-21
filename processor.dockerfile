@@ -7,11 +7,10 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
 RUN --mount=type=cache,target=/root/.cache/uv \
---mount=type=bind,source=uv.lock,target=uv.lock \
---mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-uv sync --frozen --no-install-project --no-group dev --group processor
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-group dev --group processor
 
-RUN uv run spacy download en_core_web_lg
 RUN uv run python3 -c "import nltk; nltk.download('stopwords')"
 RUN uv run python3 -c "import nltk; nltk.download('wordnet')"
 RUN uv run python3 -c "import nltk; nltk.download('punkt')"

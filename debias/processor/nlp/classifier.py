@@ -1,18 +1,17 @@
-from typing import Set
-from nltk.tokenize import word_tokenize
-from debias.processor.nlp.config import NEWS_CATEGORIES, TRANSFORMER_MODEL
-from debias.processor.nlp.utils import normalize_text
 from transformers import pipeline
+
+from debias.processor.nlp.config import NEWS_CATEGORIES
+from debias.processor.nlp.utils import normalize_text
 
 
 class ZeroShotClassifier:
     """Classify news articles with zero-shot classification"""
 
-    def __init__(self):
+    def __init__(self, model: str):
         super().__init__()
         self.classifier = pipeline(
             "zero-shot-classification",
-            model=TRANSFORMER_MODEL,
+            model,
             device=-1,  # Use CPU
         )
 

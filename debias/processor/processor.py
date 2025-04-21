@@ -2,11 +2,12 @@ from datetime import datetime
 
 from core.wordstore import Keyword, ProcessingResult, Topic
 from pydantic import BaseModel
+
 from debias.processor.nlp.classifier import ZeroShotClassifier
-from debias.processor.nlp.extractor import SpacyKeywordExtractor
-from debias.processor.nlp.parser import parse_news
-from debias.processor.nlp.models import RawNewsData, FormattedNewsData
 from debias.processor.nlp.config import SNIPPET_LENGTH
+from debias.processor.nlp.extractor import SpacyKeywordExtractor
+from debias.processor.nlp.models import FormattedNewsData, RawNewsData
+from debias.processor.nlp.parser import parse_news
 
 
 class WebpageData(BaseModel):

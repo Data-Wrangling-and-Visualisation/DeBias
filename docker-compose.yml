@@ -11,9 +11,10 @@ services:
     build:
       context: .
       dockerfile: scraper.dockerfile
+    restart: always
     volumes:
       - ./debias/scraper/config.toml:/app/config.toml
-    command: "uv run faststream run debias.scraper:app --config=/app/config.toml --workers 1"
+    command: "uv run faststream run --log-level debug debias.scraper:app --config=/app/config.toml --workers 1"
     depends_on:
       - message-queue
       - postgres
@@ -23,12 +24,13 @@ services:
     build:
       context: .
       dockerfile: server.dockerfile
+    restart: always
     volumes:
       - ./debias/server/config.toml:/app/config.toml
     ports:
       - "127.0.0.1:8080:8080"
     environment:
-      - server.config=/app/config.toml
+      - CONFIG=/app/config.toml
     command: "uv run litestar --app debias.server:app run --host 0.0.0.0 --port 8080"
     depends_on:
       - postgres
@@ -37,9 +39,10 @@ services:
     build:
       context: .
       dockerfile: renderer.dockerfile
+    restart: always
     volumes:
       - ./debias/renderer/config.toml:/app/config.toml
-    command: "uv run faststream run debias.renderer:app --config=/app/config.toml --workers 1"
+    command: "uv run faststream run --log-level debug debias.renderer:app --config=/app/config.toml --workers 1"
     depends_on:
       - message-queue
       - postgres
@@ -49,18 +52,25 @@ services:
     build:
       context: .
       dockerfile: processor.dockerfile
+    environment:
+      - HF_HOME=/models/cache
+    restart: always
     volumes:
       - ./debias/processor/config.toml:/app/config.toml
-    command: bash -c "while true; do sleep 1; done"
-    
-    # "uv run faststream run debias.processor:app --config=/app/config.toml --workers 1"
+      - ./models:/models:ro
+    command: "uv run faststream run --log-level debug debias.processor:app --config=/app/config.toml --workers 1"
+    depends_on:
+      - postgres
+      - key-value
+      - message-queue
 
   message-queue:
     image: nats:2.11-linux
     ports:
       - "127.0.0.1:4222:4222"
       - "127.0.0.1:8222:8222"
-    command: "--jetstream --store_dir /data"
+    restart: always
+    command: "--jetstream -D --store_dir /data"
     volumes:
       - message_queue_volume:/data
 
@@ -70,6 +80,7 @@ services:
       - "127.0.0.1:6379:6379"
     environment:
       - VALKEY_DB=0
+    restart: always
     volumes:
       - key_value_volume:/data
     command: ["--appendonly", "yes"]
@@ -78,6 +89,7 @@ services:
     image: postgres:16
     ports:
       - "127.0.0.1:5432:5432"
+    restart: always
     environment:
       - POSTGRES_USER=${PG_USERNAME}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
