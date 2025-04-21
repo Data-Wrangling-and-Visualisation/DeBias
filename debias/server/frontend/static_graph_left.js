@@ -114,7 +114,7 @@ function createSandboxNetwork(options) {
         const nodeEntry = nodesMap.get(keyword);
         nodeEntry.totalFreq += mention;
         article.mentioned_in.forEach((ment) => {
-          nodeEntry.articles.add(ment.title);
+          nodeEntry.articles.add(ment);
         });
 
         // Increment count for the specific NER type of this mention
@@ -529,8 +529,15 @@ function createSandboxNetwork(options) {
     publicationList.html("");
     const articlesToShow = Array.from(nodeData.articles).sort();
     const maxShown = 100;
+    let mentioned = new Set();
     articlesToShow.slice(0, maxShown).forEach((title) => {
-      publicationList.append("li").text(title);
+      if (!(title.id in mentioned)) {
+          mentioned.add(title.id);
+          let article_info = "Title: " + title.title + "/n";
+          article_info += "Alignment: " + title.alignment + "/n";
+          article_info += "Country: " + title.country;
+          publicationList.append("li").text(article_info);
+        }
     });
     if (articlesToShow.length > maxShown)
       modalFooter.text(
@@ -551,11 +558,11 @@ document.addEventListener("DOMContentLoaded", function () {
   function getSandboxSettings() {
     return {
       containerSelector: "#left_network",
-      dataUrl: "/api/keywords/graph/?alignment=Lean%20Left;Left",
+      dataUrl: "/api/keywords/graph/?alignment=Lean%20Left;Left&date_from=2025-04-20&date_till=2025-04-20",
       startDate: null,
       endDate: null,
       selectedTopics: [],
-      maxNodes: 10,
+      maxNodes: 20,
       edgeThreshold: 2,
       tooltipSelector: "#sandbox-tooltip",
     };

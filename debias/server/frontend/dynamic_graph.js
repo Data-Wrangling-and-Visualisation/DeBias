@@ -96,6 +96,7 @@ function createSandboxNetwork(options) {
         displayMessage("No data loaded.");
         return;
       }
+      console.log("meow")
 
       // --- 2a. Filter Data (Articles) ---
       const filteredArticles = rawData;
@@ -128,7 +129,7 @@ function createSandboxNetwork(options) {
         const nodeEntry = nodesMap.get(keyword);
         nodeEntry.totalFreq += mention;
         article.mentioned_in.forEach((ment) => {
-          nodeEntry.articles.add(ment.title);
+          nodeEntry.articles.add(ment);
         });
 
         // Increment count for the specific NER type of this mention
@@ -543,8 +544,15 @@ function createSandboxNetwork(options) {
     publicationList.html("");
     const articlesToShow = Array.from(nodeData.articles).sort();
     const maxShown = 100;
+    let mentioned = new Set();
     articlesToShow.slice(0, maxShown).forEach((title) => {
-      publicationList.append("li").text(title);
+      if (!(title.id in mentioned)) {
+          mentioned.add(title.id);
+          let article_info = "Title: " + title.title + "/n";
+          article_info += "Alignment: " + title.alignment + "/n";
+          article_info += "Country: " + title.country;
+          publicationList.append("li").text(article_info);
+        }
     });
     if (articlesToShow.length > maxShown)
       modalFooter.text(
