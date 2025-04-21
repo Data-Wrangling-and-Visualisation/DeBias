@@ -96,7 +96,6 @@ function createSandboxNetworkDynamic(options) {
         displayMessage("No data loaded.");
         return;
       }
-      console.log("meow")
 
       // --- 2a. Filter Data (Articles) ---
       const filteredArticles = rawData;
@@ -623,23 +622,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     checks = [];
 
-    if (RightCheck.value === "on") {
+    if (RightCheck.checked) {
       checks.push("Right");
     }
 
-    if (LeanRightCheck.value === "on") {
+    if (LeanRightCheck.checked) {
       checks.push("Lean%20Right");
     }
 
-    if (CenterCheck.value === "on") {
+    if (CenterCheck.checked) {
       checks.push("Center");
     }
 
-    if (LeanLeftCheck.value === "on") {
+    if (LeanLeftCheck.checked) {
       checks.push("Lean%20Left");
     }
 
-    if (LeftCheck.value === "on") {
+    if (LeftCheck.checked) {
       checks.push("Left");
     }
 
