@@ -1,5 +1,6 @@
 import datetime
 import os
+from pathlib import Path
 
 import litestar as lt
 import msgspec as ms
@@ -425,7 +426,7 @@ app = Litestar(
     route_handlers=[
         create_static_files_router(
             path="/",
-            directories=["frontend"],
+            directories=[Path(__file__).parent / "frontend"],
             html_mode=True,
         ),
         get_targets,
