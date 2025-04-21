@@ -606,10 +606,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (endDateInput.value) {
       if (first) {
-        input_link = input_link + "?date_to=" + endDateInput.value;
+        input_link = input_link + "?date_till=" + endDateInput.value;
         first = false;
       } else {
-        input_link = input_link + "&date_to=" + endDateInput.value;
+        input_link = input_link + "&date_till=" + endDateInput.value;
       }
     }
 
