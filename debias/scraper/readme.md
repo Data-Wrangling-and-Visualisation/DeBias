@@ -14,7 +14,7 @@
 uv sync --group scraper
 ```
 
-1. Launch application:
+3. Launch application:
 ```bash
 uv run faststream run debias.scraper:app --config=debias/scraper/config.toml --workers 1
 ```
