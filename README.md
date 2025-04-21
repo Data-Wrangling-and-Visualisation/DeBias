@@ -60,6 +60,10 @@ The final goal is to create an interactive visualization, which would show how c
 - <img src=".github/assets/postgres.svg" width="16" height="16"></img> Postgres 
 - <img src=".github/assets/playwright.svg" width="16" height="16"></img> Playwright
 
+### NLP:
+- <img src=".github/assets/huggingface.svg" width="16" height="16"></img> Transfrormers
+- <img src=".github/assets/spacy.svg" width="16" height="16"></img> SpaCy
+
 ## Services
 
 ![Architecture](.github/assets/architecture.png)
@@ -73,6 +77,13 @@ Renderer is a service which renders news pages using browser API. It is called b
 
 ### [Processor](debias/processor/readme.md)
 Processor is a service which processes news pages. It extracts human-readable text from the page, performs NLP pipelines and stores the results in the `wordstore` service.
+
+#### NLP pipeline
+- **Classifier**
+  - A *zero-shot classifier* from HuggingFace Transformers. In particular, `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` due to it's comparably low size.
+- **Extractor**
+  - A keyword exctraction algorithm with SpaCy. SpaCy is used to extract Named Entities, which are used as keywords after processing.
+
 
 ### [Server](debias/server/readme.md)
 Web server which serves the results of the `processor`. It aggregates the statistics of the words, precomputes and caches aggregations, and serves them to the client. It serves the frontend files as well.
