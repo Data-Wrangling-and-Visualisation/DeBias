@@ -170,7 +170,6 @@ class Wordstore:
                     primary key (topic_id, document_id)
                 );
             """)
-        await conn.commit()
 
     @asynccontextmanager
     async def with_transaction(self):
