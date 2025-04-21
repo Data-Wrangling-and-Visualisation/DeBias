@@ -14,6 +14,7 @@ from litestar.openapi.plugins import (
     StoplightRenderPlugin,
     SwaggerRenderPlugin,
 )
+from litestar.static_files import create_static_files_router
 
 from debias.server.config import Config
 
@@ -421,7 +422,18 @@ def get_keywords_graph(
 
 
 app = Litestar(
-    route_handlers=[get_targets, get_keywords, get_topics, get_topics_graph, get_keywords_graph],
+    route_handlers=[
+        create_static_files_router(
+            path="/",
+            directories=["frontend"],
+            html_mode=True,
+        ),
+        get_targets,
+        get_keywords,
+        get_topics,
+        get_topics_graph,
+        get_keywords_graph,
+    ],
     cors_config=CORSConfig(),
     openapi_config=OpenAPIConfig(
         title="DeBias API",
